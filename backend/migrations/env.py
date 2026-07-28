@@ -40,9 +40,10 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    # Set the dynamic database URL in configuration options
+    # Use dynamic sqlalchemy.url from Alembic Config if set, fallback to settings.DATABASE_URL
+    target_url = config.get_main_option("sqlalchemy.url") or settings.DATABASE_URL
     alembic_config = config.get_section(config.config_ini_section) or {}
-    alembic_config["sqlalchemy.url"] = settings.DATABASE_URL
+    alembic_config["sqlalchemy.url"] = target_url
 
     connectable = engine_from_config(
         alembic_config,

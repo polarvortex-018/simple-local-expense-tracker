@@ -112,6 +112,23 @@ class TransactionService:
         if not deleted:
             raise EntityNotFoundError(f"Transaction with ID {transaction_id} not found.")
 
-    def get_summary(self, db: Session) -> dict:
-        """Returns overall financial summary metrics."""
-        return self.repository.get_summary(db)
+    def get_summary(
+        self,
+        db: Session,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        account_id: uuid.UUID | None = None,
+        bucket_id: uuid.UUID | None = None,
+        category_ids: List[uuid.UUID] | None = None,
+        search: str | None = None
+    ) -> dict:
+        """Returns financial summary metrics matching specified filters."""
+        return self.repository.get_summary(
+            db,
+            start_date=start_date,
+            end_date=end_date,
+            account_id=account_id,
+            bucket_id=bucket_id,
+            category_ids=category_ids,
+            search=search
+        )

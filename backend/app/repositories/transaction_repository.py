@@ -97,23 +97,53 @@ class TransactionRepository:
         # Convert back to Decimal in case SQLAlchemy returns float
         return Decimal(str(income_sum)) - Decimal(str(expense_sum))
 
-    def get_summary(self, db: Session) -> dict:
-        """Computes overall financial metrics and category spending breakdown."""
-        inc_sum = db.exec(
-            select(func.sum(Transaction.amount)).where(Transaction.transaction_type == TransactionType.INCOME)
-        ).one_or_none() or Decimal("0.00")
-        
-        exp_sum = db.exec(
-            select(func.sum(Transaction.amount)).where(Transaction.transaction_type == TransactionType.EXPENSE)
-        ).one_or_none() or Decimal("0.00")
+    def get_summary(
+        self,
+        db: Session,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        account_id: uuid.UUID | None = None,
+        bucket_id: uuid.UUID | None = None,
+        category_ids: List[uuid.UUID] | None = None,
+        search: str | None = None
+    ) -> dict:
+        """Computes financial metrics and category spending breakdown with optional filtering."""
+        where_clauses = []
+        if start_date:
+            where_clauses.append(Transaction.date >= start_date)
+        if end_date:
+            where_clauses.append(Transaction.date <= end_date)
+        if account_id:
+            where_clauses.append(Transaction.account_id == account_id)
+        if bucket_id:
+            where_clauses.append(Transaction.bucket_id == bucket_id)
+        if category_ids:
+            where_clauses.append(Transaction.category_id.in_(category_ids))
+        if search:
+            sp = f"%{search}%"
+            where_clauses.append(
+                Transaction.description.like(sp) | Transaction.notes.like(sp)
+            )
 
+        inc_q = select(func.sum(Transaction.amount)).where(
+            Transaction.transaction_type == TransactionType.INCOME,
+            *where_clauses
+        )
+        exp_q = select(func.sum(Transaction.amount)).where(
+            Transaction.transaction_type == TransactionType.EXPENSE,
+            *where_clauses
+        )
+
+        inc_sum = db.exec(inc_q).one_or_none() or Decimal("0.00")
+        exp_sum = db.exec(exp_q).one_or_none() or Decimal("0.00")
         total_exp = Decimal(str(exp_sum))
 
-        cat_query = select(Transaction.category_id, func.sum(Transaction.amount)).where(
-            Transaction.transaction_type == TransactionType.EXPENSE
+        cat_q = select(Transaction.category_id, func.sum(Transaction.amount)).where(
+            Transaction.transaction_type == TransactionType.EXPENSE,
+            *where_clauses
         ).group_by(Transaction.category_id)
-        
-        cat_results = db.exec(cat_query).all()
+
+        cat_results = db.exec(cat_q).all()
         category_breakdown = []
 
         for cat_id, amount in cat_results:

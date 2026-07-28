@@ -58,8 +58,23 @@ export const api = {
     return request(`/transactions/${queryString}`);
   },
 
-  getTransactionSummary() {
-    return request('/transactions/summary');
+  getTransactionSummary(params = {}) {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '') {
+        if (Array.isArray(val)) {
+          val.forEach(item => {
+            if (item !== undefined && item !== null && item !== '') {
+              query.append(key, item);
+            }
+          });
+        } else {
+          query.append(key, val);
+        }
+      }
+    });
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return request(`/transactions/summary${queryString}`);
   },
   
   createTransaction(payload) {
@@ -194,6 +209,64 @@ export const api = {
     return request('/buckets/transfer', {
       method: 'POST',
       body: JSON.stringify(payload),
+    });
+  },
+
+  // Vaults Management
+  getVaults() {
+    return request('/vaults/');
+  },
+
+  createVault(name) {
+    return request('/vaults/create', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+  },
+
+  switchVault(filename) {
+    return request('/vaults/switch', {
+      method: 'POST',
+      body: JSON.stringify({ filename }),
+    });
+  },
+
+  importVault(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetch(`${API_BASE_URL}/vaults/import`, {
+      method: 'POST',
+      body: formData,
+    }).then(res => {
+      if (!res.ok) throw new Error('Failed to import vault file.');
+      return res.json();
+    });
+  },
+
+  deleteVault(filename) {
+    return request(`/vaults/${filename}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Database Backup & Restore
+  exportDatabaseUrl() {
+    return `${API_BASE_URL}/backup/export`;
+  },
+
+  createBackup() {
+    return request('/backup/create', {
+      method: 'POST',
+    });
+  },
+
+  getBackups() {
+    return request('/backup/list');
+  },
+
+  restoreBackup(filename) {
+    return request(`/backup/restore/${filename}`, {
+      method: 'POST',
     });
   }
 };
