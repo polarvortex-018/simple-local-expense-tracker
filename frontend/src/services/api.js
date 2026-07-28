@@ -58,8 +58,23 @@ export const api = {
     return request(`/transactions/${queryString}`);
   },
 
-  getTransactionSummary() {
-    return request('/transactions/summary');
+  getTransactionSummary(params = {}) {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '') {
+        if (Array.isArray(val)) {
+          val.forEach(item => {
+            if (item !== undefined && item !== null && item !== '') {
+              query.append(key, item);
+            }
+          });
+        } else {
+          query.append(key, val);
+        }
+      }
+    });
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return request(`/transactions/summary${queryString}`);
   },
   
   createTransaction(payload) {

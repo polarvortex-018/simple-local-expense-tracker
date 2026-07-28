@@ -32,6 +32,8 @@ const limit = 20;
 // Modal control
 const showForm = ref(false);
 const editingTransaction = ref(null);
+const selectedBucketForTx = ref('');
+const selectedTypeForTx = ref('expense');
 const loading = ref(false);
 const error = ref('');
 
@@ -167,13 +169,22 @@ const handlePageChange = (newPage) => {
   fetchTransactions();
 };
 
-const openAddTransaction = () => {
+const openAddTransaction = (payload = '') => {
   editingTransaction.value = null;
+  if (typeof payload === 'object' && payload !== null) {
+    selectedBucketForTx.value = payload.bucketId || '';
+    selectedTypeForTx.value = payload.type || 'expense';
+  } else {
+    selectedBucketForTx.value = typeof payload === 'string' ? payload : '';
+    selectedTypeForTx.value = 'expense';
+  }
   showForm.value = true;
 };
 
 const openEditTransaction = (tx) => {
   editingTransaction.value = tx;
+  selectedBucketForTx.value = '';
+  selectedTypeForTx.value = tx.transaction_type || 'expense';
   showForm.value = true;
 };
 
@@ -449,6 +460,8 @@ onMounted(() => {
       :accounts="accounts"
       :categories="categories"
       :buckets="buckets"
+      :default-bucket-id="selectedBucketForTx"
+      :default-type="selectedTypeForTx"
       @close="showForm = false"
       @save="handleSaveTransaction"
     />

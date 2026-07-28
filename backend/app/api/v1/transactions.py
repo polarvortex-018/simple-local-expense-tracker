@@ -28,13 +28,27 @@ def create_transaction(
 
 @router.get(
     "/summary",
-    summary="Get overall financial summary stats"
+    summary="Get overall financial summary stats with filters"
 )
 def get_transaction_summary(
+    account_id: uuid.UUID | None = Query(default=None),
+    category_id: List[uuid.UUID] = Query(default=[]),
+    bucket_id: uuid.UUID | None = Query(default=None),
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+    search: str | None = Query(default=None),
     db: Session = Depends(get_session)
 ) -> dict:
-    """Returns overall financial summary metrics across all transactions."""
-    return service.get_summary(db)
+    """Returns overall financial summary metrics and category breakdown matching filters."""
+    return service.get_summary(
+        db,
+        start_date=start_date,
+        end_date=end_date,
+        account_id=account_id,
+        bucket_id=bucket_id,
+        category_ids=category_id,
+        search=search
+    )
 
 
 @router.get(

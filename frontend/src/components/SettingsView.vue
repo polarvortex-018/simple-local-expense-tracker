@@ -14,6 +14,13 @@
       </button>
     </div>
 
+    <!-- Click Interceptor Overlay for active Emoji Pickers -->
+    <div 
+      v-if="showNewEmojiPicker || activeEditEmojiPickerId !== null" 
+      class="fixed inset-0 z-40" 
+      @click="closeAllEmojiPickers"
+    ></div>
+
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
@@ -37,14 +44,39 @@
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add Savings Bucket</p>
           
           <div class="space-y-2">
-            <div class="flex gap-2">
-              <input 
-                v-model="newBucket.icon"
-                type="text"
-                placeholder="🪣"
-                maxlength="4"
-                class="w-12 text-center px-2 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-sm focus:outline-none transition"
-              />
+            <div class="flex gap-2 relative">
+              <!-- Emoji Button & Input Trigger -->
+              <div class="relative z-50">
+                <button
+                  type="button"
+                  @click="showNewEmojiPicker = !showNewEmojiPicker"
+                  class="w-12 h-9 flex items-center justify-center bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-xl text-lg transition cursor-pointer"
+                  title="Click to pick an emoji"
+                >
+                  {{ newBucket.icon || '🪣' }}
+                </button>
+
+                <!-- Emoji Picker Dropdown Overlay for New Bucket -->
+                <div 
+                  v-if="showNewEmojiPicker" 
+                  class="absolute left-0 top-11 z-50 w-64 bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-2xl space-y-2 transform transition-all"
+                >
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Bucket Emoji</p>
+                  <div class="grid grid-cols-6 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                    <button
+                      v-for="emoji in presetEmojis"
+                      :key="emoji"
+                      type="button"
+                      @click="selectNewEmoji(emoji)"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-indigo-950 text-base transition cursor-pointer"
+                    >
+                      {{ emoji }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bucket Name -->
               <input 
                 v-model="newBucket.name"
                 type="text"
@@ -89,13 +121,37 @@
             >
               <!-- Editing Mode -->
               <div v-if="editingBucketId === bucket.id" class="space-y-3">
-                <div class="flex gap-2">
-                  <input 
-                    v-model="editBucketIcon"
-                    type="text"
-                    maxlength="4"
-                    class="w-10 text-center px-2 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-100 text-xs focus:outline-none transition"
-                  />
+                <div class="flex gap-2 relative">
+                  <!-- Edit Emoji Trigger -->
+                  <div class="relative z-50">
+                    <button
+                      type="button"
+                      @click="activeEditEmojiPickerId = activeEditEmojiPickerId === bucket.id ? null : bucket.id"
+                      class="w-10 h-8 flex items-center justify-center bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-lg text-sm transition cursor-pointer"
+                    >
+                      {{ editBucketIcon || '🪣' }}
+                    </button>
+
+                    <!-- Edit Emoji Picker Overlay -->
+                    <div 
+                      v-if="activeEditEmojiPickerId === bucket.id" 
+                      class="absolute left-0 top-10 z-50 w-64 bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-2xl space-y-2"
+                    >
+                      <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Bucket Emoji</p>
+                      <div class="grid grid-cols-6 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                        <button
+                          v-for="emoji in presetEmojis"
+                          :key="emoji"
+                          type="button"
+                          @click="selectEditEmoji(emoji)"
+                          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-indigo-950 text-base transition cursor-pointer"
+                        >
+                          {{ emoji }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   <input 
                     v-model="editBucketName"
                     type="text"
@@ -552,6 +608,33 @@ const emit = defineEmits([
   'transfer-bucket'
 ]);
 
+// Preset Emoji Grid Palette
+const presetEmojis = [
+  '🪣', '💵', '🛡️', '✈️', '💻', '📈', '💰', '💳',
+  '🏦', '🚗', '🏠', '🎓', '💍', '🎁', '🏖️', '💎',
+  '🛒', '🍔', '🏥', '👶', '🐕', '🎮', '☕', '⚡',
+  '⛽', '🏋️', '👕', '🔑', '🚲', '🎬', '🪙', '🧾'
+];
+
+// Emoji Picker Overlays
+const showNewEmojiPicker = ref(false);
+const activeEditEmojiPickerId = ref(null);
+
+const selectNewEmoji = (emoji) => {
+  newBucket.value.icon = emoji;
+  showNewEmojiPicker.value = false;
+};
+
+const selectEditEmoji = (emoji) => {
+  editBucketIcon.value = emoji;
+  activeEditEmojiPickerId.value = null;
+};
+
+const closeAllEmojiPickers = () => {
+  showNewEmojiPicker.value = false;
+  activeEditEmojiPickerId.value = null;
+};
+
 // Filters & Modals
 const showArchivedBuckets = ref(false);
 const showTransferModal = ref(false);
@@ -641,6 +724,7 @@ const submitBucket = async () => {
     newBucket.value.color = '#6366f1';
   } finally {
     submittingBucket.value = false;
+    showNewEmojiPicker.value = false;
   }
 };
 
@@ -711,6 +795,7 @@ const startEditBucket = (bucket) => {
   editBucketIcon.value = bucket.icon || '🪣';
   editBucketColor.value = bucket.color || '#6366f1';
   editBucketArchived.value = bucket.is_archived || false;
+  activeEditEmojiPickerId.value = null;
 };
 
 const saveBucketEdit = (bucket) => {
@@ -723,6 +808,7 @@ const saveBucketEdit = (bucket) => {
     is_archived: editBucketArchived.value
   });
   editingBucketId.value = null;
+  activeEditEmojiPickerId.value = null;
 };
 
 const confirmDeleteAccount = (account) => {

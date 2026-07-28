@@ -35,7 +35,27 @@
         <div v-if="currentStep === 1" class="space-y-4">
           <div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-xl text-xs text-slate-300">
             <p class="font-semibold text-indigo-400 mb-0.5">Where and why is this money being moved?</p>
-            <p class="text-slate-400">Buckets represent the <strong>purpose</strong> of the funds, while Accounts represent the <strong>storage location</strong>.</p>
+            <p class="text-slate-400">Buckets represent the <strong>purpose</strong> (why), while Accounts represent the <strong>storage location</strong> (where).</p>
+          </div>
+
+          <!-- Transaction Type Switch (Step 1) -->
+          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800">
+            <button 
+              type="button"
+              @click="form.transaction_type = 'expense'"
+              class="py-2 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+              :class="form.transaction_type === 'expense' ? 'bg-slate-900 text-rose-400 shadow-md border border-rose-900/40' : 'text-slate-400 hover:text-slate-200'"
+            >
+              <span>↑ Expense (Spend from Bucket)</span>
+            </button>
+            <button 
+              type="button"
+              @click="form.transaction_type = 'income'"
+              class="py-2 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+              :class="form.transaction_type === 'income' ? 'bg-slate-900 text-emerald-400 shadow-md border border-emerald-900/40' : 'text-slate-400 hover:text-slate-200'"
+            >
+              <span>↓ Income (Add to Bucket)</span>
+            </button>
           </div>
 
           <!-- Savings Bucket Selection -->
@@ -253,6 +273,14 @@ const props = defineProps({
   buckets: {
     type: Array,
     default: () => []
+  },
+  defaultBucketId: {
+    type: String,
+    default: ''
+  },
+  defaultType: {
+    type: String,
+    default: 'expense'
   }
 });
 
@@ -273,11 +301,11 @@ const form = ref({
   amount: '',
   date: new Date().toISOString().substring(0, 10),
   description: '',
-  transaction_type: 'expense',
+  transaction_type: props.defaultType || 'expense',
   notes: '',
   account_id: '',
   category_id: '',
-  bucket_id: ''
+  bucket_id: props.defaultBucketId || ''
 });
 
 // Helper labels
@@ -313,7 +341,11 @@ onMounted(() => {
     // Set default account, category, and bucket
     if (props.accounts.length > 0) form.value.account_id = props.accounts[0].id;
     if (props.categories.length > 0) form.value.category_id = props.categories[0].id;
-    if (activeBuckets.value.length > 0) form.value.bucket_id = activeBuckets.value[0].id;
+    if (props.defaultBucketId) {
+      form.value.bucket_id = props.defaultBucketId;
+    } else if (activeBuckets.value.length > 0) {
+      form.value.bucket_id = activeBuckets.value[0].id;
+    }
   }
 });
 
