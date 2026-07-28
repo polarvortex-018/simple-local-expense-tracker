@@ -487,6 +487,67 @@
 
     </div>
 
+    <!-- 4. Data Management & Database Backups Card -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+            <span>💾</span> Data Backup & Export Controls
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Export active database file, create local snapshots, or restore backups.</p>
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <a 
+            :href="exportUrl"
+            download
+            class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
+          >
+            <span>⬇️ Export Active Database</span>
+          </a>
+          <button 
+            @click="handleCreateSnapshot"
+            :disabled="creatingBackup"
+            class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+          >
+            <span>{{ creatingBackup ? 'Creating...' : '📸 Create Local Snapshot' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Local Snapshots List -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Local Snapshots (<code class="text-indigo-400 font-mono">backups/</code>)</p>
+          <button @click="loadBackupsList" class="text-xs text-indigo-400 hover:underline cursor-pointer">Refresh List</button>
+        </div>
+
+        <div v-if="backupsList.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20 max-h-48 overflow-y-auto">
+          <div 
+            v-for="b in backupsList" 
+            :key="b.filename"
+            class="p-3 flex items-center justify-between hover:bg-slate-950/30 transition"
+          >
+            <div class="flex items-center gap-2.5">
+              <span class="text-base">📦</span>
+              <div>
+                <p class="text-xs font-semibold text-slate-200 font-mono">{{ b.filename }}</p>
+                <p class="text-[10px] text-slate-500">{{ formatSize(b.size_bytes) }}</p>
+              </div>
+            </div>
+            <button 
+              @click="handleRestoreBackup(b.filename)"
+              class="px-2.5 py-1 bg-amber-950/80 hover:bg-amber-900 text-amber-400 border border-amber-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer"
+            >
+              Restore
+            </button>
+          </div>
+        </div>
+        <div v-else class="text-center py-6 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+          No snapshot backups saved in <code class="text-slate-400 font-mono">backups/</code> folder yet. Click "Create Local Snapshot" above to save a backup.
+        </div>
+      </div>
+    </div>
+
     <!-- Bucket Transfer Modal -->
     <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">
@@ -830,5 +891,57 @@ const confirmDeleteBucket = (bucket) => {
   if (confirm) {
     emit('delete-bucket', bucket.id);
   }
+};
+
+// Data Backup & Export System
+import { api } from '../services/api';
+import { onMounted } from 'vue';
+
+const exportUrl = computed(() => api.exportDatabaseUrl());
+const backupsList = ref([]);
+const creatingBackup = ref(false);
+
+const loadBackupsList = async () => {
+  try {
+    backupsList.value = await api.getBackups();
+  } catch (err) {
+    console.error("Failed to load backups list:", err);
+  }
+};
+
+onMounted(() => {
+  loadBackupsList();
+});
+
+const handleCreateSnapshot = async () => {
+  creatingBackup.value = true;
+  try {
+    const res = await api.createBackup();
+    alert(`Snapshot backup created: ${res.backup_filename}`);
+    await loadBackupsList();
+  } catch (err) {
+    alert(`Failed to create backup: ${err.message}`);
+  } finally {
+    creatingBackup.value = false;
+  }
+};
+
+const handleRestoreBackup = async (filename) => {
+  if (confirm(`Are you sure you want to restore database from backup "${filename}"? Current data will be overwritten.`)) {
+    try {
+      await api.restoreBackup(filename);
+      alert(`Successfully restored database from backup! Application will reload.`);
+      window.location.reload();
+    } catch (err) {
+      alert(`Failed to restore backup: ${err.message}`);
+    }
+  }
+};
+
+const formatSize = (bytes) => {
+  if (!bytes) return '0 KB';
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${Math.round(kb)} KB`;
+  return `${(kb / 1024).toFixed(1)} MB`;
 };
 </script>

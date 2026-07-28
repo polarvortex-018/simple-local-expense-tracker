@@ -1,14 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import Session
 
 from app.api.router import api_router
 from app.core.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
-from app.db.init_db import init_db
-from app.db.session import engine
+from app.db.vault_manager import vault_manager
 
 
 @asynccontextmanager
@@ -16,10 +14,17 @@ async def lifespan(app: FastAPI):
     # Initialize and configure logging
     setup_logging()
     
-    # Run DB creation and seed defaults
-    with Session(engine) as session:
-        init_db(session)
-        
+    print("\n" + "="*55)
+    print(" [+] Finance Tracker Local-First Engine Starting...")
+    print("="*55)
+    
+    # Run DB auto-creation, Alembic migrations, and seed defaults
+    vault_manager.init_active_vault()
+    
+    print(f" [+] Active Vault: {vault_manager.active_vault_filename}")
+    print(f" [+] Data Directory: {settings.DATA_DIR.as_posix()}")
+    print(" [+] Schema Migrations: Up-to-Date (Alembic Head)")
+    print("="*55 + "\n")
     yield
 
 
@@ -32,7 +37,7 @@ app = FastAPI(
 # Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict origins in production settings later
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,5 +56,6 @@ def read_root() -> dict:
     return {
         "status": "online",
         "project": settings.PROJECT_NAME,
+        "active_vault": vault_manager.active_vault_filename,
         "api_documentation": "/docs"
     }

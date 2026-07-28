@@ -1,11 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { api } from './services/api';
 import Dashboard from './components/Dashboard.vue';
 import TransactionList from './components/TransactionList.vue';
 import TransactionForm from './components/TransactionForm.vue';
 import DebtList from './components/DebtList.vue';
 import SettingsView from './components/SettingsView.vue';
+import VaultModal from './components/VaultModal.vue';
 
 // State
 const currentTab = ref('dashboard'); // 'dashboard', 'transactions', 'debts', or 'settings'
@@ -14,6 +15,16 @@ const accounts = ref([]);
 const categories = ref([]);
 const buckets = ref([]);
 const debts = ref([]);
+
+// Vaults State
+const vaults = ref([]);
+const activeVault = ref('finance.db');
+const showVaultModal = ref(false);
+
+const activeVaultName = computed(() => {
+  const v = vaults.value.find(item => item.is_active);
+  return v ? v.name : 'Personal';
+});
 
 // Pagination & filters
 const filters = ref({
@@ -84,107 +95,158 @@ const calculateDates = (timeRange, customStart, customEnd) => {
       return { start_date: formatDateStr(start), end_date: formatDateStr(end) };
     }
     default:
-      return {
-        start_date: null,
-        end_date: null
-      };
+      return { start_date: null, end_date: null };
   }
 };
 
-// Fetch all metadata (accounts, categories, & savings buckets)
-const fetchMetadata = async () => {
-  try {
-    const [accData, catData, bucketData] = await Promise.all([
-      api.getAccounts(),
-      api.getCategories(),
-      api.getBuckets(true)
-    ]);
-    accounts.value = accData;
-    categories.value = catData;
-    buckets.value = bucketData;
-  } catch (err) {
-    error.value = 'Failed to load initial data. Is the backend server running?';
-    console.error(err);
-  }
-};
-
-// Fetch debts
-const fetchDebts = async () => {
-  try {
-    debts.value = await api.getDebts();
-  } catch (err) {
-    console.error('Failed to fetch debts:', err);
-  }
-};
-
-// Fetch transactions based on current filters and page
 const fetchTransactions = async () => {
-  loading.value = true;
   try {
-    const skip = (page.value - 1) * limit;
     const { start_date, end_date } = calculateDates(
       filters.value.time_range,
       filters.value.start_date,
       filters.value.end_date
     );
 
-    const txData = await api.getTransactions({
-      search: filters.value.search,
-      account_id: filters.value.account_id,
-      bucket_id: filters.value.bucket_id,
-      category_id: filters.value.category_ids,
-      transaction_type: filters.value.transaction_type,
-      start_date,
-      end_date,
-      skip,
-      limit
-    });
-    transactions.value = txData;
+    const apiParams = {
+      skip: (page.value - 1) * limit,
+      limit: limit,
+      search: filters.value.search || undefined,
+      account_id: filters.value.account_id || undefined,
+      bucket_id: filters.value.bucket_id || undefined,
+      category_id: filters.value.category_ids.length > 0 ? filters.value.category_ids : undefined,
+      transaction_type: filters.value.transaction_type || undefined,
+      start_date: start_date || undefined,
+      end_date: end_date || undefined
+    };
+
+    transactions.value = await api.getTransactions(apiParams);
   } catch (err) {
-    error.value = err.message || 'Failed to fetch transactions.';
-    console.error(err);
-  } finally {
-    loading.value = false;
+    error.value = 'Failed to load transactions: ' + err.message;
   }
 };
 
-// Complete refresh across all modules
-const refreshAll = async () => {
-  await Promise.all([
-    fetchMetadata(),
-    fetchTransactions(),
-    fetchDebts()
-  ]);
+const fetchAccounts = async () => {
+  try {
+    accounts.value = await api.getAccounts();
+  } catch (err) {
+    error.value = 'Failed to load accounts: ' + err.message;
+  }
 };
 
-// Handlers
-const handleFilterChange = (newFilters) => {
+const fetchCategories = async () => {
+  try {
+    categories.value = await api.getCategories();
+  } catch (err) {
+    error.value = 'Failed to load categories: ' + err.message;
+  }
+};
+
+const fetchBuckets = async () => {
+  try {
+    buckets.value = await api.getBuckets(true);
+  } catch (err) {
+    error.value = 'Failed to load savings buckets: ' + err.message;
+  }
+};
+
+const fetchDebts = async () => {
+  try {
+    debts.value = await api.getDebts();
+  } catch (err) {
+    error.value = 'Failed to load debts: ' + err.message;
+  }
+};
+
+const loadVaults = async () => {
+  try {
+    vaults.value = await api.getVaults();
+    const active = vaults.value.find(v => v.is_active);
+    if (active) activeVault.value = active.filename;
+  } catch (err) {
+    console.error("Failed to load vaults:", err);
+  }
+};
+
+const refreshAll = async () => {
+  loading.value = true;
+  error.value = '';
+  await Promise.all([
+    fetchTransactions(),
+    fetchAccounts(),
+    fetchCategories(),
+    fetchBuckets(),
+    fetchDebts(),
+    loadVaults()
+  ]);
+  loading.value = false;
+};
+
+// Vault Management Handlers
+const handleSwitchVault = async (filename) => {
+  try {
+    await api.switchVault(filename);
+    await refreshAll();
+    showVaultModal.value = false;
+  } catch (err) {
+    alert(err.message || 'Failed to switch vault.');
+  }
+};
+
+const handleCreateVault = async (name) => {
+  try {
+    await api.createVault(name);
+    await refreshAll();
+    showVaultModal.value = false;
+  } catch (err) {
+    alert(err.message || 'Failed to create vault.');
+  }
+};
+
+const handleImportVault = async (file) => {
+  try {
+    await api.importVault(file);
+    await refreshAll();
+    showVaultModal.value = false;
+  } catch (err) {
+    alert(err.message || 'Failed to import vault.');
+  }
+};
+
+const handleDeleteVault = async (filename) => {
+  if (confirm(`Are you sure you want to delete vault "${filename}"? This action cannot be undone.`)) {
+    try {
+      await api.deleteVault(filename);
+      await loadVaults();
+    } catch (err) {
+      alert(err.message || 'Failed to delete vault.');
+    }
+  }
+};
+
+// Filter & Pagination Handlers
+const handleUpdateFilters = (newFilters) => {
   filters.value = newFilters;
   page.value = 1;
   fetchTransactions();
 };
 
-const handlePageChange = (newPage) => {
+const handleUpdatePage = (newPage) => {
   page.value = newPage;
   fetchTransactions();
 };
 
-const openAddTransaction = (payload = '') => {
+// Form Open/Close Handlers
+const openAddTransaction = (opts = {}) => {
   editingTransaction.value = null;
-  if (typeof payload === 'object' && payload !== null) {
-    selectedBucketForTx.value = payload.bucketId || '';
-    selectedTypeForTx.value = payload.type || 'expense';
-  } else {
-    selectedBucketForTx.value = typeof payload === 'string' ? payload : '';
-    selectedTypeForTx.value = 'expense';
-  }
+  selectedBucketForTx.value = opts.bucketId || '';
+  selectedTypeForTx.value = opts.type || 'expense';
   showForm.value = true;
 };
 
-const openEditTransaction = (tx) => {
-  editingTransaction.value = tx;
-  selectedBucketForTx.value = '';
-  selectedTypeForTx.value = tx.transaction_type || 'expense';
+const openEditTransaction = (transaction) => {
+  editingTransaction.value = transaction;
+  selectedBucketForTx.value = transaction.bucket_id || '';
+  selectedTypeForTx.value = transaction.transaction_type || 'expense';
   showForm.value = true;
 };
 
@@ -196,7 +258,6 @@ const handleSaveTransaction = async (payload) => {
       await api.createTransaction(payload);
     }
     showForm.value = false;
-    editingTransaction.value = null;
     await refreshAll();
   } catch (err) {
     alert(err.message || 'Failed to save transaction.');
@@ -291,7 +352,7 @@ const handleDeleteBucket = async (id) => {
     await api.deleteBucket(id);
     await refreshAll();
   } catch (err) {
-    alert(err.message || 'Failed to delete/archive bucket.');
+    alert(err.message || 'Failed to delete savings bucket.');
   }
 };
 
@@ -300,7 +361,7 @@ const handleTransferBucket = async (payload) => {
     await api.transferBucket(payload);
     await refreshAll();
   } catch (err) {
-    alert(err.message || 'Failed to transfer funds between buckets.');
+    alert(err.message || 'Failed to transfer bucket funds.');
   }
 };
 
@@ -310,22 +371,22 @@ const handleCreateDebt = async (payload) => {
     await api.createDebt(payload);
     await refreshAll();
   } catch (err) {
-    alert(err.message || 'Failed to record debt.');
+    alert(err.message || 'Failed to record debt entry.');
   }
 };
 
-const handleSettleDebt = async (debtId, accountId) => {
+const handleSettleDebt = async (id, payload) => {
   try {
-    await api.settleDebt(debtId, { account_id: accountId });
+    await api.settleDebt(id, payload);
     await refreshAll();
   } catch (err) {
     alert(err.message || 'Failed to settle debt.');
   }
 };
 
-const handleDeleteDebt = async (debtId) => {
+const handleDeleteDebt = async (id) => {
   try {
-    await api.deleteDebt(debtId);
+    await api.deleteDebt(id);
     await refreshAll();
   } catch (err) {
     alert(err.message || 'Failed to delete debt.');
@@ -347,6 +408,17 @@ onMounted(() => {
             F
           </div>
           <span class="font-bold text-slate-100 tracking-tight text-lg">Finance Tracker</span>
+          
+          <!-- Vault Switcher Pill -->
+          <button 
+            @click="showVaultModal = true"
+            class="ml-2 px-3 py-1 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-indigo-500 rounded-xl text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition cursor-pointer shadow-sm"
+            title="Click to switch or manage database vaults"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>🏦 Vault: <strong class="text-indigo-400">{{ activeVaultName }}</strong></span>
+            <span class="text-[10px] text-slate-500">▾</span>
+          </button>
         </div>
 
         <nav class="flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
@@ -421,11 +493,11 @@ onMounted(() => {
           @add-transaction="openAddTransaction"
           @edit-transaction="openEditTransaction"
           @delete-transaction="handleDeleteTransaction"
-          @update-filters="handleFilterChange"
-          @update-page="handlePageChange"
+          @update-filters="handleUpdateFilters"
+          @update-page="handleUpdatePage"
         />
 
-        <DebtList
+        <DebtList 
           v-if="currentTab === 'debts'"
           :debts="debts"
           :accounts="accounts"
@@ -434,7 +506,7 @@ onMounted(() => {
           @delete-debt="handleDeleteDebt"
         />
 
-        <SettingsView
+        <SettingsView 
           v-if="currentTab === 'settings'"
           :accounts="accounts"
           :categories="categories"
@@ -466,9 +538,15 @@ onMounted(() => {
       @save="handleSaveTransaction"
     />
 
-    <!-- Footer -->
-    <footer class="bg-slate-950/40 border-t border-slate-900 py-6 text-center text-xs text-slate-500">
-      <p>&copy; 2026 Finance Tracker App. Local-first, offline-first expense manager.</p>
-    </footer>
+    <!-- Multi-Vault Management Modal -->
+    <VaultModal 
+      :is-open="showVaultModal"
+      :vaults="vaults"
+      @close="showVaultModal = false"
+      @switch-vault="handleSwitchVault"
+      @create-vault="handleCreateVault"
+      @import-vault="handleImportVault"
+      @delete-vault="handleDeleteVault"
+    />
   </div>
 </template>

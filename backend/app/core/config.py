@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -7,7 +8,6 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # Base path of the application (root of the workspace)
-    # config.py is at backend/app/core/config.py
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent.parent
     DATA_DIR: Path = BASE_DIR / "data"
     BACKUP_DIR: Path = BASE_DIR / "backups"
@@ -18,6 +18,20 @@ class Settings(BaseSettings):
         case_sensitive=True,
         extra="ignore"
     )
+
+    def __init__(self, **values):
+        super().__init__(**values)
+        self._ensure_env_file()
+
+    def _ensure_env_file(self) -> None:
+        """Auto-creates .env from .env.example if missing."""
+        env_path = self.BASE_DIR / ".env"
+        example_path = self.BASE_DIR / ".env.example"
+        if not env_path.exists() and example_path.exists():
+            try:
+                shutil.copy2(example_path, env_path)
+            except Exception:
+                pass
 
     @property
     def DATABASE_URL(self) -> str:

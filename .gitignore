@@ -1,117 +1,77 @@
 # ======================================================
-# Python
+# Python & Virtual Environments
 # ======================================================
-
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Virtual environments
 .venv/
 venv/
 env/
 ENV/
-
-# Python packaging
 build/
 dist/
 *.egg-info/
 .eggs/
-pip-wheel-metadata/
 
 # ======================================================
-# Pytest
+# Pytest & Tool Caches
 # ======================================================
-
 .pytest_cache/
 .coverage
 .coverage.*
 htmlcov/
-
-# ======================================================
-# Type checking / Linters
-# ======================================================
-
 .mypy_cache/
 .ruff_cache/
-.pyre/
-.pytype/
 
 # ======================================================
-# IDEs
+# IDEs & OS Files
 # ======================================================
-
 .vscode/
 .idea/
 *.code-workspace
-
-# ======================================================
-# OS Files
-# ======================================================
-
 .DS_Store
 Thumbs.db
 desktop.ini
 
 # ======================================================
-# Logs
+# User Data, Databases & Backups (Local-First Data)
 # ======================================================
-
-*.log
-logs/
-
-# ======================================================
-# SQLite Database
-# ======================================================
-
 *.db
 *.db-shm
 *.db-wal
 *.sqlite
 *.sqlite3
 
-# Keep the data folder but ignore generated databases
-data/*.db
-data/*.db-shm
-data/*.db-wal
+data/
+backups/
+!data/.gitkeep
+!backups/.gitkeep
 
 # ======================================================
-# Secrets
+# Environment Secrets & Configs
 # ======================================================
-
 .env
+.env.local
 .env.*
 !.env.example
 
 # ======================================================
-# Node / Vite
+# Node Modules & Build Artifacts
 # ======================================================
-
+node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 
-# npm / yarn logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
 # ======================================================
-# Temporary files
+# Logs & System Generated Files
 # ======================================================
-
-*.tmp
-*.temp
-*.bak
-*.swp
-*.swo
-
-# ======================================================
-# Misc
-# ======================================================
-
-.cache/
-
-
-data/expenses from 2021-2025.txt
+*.log
+logs/
+.system_generated/
+brain/
