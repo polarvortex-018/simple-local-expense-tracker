@@ -1,0 +1,748 @@
+<template>
+  <div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-100 tracking-tight">Settings</h2>
+        <p class="text-sm text-slate-400 mt-1">Manage your storage accounts, categories, and savings buckets.</p>
+      </div>
+      <button 
+        @click="showTransferModal = true"
+        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition duration-150 shadow-lg shadow-indigo-600/20 cursor-pointer shrink-0"
+      >
+        <span class="text-sm">⇄</span> Transfer Between Buckets
+      </button>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- 1. Savings Buckets Management Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col space-y-6">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="text-base font-semibold text-slate-200">Savings Buckets</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Allocate purposes for your money</p>
+          </div>
+          <button 
+            @click="showArchivedBuckets = !showArchivedBuckets"
+            class="text-[11px] font-medium text-indigo-400 hover:underline cursor-pointer"
+          >
+            {{ showArchivedBuckets ? 'Hide Archived' : 'Show Archived' }}
+          </button>
+        </div>
+
+        <!-- Add Bucket Form -->
+        <form @submit.prevent="submitBucket" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-3">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add Savings Bucket</p>
+          
+          <div class="space-y-2">
+            <div class="flex gap-2">
+              <input 
+                v-model="newBucket.icon"
+                type="text"
+                placeholder="🪣"
+                maxlength="4"
+                class="w-12 text-center px-2 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-sm focus:outline-none transition"
+              />
+              <input 
+                v-model="newBucket.name"
+                type="text"
+                placeholder="Bucket Name (e.g. Emergency Fund)"
+                required
+                class="flex-grow px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+              />
+            </div>
+
+            <div class="flex justify-between items-center pt-1">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 uppercase font-semibold">Color:</span>
+                <div class="relative w-7 h-7 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+                  <input 
+                    v-model="newBucket.color"
+                    type="color"
+                    class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
+                    style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
+                  />
+                  <div class="w-3.5 h-3.5 rounded-full border border-white/20" :style="{ backgroundColor: newBucket.color }"></div>
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                :disabled="submittingBucket"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+              >
+                {{ submittingBucket ? 'Creating...' : 'Create Bucket' }}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Bucket List -->
+        <div class="flex-grow">
+          <div v-if="displayedBuckets.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20">
+            <div 
+              v-for="bucket in displayedBuckets" 
+              :key="bucket.id"
+              class="p-3.5 hover:bg-slate-950/30 transition duration-150"
+            >
+              <!-- Editing Mode -->
+              <div v-if="editingBucketId === bucket.id" class="space-y-3">
+                <div class="flex gap-2">
+                  <input 
+                    v-model="editBucketIcon"
+                    type="text"
+                    maxlength="4"
+                    class="w-10 text-center px-2 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-100 text-xs focus:outline-none transition"
+                  />
+                  <input 
+                    v-model="editBucketName"
+                    type="text"
+                    required
+                    class="flex-grow px-3 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-xs focus:outline-none transition"
+                  />
+                  <!-- Color -->
+                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+                    <input 
+                      v-model="editBucketColor"
+                      type="color"
+                      class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
+                      style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
+                    />
+                    <div class="w-4 h-4 rounded-full border border-white/20" :style="{ backgroundColor: editBucketColor }"></div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <label class="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
+                    <input type="checkbox" v-model="editBucketArchived" class="rounded border-slate-800 text-indigo-600 bg-slate-900" />
+                    <span>Archive Bucket</span>
+                  </label>
+
+                  <div class="flex gap-2">
+                    <button 
+                      type="button"
+                      @click="editingBucketId = null"
+                      class="px-2.5 py-1 text-[10px] font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="button"
+                      @click="saveBucketEdit(bucket)"
+                      class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Normal Mode -->
+              <div v-else class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-base">{{ bucket.icon || '🪣' }}</span>
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <p class="text-xs font-semibold text-slate-200">{{ bucket.name }}</p>
+                      <span v-if="bucket.is_archived" class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-amber-950/60 text-amber-400 border border-amber-800/40">Archived</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">
+                      Allocated: <span class="text-indigo-400 font-semibold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex gap-1.5">
+                  <button 
+                    @click="startEditBucket(bucket)"
+                    class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
+                    title="Edit Bucket"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button 
+                    @click="confirmDeleteBucket(bucket)"
+                    class="text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
+                    title="Delete / Archive Bucket"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+            No savings buckets found.
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Account Management Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col space-y-6">
+        <div>
+          <h3 class="text-base font-semibold text-slate-200">Manage Accounts</h3>
+          <p class="text-xs text-slate-400 mt-1">Create accounts (where money is stored)</p>
+        </div>
+
+        <!-- Add Account Form -->
+        <form @submit.prevent="submitAccount" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-4">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add New Account</p>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input 
+              v-model="newAccount.name"
+              type="text"
+              placeholder="Account Name (e.g. SBI)"
+              required
+              class="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+            />
+            <select 
+              v-model="newAccount.type"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-850 focus:bg-slate-900 focus:border-indigo-500 rounded-xl text-slate-200 text-xs focus:outline-none transition cursor-pointer"
+            >
+              <option value="Checking">Checking</option>
+              <option value="Savings">Savings</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Cash">Cash</option>
+              <option value="Wallet">Wallet</option>
+            </select>
+          </div>
+          <button 
+            type="submit"
+            :disabled="submittingAccount"
+            class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+          >
+            {{ submittingAccount ? 'Creating...' : 'Create Account' }}
+          </button>
+        </form>
+
+        <!-- Account List -->
+        <div class="flex-grow">
+          <div v-if="accounts.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20">
+            <div 
+              v-for="account in accounts" 
+              :key="account.id"
+              class="p-3.5 hover:bg-slate-950/30 transition duration-150"
+            >
+              <!-- Editing Mode -->
+              <div v-if="editingAccountId === account.id" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input 
+                    v-model="editAccountName"
+                    type="text"
+                    required
+                    class="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-xs focus:outline-none transition"
+                  />
+                  <select 
+                    v-model="editAccountType"
+                    class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-200 text-xs focus:outline-none transition cursor-pointer"
+                  >
+                    <option value="Checking">Checking</option>
+                    <option value="Savings">Savings</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Wallet">Wallet</option>
+                  </select>
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button 
+                    type="button"
+                    @click="cancelEditAccount"
+                    class="px-2.5 py-1 text-[10px] font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button"
+                    @click="saveAccountEdit(account)"
+                    class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+
+              <!-- Normal Mode -->
+              <div v-else class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-slate-200">{{ account.name }}</p>
+                  <p class="text-[10px] text-slate-400 mt-0.5">
+                    <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">{{ account.type }}</span>
+                    <span class="ml-2 font-medium text-slate-300">Balance: ₹{{ formatAmount(account.balance) }}</span>
+                  </p>
+                </div>
+                <div class="flex gap-1.5">
+                  <button 
+                    @click="startEditAccount(account)"
+                    class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
+                    title="Edit Account"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button 
+                    @click="confirmDeleteAccount(account)"
+                    class="text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
+                    title="Delete Account"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+            No accounts configured.
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Category Management Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col space-y-6">
+        <div>
+          <h3 class="text-base font-semibold text-slate-200">Manage Categories</h3>
+          <p class="text-xs text-slate-400 mt-1">Create categories (for spending analytics)</p>
+        </div>
+
+        <!-- Add Category Form -->
+        <form @submit.prevent="submitCategory" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-4">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add New Category</p>
+          
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input 
+              v-model="newCategory.name"
+              type="text"
+              placeholder="Category Name (e.g. Subscriptions)"
+              required
+              class="flex-grow px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+            />
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 uppercase font-semibold">Color:</span>
+                <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+                  <input 
+                    v-model="newCategory.color"
+                    type="color"
+                    class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
+                    style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
+                  />
+                  <div class="w-4 h-4 rounded-full border border-white/20" :style="{ backgroundColor: newCategory.color }"></div>
+                </div>
+              </div>
+              <button 
+                type="submit"
+                :disabled="submittingCategory"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+              >
+                {{ submittingCategory ? 'Creating...' : 'Create' }}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Category List -->
+        <div class="flex-grow">
+          <div v-if="categories.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20">
+            <div 
+              v-for="category in categories" 
+              :key="category.id"
+              class="p-3.5 hover:bg-slate-950/30 transition duration-150"
+            >
+              <!-- Editing Mode -->
+              <div v-if="editingCategoryId === category.id" class="space-y-3">
+                <div class="flex gap-2 items-center">
+                  <input 
+                    v-model="editCategoryName"
+                    type="text"
+                    required
+                    class="flex-grow px-3 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-xs focus:outline-none transition"
+                  />
+                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+                    <input 
+                      v-model="editCategoryColor"
+                      type="color"
+                      class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
+                      style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
+                    />
+                    <div class="w-4 h-4 rounded-full border border-white/20" :style="{ backgroundColor: editCategoryColor }"></div>
+                  </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button 
+                    type="button"
+                    @click="cancelEditCategory"
+                    class="px-2.5 py-1 text-[10px] font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button"
+                    @click="saveCategoryEdit(category)"
+                    class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+
+              <!-- Normal Mode -->
+              <div v-else class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-3 h-3 rounded-full border border-white/10 shrink-0" :style="{ backgroundColor: category.color }"></span>
+                  <p class="text-xs font-semibold text-slate-200">{{ category.name }}</p>
+                </div>
+                <div class="flex gap-1.5">
+                  <button 
+                    @click="startEditCategory(category)"
+                    class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
+                    title="Edit Category"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button 
+                    @click="confirmDeleteCategory(category)"
+                    class="text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
+                    title="Delete Category"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+            No categories configured.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bucket Transfer Modal -->
+    <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="text-base font-bold text-slate-100">Transfer Allocation Between Buckets</h3>
+          <button @click="showTransferModal = false" class="text-slate-400 hover:text-slate-200 text-lg">✕</button>
+        </div>
+
+        <div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-xl text-xs text-slate-300">
+          <p>This moves allocated funds from one bucket to another. Your physical <strong>bank account balances remain 100% unchanged</strong>.</p>
+        </div>
+
+        <form @submit.prevent="submitBucketTransfer" class="space-y-4">
+          <!-- From Bucket -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">From Bucket *</label>
+            <select 
+              v-model="transferForm.from_bucket_id"
+              required
+              class="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition cursor-pointer"
+            >
+              <option value="" disabled>Select Source Bucket</option>
+              <option v-for="b in activeBuckets" :key="b.id" :value="b.id">
+                {{ b.icon || '🪣' }} {{ b.name }} (Allocated: ₹{{ formatAmount(b.allocated_balance) }})
+              </option>
+            </select>
+          </div>
+
+          <!-- To Bucket -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">To Bucket *</label>
+            <select 
+              v-model="transferForm.to_bucket_id"
+              required
+              class="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition cursor-pointer"
+            >
+              <option value="" disabled>Select Destination Bucket</option>
+              <option v-for="b in activeBuckets" :key="b.id" :value="b.id">
+                {{ b.icon || '🪣' }} {{ b.name }} (Allocated: ₹{{ formatAmount(b.allocated_balance) }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Amount -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Amount to Move (₹) *</label>
+            <input 
+              v-model.number="transferForm.amount"
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder="0.00"
+              required
+              class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition"
+            />
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Reason / Description (Optional)</label>
+            <input 
+              v-model="transferForm.description"
+              type="text"
+              placeholder="e.g. Reallocating trip funds to laptop"
+              class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition"
+            />
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button 
+              type="button" 
+              @click="showTransferModal = false" 
+              class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              :disabled="submittingTransfer"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+            >
+              {{ submittingTransfer ? 'Transferring...' : 'Transfer Funds' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+
+const props = defineProps({
+  accounts: {
+    type: Array,
+    required: true
+  },
+  categories: {
+    type: Array,
+    required: true
+  },
+  buckets: {
+    type: Array,
+    default: () => []
+  }
+});
+
+const emit = defineEmits([
+  'create-account', 
+  'update-account',
+  'delete-account', 
+  'create-category', 
+  'update-category',
+  'delete-category',
+  'create-bucket',
+  'update-bucket',
+  'delete-bucket',
+  'transfer-bucket'
+]);
+
+// Filters & Modals
+const showArchivedBuckets = ref(false);
+const showTransferModal = ref(false);
+
+const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
+const displayedBuckets = computed(() => {
+  if (showArchivedBuckets.value) return props.buckets;
+  return activeBuckets.value;
+});
+
+// Form States
+const newAccount = ref({ name: '', type: 'Checking' });
+const submittingAccount = ref(false);
+
+const newCategory = ref({ name: '', color: '#6366f1' });
+const submittingCategory = ref(false);
+
+const newBucket = ref({ name: '', icon: '🪣', color: '#6366f1' });
+const submittingBucket = ref(false);
+
+const transferForm = ref({ from_bucket_id: '', to_bucket_id: '', amount: '', description: '' });
+const submittingTransfer = ref(false);
+
+// Editing States
+const editingAccountId = ref(null);
+const editAccountName = ref('');
+const editAccountType = ref('Checking');
+
+const editingCategoryId = ref(null);
+const editCategoryName = ref('');
+const editCategoryColor = ref('#6366f1');
+
+const editingBucketId = ref(null);
+const editBucketName = ref('');
+const editBucketIcon = ref('🪣');
+const editBucketColor = ref('#6366f1');
+const editBucketArchived = ref(false);
+
+// Format amounts
+const formatAmount = (val) => {
+  const num = Number(val);
+  return isNaN(num) ? '0.00' : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+// Handlers
+const submitAccount = async () => {
+  if (!newAccount.value.name.trim()) return;
+  submittingAccount.value = true;
+  try {
+    emit('create-account', {
+      name: newAccount.value.name.trim(),
+      type: newAccount.value.type
+    });
+    newAccount.value.name = '';
+    newAccount.value.type = 'Checking';
+  } finally {
+    submittingAccount.value = false;
+  }
+};
+
+const submitCategory = async () => {
+  if (!newCategory.value.name.trim()) return;
+  submittingCategory.value = true;
+  try {
+    emit('create-category', {
+      name: newCategory.value.name.trim(),
+      color: newCategory.value.color
+    });
+    newCategory.value.name = '';
+    newCategory.value.color = '#6366f1';
+  } finally {
+    submittingCategory.value = false;
+  }
+};
+
+const submitBucket = async () => {
+  if (!newBucket.value.name.trim()) return;
+  submittingBucket.value = true;
+  try {
+    emit('create-bucket', {
+      name: newBucket.value.name.trim(),
+      icon: newBucket.value.icon.trim() || '🪣',
+      color: newBucket.value.color
+    });
+    newBucket.value.name = '';
+    newBucket.value.icon = '🪣';
+    newBucket.value.color = '#6366f1';
+  } finally {
+    submittingBucket.value = false;
+  }
+};
+
+const submitBucketTransfer = async () => {
+  if (!transferForm.value.from_bucket_id || !transferForm.value.to_bucket_id || !transferForm.value.amount) return;
+  if (transferForm.value.from_bucket_id === transferForm.value.to_bucket_id) {
+    alert("Source and destination buckets must be different.");
+    return;
+  }
+  submittingTransfer.value = true;
+  try {
+    emit('transfer-bucket', {
+      from_bucket_id: transferForm.value.from_bucket_id,
+      to_bucket_id: transferForm.value.to_bucket_id,
+      amount: Number(transferForm.value.amount),
+      description: transferForm.value.description.trim() || null
+    });
+    showTransferModal.value = false;
+    transferForm.value = { from_bucket_id: '', to_bucket_id: '', amount: '', description: '' };
+  } finally {
+    submittingTransfer.value = false;
+  }
+};
+
+const startEditAccount = (account) => {
+  editingAccountId.value = account.id;
+  editAccountName.value = account.name;
+  editAccountType.value = account.type;
+};
+
+const cancelEditAccount = () => {
+  editingAccountId.value = null;
+};
+
+const saveAccountEdit = (account) => {
+  const name = editAccountName.value.trim();
+  if (!name) return;
+  emit('update-account', account.id, {
+    name,
+    type: editAccountType.value
+  });
+  editingAccountId.value = null;
+};
+
+const startEditCategory = (category) => {
+  editingCategoryId.value = category.id;
+  editCategoryName.value = category.name;
+  editCategoryColor.value = category.color || '#6366f1';
+};
+
+const cancelEditCategory = () => {
+  editingCategoryId.value = null;
+};
+
+const saveCategoryEdit = (category) => {
+  const name = editCategoryName.value.trim();
+  if (!name) return;
+  emit('update-category', category.id, { 
+    name,
+    color: editCategoryColor.value
+  });
+  editingCategoryId.value = null;
+};
+
+const startEditBucket = (bucket) => {
+  editingBucketId.value = bucket.id;
+  editBucketName.value = bucket.name;
+  editBucketIcon.value = bucket.icon || '🪣';
+  editBucketColor.value = bucket.color || '#6366f1';
+  editBucketArchived.value = bucket.is_archived || false;
+};
+
+const saveBucketEdit = (bucket) => {
+  const name = editBucketName.value.trim();
+  if (!name) return;
+  emit('update-bucket', bucket.id, {
+    name,
+    icon: editBucketIcon.value.trim() || '🪣',
+    color: editBucketColor.value,
+    is_archived: editBucketArchived.value
+  });
+  editingBucketId.value = null;
+};
+
+const confirmDeleteAccount = (account) => {
+  const confirm = window.confirm(`Are you sure you want to delete the account "${account.name}"?`);
+  if (confirm) {
+    emit('delete-account', account.id);
+  }
+};
+
+const confirmDeleteCategory = (category) => {
+  const confirm = window.confirm(`Are you sure you want to delete the category "${category.name}"?`);
+  if (confirm) {
+    emit('delete-category', category.id);
+  }
+};
+
+const confirmDeleteBucket = (bucket) => {
+  const confirm = window.confirm(`Are you sure you want to delete/archive the bucket "${bucket.name}"?`);
+  if (confirm) {
+    emit('delete-bucket', bucket.id);
+  }
+};
+</script>
