@@ -14,11 +14,51 @@
       </button>
     </div>
 
-    <!-- Filters Section -->
+    <!-- Filters Section (Collapsible Choose Filters Drawer) -->
     <div v-if="showCategoryDropdown" class="fixed inset-0 z-10" @click="showCategoryDropdown = false"></div>
 
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+    <!-- Filters Trigger Bar -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <button 
+          @click="showFilterDrawer = !showFilterDrawer"
+          class="px-4 py-2.5 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/60 hover:border-indigo-500 rounded-xl text-xs font-bold text-indigo-200 flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95"
+        >
+          <span>🔍 Choose Filters</span>
+          <span v-if="activeFilterCount > 0" class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-600 text-white font-bold">
+            {{ activeFilterCount }}
+          </span>
+          <span class="text-[10px] text-slate-400 transition" :class="{ 'rotate-180': showFilterDrawer }">▼</span>
+        </button>
+
+        <!-- Active Filter Pills & Clear Button -->
+        <button 
+          v-if="hasActiveFilters"
+          @click="clearFilters"
+          class="px-3 py-1.5 bg-rose-950/60 hover:bg-rose-900/60 border border-rose-900/50 rounded-xl text-[11px] font-semibold text-rose-300 transition cursor-pointer flex items-center gap-1"
+        >
+          <span>Clear Filters</span>
+          <span class="text-xs">✕</span>
+        </button>
+      </div>
+
+      <span class="text-xs text-slate-400 font-medium">
+        Showing <strong>{{ transactions.length }}</strong> transactions
+      </span>
+    </div>
+
+    <!-- Collapsible Filter Drawer Panel -->
+    <div v-if="showFilterDrawer" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+          <span>🔍</span> Filter & Search Controls
+        </h3>
+        <button @click="showFilterDrawer = false" class="text-xs text-indigo-400 hover:underline font-semibold cursor-pointer">
+          Done ✕
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- Search Input -->
         <div class="space-y-1.5">
           <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Search</label>
@@ -99,7 +139,7 @@
                 @change="emitFilters"
                 class="rounded border-slate-800 text-indigo-600 focus:ring-indigo-600 bg-slate-900 cursor-pointer"
               />
-              <span>{{ cat.name }}</span>
+              <span>{{ cat.icon || '🏷️' }} {{ cat.name }}</span>
             </label>
           </div>
         </div>
@@ -163,13 +203,19 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 pt-1">
+      <div class="flex justify-end gap-3 pt-2 border-t border-slate-800">
         <button 
           v-if="hasActiveFilters"
           @click="clearFilters" 
           class="px-3.5 py-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
         >
-          Clear Filters
+          Clear All Filters
+        </button>
+        <button 
+          @click="showFilterDrawer = false" 
+          class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer"
+        >
+          Apply & Close
         </button>
       </div>
     </div>
@@ -511,6 +557,18 @@ const applyCustomDates = () => {
 };
 
 const showCategoryDropdown = ref(false);
+const showFilterDrawer = ref(false);
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (filters.value.search) count++;
+  if (filters.value.bucket_id) count++;
+  if (filters.value.account_id) count++;
+  if (filters.value.category_ids && filters.value.category_ids.length > 0) count++;
+  if (filters.value.transaction_type) count++;
+  if (filters.value.time_range) count++;
+  return count;
+});
 
 const selectedCategoryNames = computed(() => {
   if (!filters.value.category_ids || filters.value.category_ids.length === 0) {

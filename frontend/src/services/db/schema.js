@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS categories (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     color TEXT NOT NULL DEFAULT '#6366f1',
+    icon TEXT NULL DEFAULT '🏷️',
+    is_quick_select INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
@@ -25,6 +27,7 @@ CREATE TABLE IF NOT EXISTS savings_buckets (
     target_amount REAL NULL,
     icon TEXT NULL DEFAULT '🪣',
     color TEXT NULL DEFAULT '#6366f1',
+    sort_order INTEGER NOT NULL DEFAULT 0,
     is_archived INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
@@ -62,14 +65,15 @@ CREATE TABLE IF NOT EXISTS debts (
 `;
 
 export const DEFAULT_CATEGORIES = [
-  { name: 'Food & Dining', color: '#ef4444' },
-  { name: 'Rent & Housing', color: '#3b82f6' },
-  { name: 'Utilities', color: '#f59e0b' },
-  { name: 'Salary & Income', color: '#10b981' },
-  { name: 'Shopping', color: '#8b5cf6' },
-  { name: 'Entertainment', color: '#ec4899' },
-  { name: 'Transportation', color: '#06b6d4' },
-  { name: 'General', color: '#64748b' }
+  { name: 'Food & Dining', color: '#ef4444', icon: '🍔', is_quick_select: 1 },
+  { name: 'Groceries', color: '#10b981', icon: '🛒', is_quick_select: 1 },
+  { name: 'Rent & Housing', color: '#3b82f6', icon: '🏠', is_quick_select: 1 },
+  { name: 'Utilities', color: '#f59e0b', icon: '⚡', is_quick_select: 1 },
+  { name: 'Salary & Income', color: '#10b981', icon: '💰', is_quick_select: 0 },
+  { name: 'Shopping', color: '#8b5cf6', icon: '🛍️', is_quick_select: 1 },
+  { name: 'Entertainment', color: '#ec4899', icon: '🎬', is_quick_select: 0 },
+  { name: 'Transportation', color: '#06b6d4', icon: '🚗', is_quick_select: 0 },
+  { name: 'General', color: '#64748b', icon: '🏷️', is_quick_select: 0 }
 ];
 
 export const DEFAULT_ACCOUNTS = [

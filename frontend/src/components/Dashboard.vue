@@ -6,15 +6,82 @@
         <h2 class="text-2xl font-bold text-slate-100 tracking-tight">Financial Overview</h2>
         <p class="text-sm text-slate-400">Real-time summary of your accounts, income, expenses, and savings buckets.</p>
       </div>
-      <button 
-        @click="$emit('add-transaction')" 
-        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition duration-150 shadow-lg shadow-indigo-600/20 cursor-pointer shrink-0"
-      >
-        <span class="text-lg font-bold leading-none">+</span> Add Transaction
-      </button>
     </div>
 
-    <!-- 1. SAVINGS BUCKETS BREAKDOWN (AT THE VERY TOP) -->
+    <!-- 1. HERO FOCUS CTA CARD: ADD TRANSACTION (MAIN FOCUS AT TOP) -->
+    <div 
+      @click="$emit('add-transaction')" 
+      class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900/60 via-purple-900/40 to-slate-900 border border-indigo-500/40 p-5 sm:p-6 shadow-2xl hover:border-indigo-400 transition-all duration-200 cursor-pointer group transform hover:-translate-y-0.5"
+    >
+      <div class="absolute right-0 top-0 -mt-6 -mr-6 w-32 h-32 rounded-full bg-indigo-500/20 blur-2xl group-hover:bg-indigo-500/30 transition"></div>
+      
+      <div class="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-indigo-600/40 shrink-0 group-hover:scale-105 transition">
+            ＋
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-100 group-hover:text-indigo-300 transition">Log New Transaction</h3>
+            <p class="text-xs text-slate-300 mt-0.5">Record an expense or income entry in 1 tap</p>
+          </div>
+        </div>
+
+        <button 
+          type="button"
+          class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2"
+        >
+          <span>＋ Add Transaction</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. PRIMARY METRIC CARDS -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+      <!-- Net Worth -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/30 p-4 sm:p-5 shadow-xl">
+        <div class="absolute right-0 top-0 -mt-3 -mr-3 w-20 h-20 rounded-full bg-indigo-600/10 blur-xl"></div>
+        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-400/80">Net Worth</p>
+        <p class="mt-1.5 text-lg sm:text-2xl font-bold tracking-tight truncate" :class="netWorth >= 0 ? 'text-slate-100' : 'text-rose-400'">
+          ₹{{ formatAmount(netWorth) }}
+        </p>
+        <p class="mt-0.5 text-[10px] sm:text-[11px] text-slate-400 truncate">Total account balances</p>
+      </div>
+
+      <!-- Income -->
+      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
+        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-400">Total Income</p>
+        <p class="mt-1.5 text-lg sm:text-2xl font-bold text-slate-100 tracking-tight truncate">
+          ₹{{ formatAmount(totalIncome) }}
+        </p>
+        <p class="mt-0.5 text-[10px] sm:text-[11px] text-emerald-500/80 flex items-center gap-1 font-medium truncate">
+          ▲ All-time earnings
+        </p>
+      </div>
+
+      <!-- Expenses -->
+      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
+        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-rose-400">Total Expenses</p>
+        <p class="mt-1.5 text-lg sm:text-2xl font-bold text-slate-100 tracking-tight truncate">
+          ₹{{ formatAmount(totalExpenses) }}
+        </p>
+        <p class="mt-0.5 text-[10px] sm:text-[11px] text-rose-500/80 flex items-center gap-1 font-medium truncate">
+          ▼ All-time spending
+        </p>
+      </div>
+
+      <!-- Savings Rate / Health -->
+      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
+        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-400">Savings Rate</p>
+        <p class="mt-1.5 text-lg sm:text-2xl font-bold tracking-tight truncate" :class="savingsRate >= 0 ? 'text-amber-300' : 'text-rose-400'">
+          {{ savingsRate }}%
+        </p>
+        <p class="mt-0.5 text-[10px] sm:text-[11px] text-slate-400 truncate">
+          {{ savingsRate >= 0 ? 'Net positive ratio' : 'Expenses exceed income' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- 3. SAVINGS BUCKETS BREAKDOWN -->
     <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800/80 pb-3.5">
         <div>
@@ -65,77 +132,11 @@
               ₹{{ formatAmount(bucket.allocated_balance) }}
             </span>
           </div>
-
-          <!-- Bottom Row: Quick Action Buttons (2-Column Grid to Prevent Text Overlap) -->
-          <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800/60" @click.stop>
-            <button 
-              type="button"
-              @click="$emit('add-transaction', { bucketId: bucket.id, type: 'income' })"
-              class="w-full py-1 px-1 text-[10px] font-bold rounded-lg bg-emerald-950/80 hover:bg-emerald-900 active:bg-emerald-950 text-emerald-400 border border-emerald-800/50 transition cursor-pointer flex items-center justify-center gap-0.5 shadow-sm active:scale-95"
-              title="Add Income to this bucket"
-            >
-              <span>+ Income</span>
-            </button>
-            <button 
-              type="button"
-              @click="$emit('add-transaction', { bucketId: bucket.id, type: 'expense' })"
-              class="w-full py-1 px-1 text-[10px] font-bold rounded-lg bg-rose-950/80 hover:bg-rose-900 active:bg-rose-950 text-rose-400 border border-rose-800/50 transition cursor-pointer flex items-center justify-center gap-0.5 shadow-sm active:scale-95"
-              title="Record Expense from this bucket"
-            >
-              <span>- Expense</span>
-            </button>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- 2. PRIMARY METRIC CARDS -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
-      <!-- Net Worth -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/30 p-4 sm:p-5 shadow-xl">
-        <div class="absolute right-0 top-0 -mt-3 -mr-3 w-20 h-20 rounded-full bg-indigo-600/10 blur-xl"></div>
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-400/80">Net Worth</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold tracking-tight truncate" :class="netWorth >= 0 ? 'text-slate-100' : 'text-rose-400'">
-          ₹{{ formatAmount(netWorth) }}
-        </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-slate-400 truncate">Total account balances</p>
-      </div>
-
-      <!-- Income -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-400">Total Income</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold text-slate-100 tracking-tight truncate">
-          ₹{{ formatAmount(totalIncome) }}
-        </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-emerald-500/80 flex items-center gap-1 font-medium truncate">
-          ▲ All-time earnings
-        </p>
-      </div>
-
-      <!-- Expenses -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-rose-400">Total Expenses</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold text-slate-100 tracking-tight truncate">
-          ₹{{ formatAmount(totalExpenses) }}
-        </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-rose-500/80 flex items-center gap-1 font-medium truncate">
-          ▼ All-time spending
-        </p>
-      </div>
-
-      <!-- Savings Rate / Health -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-400">Savings Rate</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold tracking-tight truncate" :class="savingsRate >= 0 ? 'text-amber-300' : 'text-rose-400'">
-          {{ savingsRate }}%
-        </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-slate-400 truncate">
-          {{ savingsRate >= 0 ? 'Net positive ratio' : 'Expenses exceed income' }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Main Analytics Section (Pie Chart & Accounts) -->
+    <!-- 4. Main Analytics Section (Pie Chart & Accounts) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Category Breakdown (Default: This Month with Time Filters) -->
       <div class="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl p-6 shadow-xl space-y-6">

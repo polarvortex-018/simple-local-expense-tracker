@@ -137,13 +137,24 @@ function runSchemaAndSeeds() {
 
   const now = new Date().toISOString();
 
+  // Run column migration for existing tables if needed
+  try {
+    db.run("ALTER TABLE categories ADD COLUMN is_quick_select INTEGER NOT NULL DEFAULT 0");
+  } catch (e) {}
+  try {
+    db.run("ALTER TABLE categories ADD COLUMN icon TEXT NULL DEFAULT '🏷️'");
+  } catch (e) {}
+  try {
+    db.run("ALTER TABLE savings_buckets ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0");
+  } catch (e) {}
+
   // Seed Default Categories
   const catRes = execQuery('SELECT COUNT(*) as count FROM categories');
   if (catRes[0]?.count === 0) {
     DEFAULT_CATEGORIES.forEach(cat => {
       execRun(
-        'INSERT INTO categories (id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
-        [generateUUID(), cat.name, cat.color, now, now]
+        'INSERT INTO categories (id, name, color, icon, is_quick_select, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [generateUUID(), cat.name, cat.color, cat.icon || '🏷️', cat.is_quick_select || 0, now, now]
       );
     });
   }

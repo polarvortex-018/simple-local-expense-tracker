@@ -314,8 +314,8 @@ export const api = {
     const id = generateUUID();
     const now = new Date().toISOString();
     execRun(
-      'INSERT INTO categories (id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
-      [id, payload.name.trim(), payload.color || '#6366f1', now, now]
+      'INSERT INTO categories (id, name, color, icon, is_quick_select, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id, payload.name.trim(), payload.color || '#6366f1', payload.icon || '🏷️', payload.is_quick_select ? 1 : 0, now, now]
     );
     const rows = execQuery('SELECT * FROM categories WHERE id = ?', [id]);
     return rows[0];
@@ -325,8 +325,8 @@ export const api = {
     await ensureDB();
     const now = new Date().toISOString();
     execRun(
-      'UPDATE categories SET name = ?, color = ?, updated_at = ? WHERE id = ?',
-      [payload.name.trim(), payload.color || '#6366f1', now, id]
+      'UPDATE categories SET name = ?, color = ?, icon = ?, is_quick_select = ?, updated_at = ? WHERE id = ?',
+      [payload.name.trim(), payload.color || '#6366f1', payload.icon || '🏷️', payload.is_quick_select ? 1 : 0, now, id]
     );
     const rows = execQuery('SELECT * FROM categories WHERE id = ?', [id]);
     return rows[0];
@@ -344,9 +344,18 @@ export const api = {
   async getBuckets(includeArchived = false) {
     await ensureDB();
     if (includeArchived) {
-      return execQuery('SELECT * FROM savings_buckets ORDER BY is_archived ASC, created_at ASC');
+      return execQuery('SELECT * FROM savings_buckets ORDER BY is_archived ASC, sort_order ASC, created_at ASC');
     }
-    return execQuery('SELECT * FROM savings_buckets WHERE is_archived = 0 ORDER BY created_at ASC');
+    return execQuery('SELECT * FROM savings_buckets WHERE is_archived = 0 ORDER BY sort_order ASC, created_at ASC');
+  },
+
+  async updateBucketSortOrder(bucketIds) {
+    await ensureDB();
+    const now = new Date().toISOString();
+    bucketIds.forEach((id, idx) => {
+      execRun('UPDATE savings_buckets SET sort_order = ?, updated_at = ? WHERE id = ?', [idx, now, id]);
+    });
+    return this.getBuckets(true);
   },
 
   async createBucket(payload) {

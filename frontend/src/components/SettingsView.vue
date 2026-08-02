@@ -115,7 +115,7 @@
         <div class="flex-grow">
           <div v-if="displayedBuckets.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20">
             <div 
-              v-for="bucket in displayedBuckets" 
+              v-for="(bucket, idx) in displayedBuckets" 
               :key="bucket.id"
               class="p-3.5 hover:bg-slate-950/30 transition duration-150"
             >
@@ -198,6 +198,28 @@
               <!-- Normal Mode -->
               <div v-else class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
+                  <!-- Up/Down Priority Buttons -->
+                  <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
+                    <button 
+                      type="button"
+                      @click="moveBucketPriority(idx, -1)"
+                      :disabled="idx === 0"
+                      class="text-[10px] leading-none p-0.5 text-slate-400 hover:text-indigo-400 disabled:opacity-20 cursor-pointer"
+                      title="Move Priority Up in Grid"
+                    >
+                      ▲
+                    </button>
+                    <button 
+                      type="button"
+                      @click="moveBucketPriority(idx, 1)"
+                      :disabled="idx === displayedBuckets.length - 1"
+                      class="text-[10px] leading-none p-0.5 text-slate-400 hover:text-indigo-400 disabled:opacity-20 cursor-pointer"
+                      title="Move Priority Down in Grid"
+                    >
+                      ▼
+                    </button>
+                  </div>
+
                   <span class="text-base">{{ bucket.icon || '🪣' }}</span>
                   <div>
                     <div class="flex items-center gap-1.5">
@@ -373,15 +395,34 @@
         <form @submit.prevent="submitCategory" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-4">
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add New Category</p>
           
-          <div class="flex flex-col sm:flex-row gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+            <input 
+              v-model="newCategory.icon"
+              type="text"
+              placeholder="Icon (e.g. 🍔)"
+              class="w-16 px-2.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-center text-sm focus:outline-none transition"
+            />
+
             <input 
               v-model="newCategory.name"
               type="text"
               placeholder="Category Name (e.g. Subscriptions)"
               required
-              class="flex-grow px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+              class="sm:col-span-2 px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
             />
-            <div class="flex items-center gap-3">
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+              <input 
+                type="checkbox" 
+                v-model="newCategory.is_quick_select" 
+                class="rounded border-slate-800 text-amber-500 focus:ring-amber-500 bg-slate-900 cursor-pointer"
+              />
+              <span>⭐ Pin as Quick Select in Transaction Form</span>
+            </label>
+
+            <div class="flex items-center gap-3 ml-auto">
               <div class="flex items-center gap-2">
                 <span class="text-[10px] text-slate-400 uppercase font-semibold">Color:</span>
                 <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
@@ -416,6 +457,12 @@
               <!-- Editing Mode -->
               <div v-if="editingCategoryId === category.id" class="space-y-3">
                 <div class="flex gap-2 items-center">
+                  <input 
+                    v-model="editCategoryIcon"
+                    type="text"
+                    placeholder="Icon"
+                    class="w-12 px-2 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-center text-xs focus:outline-none transition"
+                  />
                   <input 
                     v-model="editCategoryName"
                     type="text"
@@ -453,10 +500,20 @@
               <!-- Normal Mode -->
               <div v-else class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
+                  <span class="text-base">{{ category.icon || '🏷️' }}</span>
                   <span class="w-3 h-3 rounded-full border border-white/10 shrink-0" :style="{ backgroundColor: category.color }"></span>
                   <p class="text-xs font-semibold text-slate-200">{{ category.name }}</p>
                 </div>
-                <div class="flex gap-1.5">
+                <div class="flex items-center gap-2">
+                  <button 
+                    @click="$emit('update-category', category.id, { name: category.name, color: category.color, icon: category.icon || '🏷️', is_quick_select: category.is_quick_select ? 0 : 1 })"
+                    class="px-2 py-1 text-[10px] font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
+                    :class="category.is_quick_select ? 'bg-amber-950/80 text-amber-400 border border-amber-800/40' : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'"
+                    :title="category.is_quick_select ? 'Pinned to Quick Select in transaction form' : 'Pin to Quick Select in transaction form'"
+                  >
+                    <span>{{ category.is_quick_select ? '⭐ Quick Select' : '☆ Pin' }}</span>
+                  </button>
+
                   <button 
                     @click="startEditCategory(category)"
                     class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
@@ -782,7 +839,8 @@ const emit = defineEmits([
   'create-bucket',
   'update-bucket',
   'delete-bucket',
-  'transfer-bucket'
+  'transfer-bucket',
+  'reorder-buckets'
 ]);
 
 // Preset Emoji Grid Palette
@@ -826,7 +884,7 @@ const displayedBuckets = computed(() => {
 const newAccount = ref({ name: '', type: 'Checking' });
 const submittingAccount = ref(false);
 
-const newCategory = ref({ name: '', color: '#6366f1' });
+const newCategory = ref({ name: '', color: '#6366f1', icon: '🏷️', is_quick_select: false });
 const submittingCategory = ref(false);
 
 const newBucket = ref({ name: '', icon: '🪣', color: '#6366f1' });
@@ -843,6 +901,7 @@ const editAccountType = ref('Checking');
 const editingCategoryId = ref(null);
 const editCategoryName = ref('');
 const editCategoryColor = ref('#6366f1');
+const editCategoryIcon = ref('🏷️');
 
 const editingBucketId = ref(null);
 const editBucketName = ref('');
@@ -878,10 +937,14 @@ const submitCategory = async () => {
   try {
     emit('create-category', {
       name: newCategory.value.name.trim(),
-      color: newCategory.value.color
+      color: newCategory.value.color,
+      icon: newCategory.value.icon ? newCategory.value.icon.trim() : '🏷️',
+      is_quick_select: newCategory.value.is_quick_select ? 1 : 0
     });
     newCategory.value.name = '';
     newCategory.value.color = '#6366f1';
+    newCategory.value.icon = '🏷️';
+    newCategory.value.is_quick_select = false;
   } finally {
     submittingCategory.value = false;
   }
@@ -926,6 +989,16 @@ const submitBucketTransfer = async () => {
   }
 };
 
+const moveBucketPriority = (idx, direction) => {
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= displayedBuckets.value.length) return;
+  const list = [...displayedBuckets.value];
+  const [moved] = list.splice(idx, 1);
+  list.splice(newIdx, 0, moved);
+  const ids = list.map(b => b.id);
+  emit('reorder-buckets', ids);
+};
+
 const startEditAccount = (account) => {
   editingAccountId.value = account.id;
   editAccountName.value = account.name;
@@ -950,6 +1023,7 @@ const startEditCategory = (category) => {
   editingCategoryId.value = category.id;
   editCategoryName.value = category.name;
   editCategoryColor.value = category.color || '#6366f1';
+  editCategoryIcon.value = category.icon || '🏷️';
 };
 
 const cancelEditCategory = () => {
@@ -961,7 +1035,9 @@ const saveCategoryEdit = (category) => {
   if (!name) return;
   emit('update-category', category.id, { 
     name,
-    color: editCategoryColor.value
+    color: editCategoryColor.value,
+    icon: editCategoryIcon.value ? editCategoryIcon.value.trim() : '🏷️',
+    is_quick_select: category.is_quick_select ? 1 : 0
   });
   editingCategoryId.value = null;
 };

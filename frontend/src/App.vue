@@ -366,6 +366,15 @@ const handleTransferBucket = async (payload) => {
   }
 };
 
+const handleReorderBuckets = async (bucketIds) => {
+  try {
+    await api.updateBucketSortOrder(bucketIds);
+    await refreshAll();
+  } catch (err) {
+    alert(err.message || 'Failed to reorder buckets.');
+  }
+};
+
 // Debt Handlers
 const handleCreateDebt = async (payload) => {
   try {
@@ -524,6 +533,7 @@ onMounted(() => {
           @update-bucket="handleUpdateBucket"
           @delete-bucket="handleDeleteBucket"
           @transfer-bucket="handleTransferBucket"
+          @reorder-buckets="handleReorderBuckets"
         />
       </div>
     </main>
