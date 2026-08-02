@@ -544,45 +544,7 @@
 
     </div>
 
-    <!-- 4. Offline Engine & Storage Status Diagnostic Card -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-      <div>
-        <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
-          <span>⚡</span> Offline Engine & Local Storage Status
-        </h3>
-        <p class="text-xs text-slate-400 mt-0.5">Real-time status of your on-device SQLite engine and offline PWA cache.</p>
-      </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Network Connection</span>
-          <span class="text-xs font-bold flex items-center gap-1.5" :class="isOnline ? 'text-emerald-400' : 'text-amber-400'">
-            <span>{{ isOnline ? '🌐 Online' : '✈️ Airplane / Offline Mode' }}</span>
-          </span>
-        </div>
-
-        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Service Worker Cache</span>
-          <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
-            <span>🟢 Active & Precached</span>
-          </span>
-        </div>
-
-        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">SQLite WASM Engine</span>
-          <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
-            <span>🟢 Loaded in Memory</span>
-          </span>
-        </div>
-
-        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Storage Mode</span>
-          <span class="text-xs font-bold text-indigo-300 flex items-center gap-1">
-            <span>🔒 100% On-Device</span>
-          </span>
-        </div>
-      </div>
-    </div>
 
     <!-- 5. Data Management & Database Backups Card -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
@@ -622,21 +584,38 @@
           <div 
             v-for="b in backupsList" 
             :key="b.filename"
-            class="p-3 flex items-center justify-between hover:bg-slate-950/30 transition"
+            class="p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-slate-950/30 transition gap-2"
           >
-            <div class="flex items-center gap-2.5">
-              <span class="text-base">📦</span>
-              <div>
-                <p class="text-xs font-semibold text-slate-200 font-mono">{{ b.filename }}</p>
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="text-base shrink-0">📦</span>
+              <div class="truncate">
+                <p class="text-xs font-semibold text-slate-200 font-mono truncate">{{ b.filename }}</p>
                 <p class="text-[10px] text-slate-500">{{ formatSize(b.size_bytes) }}</p>
               </div>
             </div>
-            <button 
-              @click="handleRestoreBackup(b.filename)"
-              class="px-2.5 py-1 bg-amber-950/80 hover:bg-amber-900 text-amber-400 border border-amber-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer"
-            >
-              Restore
-            </button>
+            <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+              <a 
+                :href="getBackupUrl(b.filename)"
+                :download="b.filename"
+                class="px-2.5 py-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
+                title="Download backup file to phone Downloads / Files folder"
+              >
+                <span>⬇️ Save File</span>
+              </a>
+              <button 
+                @click="handleShareBackup(b.filename)"
+                class="px-2.5 py-1 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
+                title="Share or Save to Google Drive / iCloud / Files app"
+              >
+                <span>📤 Share</span>
+              </button>
+              <button 
+                @click="handleRestoreBackup(b.filename)"
+                class="px-2.5 py-1 bg-amber-950/80 hover:bg-amber-900 text-amber-400 border border-amber-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer"
+              >
+                Restore
+              </button>
+            </div>
           </div>
         </div>
         <div v-else class="text-center py-6 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
@@ -1186,6 +1165,16 @@ const handleRestoreBackup = async (filename) => {
     } catch (err) {
       alert(`Failed to restore backup: ${err.message}`);
     }
+  }
+};
+
+const getBackupUrl = (filename) => api.getBackupDownloadUrl(filename);
+
+const handleShareBackup = async (filename) => {
+  try {
+    await api.shareBackupFile(filename);
+  } catch (err) {
+    alert(err.message || 'Failed to share backup file.');
   }
 };
 

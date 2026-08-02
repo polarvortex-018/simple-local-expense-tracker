@@ -8,6 +8,7 @@ import {
   switchActiveVault,
   deleteVault as removeVault,
   exportActiveDatabaseBlob,
+  exportDatabaseBlobByName,
   importDatabaseBlob
 } from './db/local_sqlite.js';
 
@@ -511,5 +512,40 @@ export const api = {
     await ensureDB();
     switchActiveVault(filename);
     return { active_vault: filename, message: "Database restored from backup." };
+  },
+
+  getBackupDownloadUrl(filename) {
+    const binary = exportDatabaseBlobByName(filename);
+    if (!binary) return '#';
+    const blob = new Blob([binary], { type: 'application/x-sqlite3' });
+    return URL.createObjectURL(blob);
+  },
+
+  async shareBackupFile(filename) {
+    const binary = exportDatabaseBlobByName(filename);
+    if (!binary) throw new Error("Backup file not found");
+    const blob = new Blob([binary], { type: 'application/x-sqlite3' });
+    const file = new File([blob], filename, { type: 'application/x-sqlite3' });
+
+    let sharedSuccess = false;
+    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: `Cash Buddy Backup (${filename})`,
+          text: `Here is my Cash Buddy database backup file: ${filename}`,
+          files: [file]
+        });
+        sharedSuccess = true;
+      } catch (err) {
+        if (err.name === 'AbortError') sharedSuccess = true;
+      }
+    }
+
+    if (!sharedSuccess) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
   }
 };

@@ -42,27 +42,35 @@
           <div 
             v-for="v in vaults" 
             :key="v.filename"
-            class="p-3.5 flex items-center justify-between hover:bg-slate-950/40 transition"
+            class="p-3.5 flex items-center justify-between hover:bg-slate-950/40 transition gap-3"
             :class="{ 'bg-indigo-950/20 border-l-4 border-l-indigo-500': v.is_active }"
           >
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
               <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg shrink-0">
                 {{ v.is_active ? '📂' : '📁' }}
               </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <p class="text-sm font-bold text-slate-200">{{ v.name }}</p>
-                  <span v-if="v.is_active" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <p class="text-sm font-bold text-slate-200 truncate max-w-[180px] sm:max-w-[240px]" :title="v.name">{{ v.name }}</p>
+                  <span v-if="v.is_active" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40 shrink-0">
                     Active Vault
                   </span>
                 </div>
-                <p class="text-[10px] text-slate-400 mt-0.5">
-                  <span class="font-mono text-slate-500">{{ v.filename }}</span> • {{ formatSize(v.size_bytes) }}
+                <p class="text-[10px] text-slate-400 mt-0.5 truncate">
+                  <span class="font-mono text-slate-500 truncate inline-block max-w-[160px] sm:max-w-[220px] align-bottom" :title="v.filename">{{ v.filename }}</span> • {{ formatSize(v.size_bytes) }}
                 </p>
               </div>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 shrink-0 ml-2">
+              <button 
+                @click="handleSaveVaultToFolder(v.filename)"
+                class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-lg transition cursor-pointer flex items-center gap-1"
+                title="Save database file directly to a custom folder on your computer/phone"
+              >
+                <span>💾 Save To...</span>
+              </button>
+
               <button 
                 v-if="!v.is_active"
                 @click="$emit('switch-vault', v.filename)"
@@ -171,6 +179,16 @@ const handleImport = () => {
     emit('import-vault', selectedFile.value);
     selectedFile.value = null;
     selectedFileName.value = '';
+  }
+};
+
+import { api } from '../services/api';
+
+const handleSaveVaultToFolder = async (filename) => {
+  try {
+    await api.shareBackupFile(filename);
+  } catch (err) {
+    alert(err.message || 'Failed to save vault file.');
   }
 };
 

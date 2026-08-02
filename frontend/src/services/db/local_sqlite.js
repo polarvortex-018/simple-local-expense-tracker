@@ -274,6 +274,12 @@ export function exportActiveDatabaseBlob() {
   return db.export();
 }
 
+export function exportDatabaseBlobByName(filename) {
+  const raw = localStorage.getItem(`${VAULT_DATA_PREFIX}${filename}`);
+  if (!raw) return null;
+  return Base64ToUint8Array(raw);
+}
+
 // Import external .db Uint8Array binary on phone
 export function importDatabaseBlob(filename, uint8Array) {
   const cleanName = filename.toLowerCase().endsWith('.db') ? filename : `${filename}.db`;
