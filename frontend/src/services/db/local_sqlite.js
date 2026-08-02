@@ -92,9 +92,7 @@ function Base64ToUint8Array(base64) {
 // Initialize SQL.js engine & load active vault using Vite WASM asset URL
 export async function initDatabaseEngine() {
   if (!SQL) {
-    SQL = await initSqlJs({
-      locateFile: () => sqlWasmUrl
-    });
+    SQL = await initSqlJs({ locateFile: () => sqlWasmUrl });
   }
 
   const vaults = getSavedVaultsList();

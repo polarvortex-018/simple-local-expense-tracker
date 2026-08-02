@@ -170,16 +170,22 @@ const loadVaults = async () => {
 const refreshAll = async () => {
   loading.value = true;
   error.value = '';
-  await api.init();
-  await Promise.all([
-    fetchTransactions(),
-    fetchAccounts(),
-    fetchCategories(),
-    fetchBuckets(),
-    fetchDebts(),
-    loadVaults()
-  ]);
-  loading.value = false;
+  try {
+    await api.init();
+    await Promise.all([
+      fetchTransactions(),
+      fetchAccounts(),
+      fetchCategories(),
+      fetchBuckets(),
+      fetchDebts(),
+      loadVaults()
+    ]);
+  } catch (err) {
+    console.error("refreshAll error:", err);
+    error.value = err.message || 'Error loading local database';
+  } finally {
+    loading.value = false;
+  }
 };
 
 // Vault Management Handlers
@@ -411,10 +417,10 @@ onMounted(() => {
 <template>
   <div class="min-h-screen flex flex-col bg-[#0b111e]">
     <!-- Navbar -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 safe-area-pt">
       <div class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <img src="/cashbuddy-logo.svg?v=3" alt="Cash Buddy Logo" class="w-9 h-9 object-contain" />
+          <img src="/cashbuddy-logo.svg" alt="Cash Buddy Logo" class="w-9 h-9 object-contain" />
           <div class="flex flex-col">
             <span class="font-bold text-slate-100 tracking-tight text-base sm:text-lg leading-tight">Cash Buddy</span>
             <span class="text-[9px] text-indigo-300 font-medium hidden sm:inline">Your Personal Expense Tracker</span>
@@ -477,15 +483,15 @@ onMounted(() => {
         <button @click="error = ''" class="text-slate-400 hover:text-slate-200 text-sm">Dismiss</button>
       </div>
 
-      <!-- Tab Views -->
-      <div v-if="loading && transactions.length === 0" class="flex flex-col items-center justify-center py-20 gap-4">
-        <div class="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-slate-400 text-sm font-medium">Loading database...</p>
+      <!-- Non-blocking Loading Indicator -->
+      <div v-if="loading && transactions.length === 0" class="fixed top-20 right-6 z-50 bg-indigo-950/90 border border-indigo-500/50 px-3.5 py-2 rounded-xl flex items-center gap-2.5 shadow-xl backdrop-blur-md">
+        <div class="w-3.5 h-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-xs font-semibold text-indigo-200">Initializing Cash Buddy...</span>
       </div>
 
-      <div v-else>
+      <div>
         <Dashboard 
-          v-if="currentTab === 'dashboard'" 
+          v-show="currentTab === 'dashboard'" 
           :accounts="accounts"
           :transactions="transactions"
           :categories="categories"
@@ -494,7 +500,7 @@ onMounted(() => {
         />
 
         <TransactionList 
-          v-if="currentTab === 'transactions'"
+          v-show="currentTab === 'transactions'"
           :transactions="transactions"
           :accounts="accounts"
           :categories="categories"
@@ -510,7 +516,7 @@ onMounted(() => {
         />
 
         <DebtList 
-          v-if="currentTab === 'debts'"
+          v-show="currentTab === 'debts'"
           :debts="debts"
           :accounts="accounts"
           @create-debt="handleCreateDebt"
@@ -519,7 +525,7 @@ onMounted(() => {
         />
 
         <SettingsView 
-          v-if="currentTab === 'settings'"
+          v-show="currentTab === 'settings'"
           :accounts="accounts"
           :categories="categories"
           :buckets="buckets"
@@ -539,7 +545,7 @@ onMounted(() => {
     </main>
 
     <!-- Mobile Bottom Navigation Bar (Visible on < sm screens) -->
-    <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl safe-area-pb">
+    <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl safe-area-pb">
       <button 
         @click="currentTab = 'dashboard'"
         class="flex flex-col items-center gap-1 text-[11px] font-semibold transition cursor-pointer"
