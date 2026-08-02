@@ -548,6 +548,122 @@
       </div>
     </div>
 
+    <!-- 5. Frequently Asked Questions (FAQ) Card -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+          <span>❓</span> Frequently Asked Questions & App Guide
+        </h3>
+        <p class="text-xs text-slate-400 mt-0.5">Quick guide on how Cash Buddy works and how to organize your finances.</p>
+      </div>
+
+      <div class="space-y-3">
+        <!-- Q1: Buckets -->
+        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+            <span>🪣 What are Savings Buckets & why create them?</span>
+            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+            <p><strong>Buckets represent the PURPOSE of your money (why it exists).</strong></p>
+            <p class="text-slate-400">Instead of just seeing a lump sum in your bank account, Savings Buckets allow you to allocate funds for specific goals or expenses—such as an <em>Emergency Fund</em>, <em>Japan Trip</em>, <em>Rent</em>, or <em>Monthly Budget</em>.</p>
+          </div>
+        </details>
+
+        <!-- Q2: Accounts -->
+        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+            <span>🏦 What are Accounts & what do they mean?</span>
+            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+            <p><strong>Accounts represent the PHYSICAL STORAGE LOCATION of your money (where it lives).</strong></p>
+            <p class="text-slate-400">Examples include your <em>Checking Account</em>, <em>Savings Account</em>, <em>Physical Cash</em>, or <em>Digital Wallet</em>.</p>
+          </div>
+        </details>
+
+        <!-- Q3: Adding Transactions -->
+        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+            <span>➕ How do I add a transaction and link Buckets & Accounts?</span>
+            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+            <p>Tap the <strong>+ Add</strong> button anywhere in the app. You'll choose:</p>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+              <li><strong>Account</strong>: The bank account or cash wallet that paid or received the money.</li>
+              <li><strong>Savings Bucket</strong>: The purpose allocation that was spent from or added to.</li>
+              <li><strong>Category</strong>: The category (Food, Utilities, Shopping) for spending charts.</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Q4: Filtering -->
+        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+            <span>🔍 How does filtering work across the app?</span>
+            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+            <p class="text-slate-400">In the <strong>History</strong> tab, you can filter by Date Range (This Month, Last Month, Custom), Transaction Type (Income/Expense), Account, Bucket, or Categories. The spending breakdown pie charts automatically update to reflect your active filter selection!</p>
+          </div>
+        </details>
+
+        <!-- Q5: Export & Backup -->
+        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+            <span>💾 How do I backup or export my database?</span>
+            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+            <p class="text-slate-400">Scroll up to <strong>Data Backup & Export Controls</strong> in Settings. Tap <strong>Export Active Database</strong> to download your standard <code class="text-indigo-400 font-mono">.db</code> SQLite file directly to your phone's Files app, or tap <strong>Create Local Snapshot</strong> to save a local restore point anytime.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6. ABOUT CASH BUDDY (AT THE VERY BOTTOM) -->
+    <div class="bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-900 border border-indigo-900/40 rounded-2xl p-6 shadow-2xl space-y-5">
+      <div class="flex items-center gap-3 border-b border-slate-800/80 pb-4">
+        <img src="/cashbuddy-logo.svg?v=3" alt="Cash Buddy Logo" class="w-11 h-11 object-contain" />
+        <div>
+          <h3 class="text-base font-bold text-slate-100">About Cash Buddy</h3>
+          <p class="text-xs text-indigo-400 font-medium">Your Personal Expense Tracker</p>
+        </div>
+      </div>
+
+      <!-- Ideation & Creator Note -->
+      <div class="space-y-3.5 text-xs text-slate-300 leading-relaxed">
+        <div class="p-3.5 bg-indigo-950/50 border border-indigo-900/60 rounded-xl text-indigo-300 font-medium flex items-center gap-2">
+          <span>✨</span>
+          <span>This whole app was built and ideated by <strong>Sajid</strong>.</span>
+        </div>
+
+        <p class="text-slate-300">
+          I have been tracking my finances via a notepad all this time. It was just for my own needs so I would know where my money is going, but I thought I needed an app that would make adding transactions easier.
+        </p>
+        <p class="text-slate-300">
+          The first thing that made me think of this was how I spent so much time at the end of months manually tallying and summing everything; it took way too long and quite frankly I would have made many mistakes.
+        </p>
+        <p class="text-slate-300">
+          This app has been on my mind for the past 4-ish years, and I’ve been making versions of it for a very long time. But this is the first time that I’ve brought it to a phone. I am still actively working on making it better.
+        </p>
+
+        <!-- On-Device Local Data Storage Guarantee -->
+        <div class="p-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2 text-slate-400">
+          <p class="font-bold text-slate-200 uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+            <span>🔒</span> 100% Local On-Phone Storage Guarantee
+          </p>
+          <p class="text-slate-300 text-[11px] leading-normal">
+            Cash Buddy stores all your financial data <strong>completely locally on your own phone</strong>. Every transaction, savings bucket, and custom database vault is saved directly inside your device's local internal storage memory (WebAssembly SQLite + OPFS).
+          </p>
+          <p class="text-slate-400 text-[11px] leading-normal">
+            No user accounts, no external servers, no cloud sync, and zero tracking—your financial data never leaves your device.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Bucket Transfer Modal -->
     <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">

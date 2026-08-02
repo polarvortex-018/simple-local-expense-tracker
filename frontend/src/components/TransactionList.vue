@@ -259,8 +259,68 @@
       </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden">
+    <!-- Mobile Card View (Visible on < sm) -->
+    <div v-if="transactions.length > 0" class="sm:hidden space-y-3">
+      <div 
+        v-for="tx in transactions" 
+        :key="tx.id" 
+        class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg space-y-2.5"
+      >
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-950 border border-slate-800 text-base shrink-0">
+              {{ getBucketIcon(tx.bucket_id) }}
+            </span>
+            <div>
+              <p class="text-sm font-bold text-slate-100 truncate max-w-[170px]">{{ tx.description || 'No description' }}</p>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5">{{ formatDate(tx.date) }}</p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <span 
+              class="text-sm font-bold block"
+              :class="tx.transaction_type === 'income' ? 'text-emerald-400' : 'text-rose-400'"
+            >
+              {{ tx.transaction_type === 'income' ? '+' : '-' }}₹{{ formatAmount(tx.amount) }}
+            </span>
+            <span 
+              class="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider mt-0.5"
+              :class="tx.transaction_type === 'income' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/40' : 'bg-rose-950 text-rose-400 border border-rose-800/40'"
+            >
+              {{ tx.transaction_type }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-800/60 text-xs">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <!-- Category -->
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-950 text-slate-300 text-[10px] border border-slate-800">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
+              <span class="truncate max-w-[90px]">{{ getCategoryName(tx.category_id) }}</span>
+            </span>
+
+            <!-- Account -->
+            <span class="px-2 py-0.5 rounded-md bg-slate-950 text-slate-400 text-[10px] border border-slate-800">
+              {{ getAccountName(tx.account_id) }}
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2 items-center">
+            <button @click="$emit('edit-transaction', tx)" class="p-1 text-slate-400 hover:text-indigo-400 text-xs cursor-pointer" title="Edit">
+              ✏️
+            </button>
+            <button @click="$emit('delete-transaction', tx.id)" class="p-1 text-slate-400 hover:text-rose-400 text-xs cursor-pointer" title="Delete">
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Table Section (Visible on >= sm) -->
+    <div class="hidden sm:block bg-slate-900 border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden">
       <div class="w-full overflow-x-auto">
         <table class="w-full border-collapse text-left">
           <thead>

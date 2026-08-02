@@ -1,0 +1,86 @@
+// Database DDL schema definitions for WebAssembly SQLite engine
+
+export const CREATE_TABLES_SQL = `
+CREATE TABLE IF NOT EXISTS accounts (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    balance REAL NOT NULL DEFAULT 0.0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    color TEXT NOT NULL DEFAULT '#6366f1',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS savings_buckets (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    allocated_balance REAL NOT NULL DEFAULT 0.0,
+    target_amount REAL NULL,
+    icon TEXT NULL DEFAULT '🪣',
+    color TEXT NULL DEFAULT '#6366f1',
+    is_archived INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+    id TEXT PRIMARY KEY,
+    amount REAL NOT NULL,
+    transaction_type TEXT NOT NULL,
+    description TEXT NULL,
+    date TEXT NOT NULL,
+    account_id TEXT NOT NULL,
+    bucket_id TEXT NULL,
+    category_id TEXT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,
+    FOREIGN KEY (bucket_id) REFERENCES savings_buckets (id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS debts (
+    id TEXT PRIMARY KEY,
+    person_name TEXT NOT NULL,
+    amount REAL NOT NULL,
+    debt_type TEXT NOT NULL,
+    description TEXT NULL,
+    due_date TEXT NULL,
+    is_settled INTEGER NOT NULL DEFAULT 0,
+    account_id TEXT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL
+);
+`;
+
+export const DEFAULT_CATEGORIES = [
+  { name: 'Food & Dining', color: '#ef4444' },
+  { name: 'Rent & Housing', color: '#3b82f6' },
+  { name: 'Utilities', color: '#f59e0b' },
+  { name: 'Salary & Income', color: '#10b981' },
+  { name: 'Shopping', color: '#8b5cf6' },
+  { name: 'Entertainment', color: '#ec4899' },
+  { name: 'Transportation', color: '#06b6d4' },
+  { name: 'General', color: '#64748b' }
+];
+
+export const DEFAULT_ACCOUNTS = [
+  { name: 'Checking Account', type: 'Checking', balance: 0.0 },
+  { name: 'Savings Account', type: 'Savings', balance: 0.0 }
+];
+
+export const DEFAULT_BUCKET = {
+  name: 'General',
+  icon: '🪣',
+  color: '#6366f1',
+  allocated_balance: 0.0,
+  is_archived: 0
+};

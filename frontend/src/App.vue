@@ -170,6 +170,7 @@ const loadVaults = async () => {
 const refreshAll = async () => {
   loading.value = true;
   error.value = '';
+  await api.init();
   await Promise.all([
     fetchTransactions(),
     fetchAccounts(),
@@ -403,25 +404,27 @@ onMounted(() => {
     <!-- Navbar -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
       <div class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/30">
-            F
+        <div class="flex items-center gap-2.5">
+          <img src="/cashbuddy-logo.svg?v=3" alt="Cash Buddy Logo" class="w-9 h-9 object-contain" />
+          <div class="flex flex-col">
+            <span class="font-bold text-slate-100 tracking-tight text-base sm:text-lg leading-tight">Cash Buddy</span>
+            <span class="text-[9px] text-indigo-300 font-medium hidden sm:inline">Your Personal Expense Tracker</span>
           </div>
-          <span class="font-bold text-slate-100 tracking-tight text-lg">Finance Tracker</span>
           
-          <!-- Vault Switcher Pill -->
+          <!-- Vault Switcher Pill Button -->
           <button 
             @click="showVaultModal = true"
-            class="ml-2 px-3 py-1 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-indigo-500 rounded-xl text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition cursor-pointer shadow-sm"
+            class="ml-1 sm:ml-2 px-2.5 py-1 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-indigo-500 rounded-xl text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition cursor-pointer shadow-sm"
             title="Click to switch or manage database vaults"
           >
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>🏦 Vault: <strong class="text-indigo-400">{{ activeVaultName }}</strong></span>
+            <span class="truncate max-w-[100px] sm:max-w-none">🏦 <strong class="text-indigo-400">{{ activeVaultName }}</strong></span>
             <span class="text-[10px] text-slate-500">▾</span>
           </button>
         </div>
 
-        <nav class="flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <!-- Desktop Navigation Tabs -->
+        <nav class="hidden sm:flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
           <button 
             @click="currentTab = 'dashboard'"
             class="px-4 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer"
@@ -454,8 +457,8 @@ onMounted(() => {
       </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-grow max-w-6xl w-full mx-auto px-4 md:px-6 py-8">
+    <!-- Main Content Container with Bottom Padding for Mobile Nav Bar -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 md:px-6 py-6 pb-24 sm:pb-8">
       <!-- Error Banner -->
       <div v-if="error" class="mb-6 p-4 bg-rose-950/40 border border-rose-900/50 rounded-2xl flex justify-between items-center">
         <div class="flex gap-3 items-center">
@@ -468,7 +471,7 @@ onMounted(() => {
       <!-- Tab Views -->
       <div v-if="loading && transactions.length === 0" class="flex flex-col items-center justify-center py-20 gap-4">
         <div class="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-slate-400 text-sm font-medium">Loading data...</p>
+        <p class="text-slate-400 text-sm font-medium">Loading database...</p>
       </div>
 
       <div v-else>
@@ -524,6 +527,54 @@ onMounted(() => {
         />
       </div>
     </main>
+
+    <!-- Mobile Bottom Navigation Bar (Visible on < sm screens) -->
+    <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl safe-area-pb">
+      <button 
+        @click="currentTab = 'dashboard'"
+        class="flex flex-col items-center gap-1 text-[11px] font-semibold transition cursor-pointer"
+        :class="currentTab === 'dashboard' ? 'text-indigo-400' : 'text-slate-400 hover:text-slate-200'"
+      >
+        <span class="text-lg">📊</span>
+        <span>Dashboard</span>
+      </button>
+
+      <button 
+        @click="currentTab = 'transactions'"
+        class="flex flex-col items-center gap-1 text-[11px] font-semibold transition cursor-pointer"
+        :class="currentTab === 'transactions' ? 'text-indigo-400' : 'text-slate-400 hover:text-slate-200'"
+      >
+        <span class="text-lg">💸</span>
+        <span>History</span>
+      </button>
+
+      <!-- Center Floating Quick Add Action Button -->
+      <button 
+        @click="openAddTransaction()"
+        class="w-12 h-12 -mt-5 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-600/40 border-2 border-slate-900 transition active:scale-95 cursor-pointer shrink-0"
+        title="Add Transaction"
+      >
+        ＋
+      </button>
+
+      <button 
+        @click="currentTab = 'debts'"
+        class="flex flex-col items-center gap-1 text-[11px] font-semibold transition cursor-pointer"
+        :class="currentTab === 'debts' ? 'text-indigo-400' : 'text-slate-400 hover:text-slate-200'"
+      >
+        <span class="text-lg">🤝</span>
+        <span>Debts</span>
+      </button>
+
+      <button 
+        @click="currentTab = 'settings'"
+        class="flex flex-col items-center gap-1 text-[11px] font-semibold transition cursor-pointer"
+        :class="currentTab === 'settings' ? 'text-indigo-400' : 'text-slate-400 hover:text-slate-200'"
+      >
+        <span class="text-lg">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </nav>
 
     <!-- Slide-over / Modal Form -->
     <TransactionForm 
