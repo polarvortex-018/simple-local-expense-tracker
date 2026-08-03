@@ -1,6 +1,9 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm overscroll-behavior-none">
-    <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[88vh] sm:max-h-[90vh] flex flex-col overscroll-contain safe-area-pb">
+  <div
+    class="fixed left-0 top-0 z-50 flex w-full items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm overscroll-behavior-none"
+    :style="viewportStyle"
+  >
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-full sm:max-h-[90vh] flex flex-col overscroll-contain">
       
       <!-- Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/20 shrink-0">
@@ -87,7 +90,7 @@
           </div>
 
           <!-- Footer Actions Step 1 -->
-          <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+          <div class="sticky bottom-0 z-20 -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 flex items-center justify-between border-t border-slate-700 bg-slate-900/98 px-5 sm:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_28px_rgba(2,6,23,0.85)] backdrop-blur-lg">
             <button 
               type="button" 
               @click="$emit('close')"
@@ -144,10 +147,12 @@
             <div class="space-y-1.5">
               <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block">Amount (₹) *</label>
               <input 
-                v-model.number="form.amount"
-                type="number" 
-                step="0.01"
-                min="0.01"
+                v-model="form.amount"
+                type="text"
+                inputmode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
+                autocomplete="off"
+                enterkeyhint="next"
                 placeholder="0.00"
                 required
                 class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 focus:border-indigo-600 rounded-xl text-slate-100 text-base sm:text-sm font-bold placeholder-slate-600 focus:outline-none transition"
@@ -239,7 +244,7 @@
             <button 
               type="submit"
               :disabled="submitting"
-              class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
+              class="min-h-12 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
               <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
@@ -252,7 +257,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
   transaction: {
@@ -318,8 +323,24 @@ const formatAmount = (val) => {
   return isNaN(num) ? '0.00' : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
+const viewportHeight = ref(window.visualViewport?.height || window.innerHeight);
+const viewportTop = ref(window.visualViewport?.offsetTop || 0);
+const viewportStyle = computed(() => ({
+  height: `${viewportHeight.value}px`,
+  transform: `translateY(${viewportTop.value}px)`
+}));
+
+const updateVisualViewport = () => {
+  viewportHeight.value = window.visualViewport?.height || window.innerHeight;
+  viewportTop.value = window.visualViewport?.offsetTop || 0;
+};
+
 // Load edit values or defaults
 onMounted(() => {
+  window.visualViewport?.addEventListener('resize', updateVisualViewport);
+  window.visualViewport?.addEventListener('scroll', updateVisualViewport);
+  window.addEventListener('resize', updateVisualViewport);
+  updateVisualViewport();
   if (isEdit.value && props.transaction) {
     currentStep.value = 2; // Jump directly to details in edit mode
     form.value = {
@@ -342,6 +363,12 @@ onMounted(() => {
       form.value.bucket_id = activeBuckets.value[0].id;
     }
   }
+});
+
+onBeforeUnmount(() => {
+  window.visualViewport?.removeEventListener('resize', updateVisualViewport);
+  window.visualViewport?.removeEventListener('scroll', updateVisualViewport);
+  window.removeEventListener('resize', updateVisualViewport);
 });
 
 const goToStep2 = () => {
@@ -374,7 +401,8 @@ const handleSubmit = async () => {
     error.value = 'Please select a valid account.';
     return;
   }
-  if (form.value.amount <= 0 || isNaN(form.value.amount)) {
+  const normalizedAmount = String(form.value.amount).replace(',', '.');
+  if (Number(normalizedAmount) <= 0 || !Number.isFinite(Number(normalizedAmount))) {
     error.value = 'Amount must be greater than zero.';
     return;
   }
@@ -391,7 +419,7 @@ const handleSubmit = async () => {
   try {
     const payload = {
       ...form.value,
-      amount: Number(form.value.amount),
+      amount: Number(normalizedAmount),
       description: form.value.description.trim(),
       notes: form.value.notes ? form.value.notes.trim() : null
     };

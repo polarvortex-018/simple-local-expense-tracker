@@ -11,6 +11,8 @@ import VaultModal from './components/VaultModal.vue';
 // State
 const currentTab = ref('dashboard'); // 'dashboard', 'transactions', 'debts', or 'settings'
 const transactions = ref([]);
+const dashboardTransactions = ref([]);
+const transactionSummary = ref({ total_count: 0, total_income: 0, total_expense: 0, categories_breakdown: [] });
 const accounts = ref([]);
 const categories = ref([]);
 const buckets = ref([]);
@@ -47,6 +49,16 @@ const selectedBucketForTx = ref('');
 const selectedTypeForTx = ref('expense');
 const loading = ref(false);
 const error = ref('');
+const successMessage = ref('');
+let successTimer;
+
+const showSuccess = (message) => {
+  successMessage.value = message;
+  clearTimeout(successTimer);
+  successTimer = setTimeout(() => {
+    successMessage.value = '';
+  }, 1800);
+};
 
 // Helper to calculate start and end dates from a relative range choice
 const calculateDates = (timeRange, customStart, customEnd) => {
@@ -119,7 +131,13 @@ const fetchTransactions = async () => {
       end_date: end_date || undefined
     };
 
-    transactions.value = await api.getTransactions(apiParams);
+    const summaryParams = { ...apiParams };
+    delete summaryParams.skip;
+    delete summaryParams.limit;
+    [transactions.value, transactionSummary.value] = await Promise.all([
+      api.getTransactions(apiParams),
+      api.getTransactionSummary(summaryParams)
+    ]);
   } catch (err) {
     error.value = 'Failed to load transactions: ' + err.message;
   }
@@ -180,6 +198,7 @@ const refreshAll = async () => {
       fetchDebts(),
       loadVaults()
     ]);
+    dashboardTransactions.value = await api.getTransactions();
   } catch (err) {
     console.error("refreshAll error:", err);
     error.value = err.message || 'Error loading local database';
@@ -259,6 +278,7 @@ const openEditTransaction = (transaction) => {
 
 const handleSaveTransaction = async (payload) => {
   try {
+    const wasEditing = Boolean(editingTransaction.value);
     if (editingTransaction.value) {
       await api.updateTransaction(editingTransaction.value.id, payload);
     } else {
@@ -266,6 +286,7 @@ const handleSaveTransaction = async (payload) => {
     }
     showForm.value = false;
     await refreshAll();
+    showSuccess(wasEditing ? 'Transaction updated' : 'Transaction added');
   } catch (err) {
     alert(err.message || 'Failed to save transaction.');
   }
@@ -275,6 +296,7 @@ const handleDeleteTransaction = async (id) => {
   try {
     await api.deleteTransaction(id);
     await refreshAll();
+    showSuccess('Transaction deleted');
   } catch (err) {
     alert(err.message || 'Failed to delete transaction.');
   }
@@ -410,12 +432,30 @@ const handleDeleteDebt = async (id) => {
 };
 
 onMounted(() => {
+  window.addEventListener('cashbuddy-storage-error', event => {
+    error.value = `Your latest change could not be saved securely: ${event.detail}`;
+  });
   refreshAll();
 });
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col bg-[#0b111e]">
+    <Transition
+      enter-active-class="transition duration-150 ease-out"
+      enter-from-class="opacity-0 -translate-y-2"
+      leave-active-class="transition duration-150 ease-in"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div
+        v-if="successMessage"
+        class="pointer-events-none fixed top-[max(1rem,env(safe-area-inset-top))] left-1/2 z-[80] -translate-x-1/2 rounded-full border border-emerald-500/40 bg-emerald-950/95 px-4 py-2.5 text-xs font-bold text-emerald-200 shadow-2xl backdrop-blur-lg"
+        role="status"
+        aria-live="polite"
+      >
+        ✓ {{ successMessage }}
+      </div>
+    </Transition>
     <!-- Navbar -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 safe-area-pt">
       <div class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
@@ -493,7 +533,7 @@ onMounted(() => {
         <Dashboard 
           v-show="currentTab === 'dashboard'" 
           :accounts="accounts"
-          :transactions="transactions"
+          :transactions="dashboardTransactions"
           :categories="categories"
           :buckets="buckets"
           @add-transaction="openAddTransaction"
@@ -508,6 +548,7 @@ onMounted(() => {
           :page="page"
           :limit="limit"
           :filters="filters"
+          :summary="transactionSummary"
           @add-transaction="openAddTransaction"
           @edit-transaction="openEditTransaction"
           @delete-transaction="handleDeleteTransaction"

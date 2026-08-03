@@ -594,14 +594,13 @@
               </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
-              <a 
-                :href="getBackupUrl(b.filename)"
-                :download="b.filename"
+              <button
+                @click="handleDownloadBackup(b.filename)"
                 class="px-2.5 py-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
                 title="Download backup file to phone Downloads / Files folder"
               >
                 <span>⬇️ Save File</span>
-              </a>
+              </button>
               <button 
                 @click="handleShareBackup(b.filename)"
                 class="px-2.5 py-1 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
@@ -1168,7 +1167,19 @@ const handleRestoreBackup = async (filename) => {
   }
 };
 
-const getBackupUrl = (filename) => api.getBackupDownloadUrl(filename);
+const handleDownloadBackup = async (filename) => {
+  try {
+    const url = await api.getBackupDownloadUrl(filename);
+    if (url === '#') throw new Error('Backup file not found.');
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) {
+    if (!/cancelled/i.test(err.message)) alert(err.message || 'Failed to download backup.');
+  }
+};
 
 const handleShareBackup = async (filename) => {
   try {

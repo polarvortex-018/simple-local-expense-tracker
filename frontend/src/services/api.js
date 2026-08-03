@@ -2,6 +2,7 @@ import {
   initDatabaseEngine,
   execQuery,
   execRun,
+  runInTransaction,
   generateUUID,
   listVaults,
   createNewVault,
@@ -9,7 +10,12 @@ import {
   deleteVault as removeVault,
   exportActiveDatabaseBlob,
   exportDatabaseBlobByName,
-  importDatabaseBlob
+  importDatabaseBlob,
+  createBackupSnapshot,
+  listBackupSnapshots,
+  restoreBackupSnapshot,
+  exportBackupBytes,
+  checkDatabaseIntegrity
 } from './db/local_sqlite.js';
 
 let isEngineInitialized = false;
@@ -87,7 +93,7 @@ export const api = {
       sqlParams.push(params.end_date);
     }
 
-    sql += ` ORDER BY t.date DESC, t.created_at DESC`;
+    sql += ` ORDER BY t.date DESC, t.created_at DESC, t.id DESC`;
 
     if (params.limit) {
       const limit = parseInt(params.limit);
@@ -138,6 +144,7 @@ export const api = {
     });
 
     return {
+      total_count: txs.length,
       total_income: totalIncome,
       total_expense: totalExpense,
       net_savings: totalIncome - totalExpense,
@@ -153,14 +160,17 @@ export const api = {
     const type = payload.transaction_type;
 
     if (!amount || amount <= 0) throw new Error("Amount must be a positive number.");
+    if (!['income', 'expense'].includes(type)) throw new Error('Invalid transaction type.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.date || '')) throw new Error('A valid transaction date is required.');
     if (!payload.account_id) throw new Error("Account is required.");
 
+    return runInTransaction(async () => {
     // Update Account Balance
     const accRows = execQuery('SELECT * FROM accounts WHERE id = ?', [payload.account_id]);
     if (!accRows.length) throw new Error("Target account not found.");
     const currentAccBalance = Number(accRows[0].balance) || 0;
     const newAccBalance = type === 'expense' ? currentAccBalance - amount : currentAccBalance + amount;
-    execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [newAccBalance, now, payload.account_id]);
+    execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [newAccBalance, now, payload.account_id], false);
 
     // Update Savings Bucket Allocation (if bucket_id specified)
     if (payload.bucket_id) {
@@ -168,7 +178,7 @@ export const api = {
       if (bucketRows.length) {
         const currentBucketAlloc = Number(bucketRows[0].allocated_balance) || 0;
         const newBucketAlloc = type === 'expense' ? currentBucketAlloc - amount : currentBucketAlloc + amount;
-        execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [newBucketAlloc, now, payload.bucket_id]);
+        execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [newBucketAlloc, now, payload.bucket_id], false);
       }
     }
 
@@ -176,11 +186,12 @@ export const api = {
     execRun(
       `INSERT INTO transactions (id, amount, transaction_type, description, date, account_id, bucket_id, category_id, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, amount, type, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, now]
+      [id, amount, type, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, now], false
     );
 
     const created = await this.getTransactions({ limit: 1 });
     return created[0];
+    });
   },
 
   async updateTransaction(id, payload) {
@@ -188,6 +199,11 @@ export const api = {
     const existingRows = execQuery('SELECT * FROM transactions WHERE id = ?', [id]);
     if (!existingRows.length) throw new Error("Transaction not found.");
     const oldTx = existingRows[0];
+    const newAmount = Number(payload.amount);
+    if (!Number.isFinite(newAmount) || newAmount <= 0) throw new Error('Amount must be a positive number.');
+    if (!['income', 'expense'].includes(payload.transaction_type)) throw new Error('Invalid transaction type.');
+    if (!execQuery('SELECT id FROM accounts WHERE id = ?', [payload.account_id]).length) throw new Error('Target account not found.');
+    return runInTransaction(async () => {
 
     // Revert Old Transaction Impact
     const oldAmount = Number(oldTx.amount);
@@ -196,34 +212,33 @@ export const api = {
     if (oldAccRows.length) {
       const bal = Number(oldAccRows[0].balance);
       const revertedBal = oldType === 'expense' ? bal + oldAmount : bal - oldAmount;
-      execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id]);
+      execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
     }
     if (oldTx.bucket_id) {
       const oldBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [oldTx.bucket_id]);
       if (oldBucketRows.length) {
         const alloc = Number(oldBucketRows[0].allocated_balance);
         const revertedAlloc = oldType === 'expense' ? alloc + oldAmount : alloc - oldAmount;
-        execRun('UPDATE savings_buckets SET allocated_balance = ? WHERE id = ?', [revertedAlloc, oldTx.bucket_id]);
+        execRun('UPDATE savings_buckets SET allocated_balance = ? WHERE id = ?', [revertedAlloc, oldTx.bucket_id], false);
       }
     }
 
     // Apply New Transaction Impact
     const now = new Date().toISOString();
-    const newAmount = Number(payload.amount);
     const newType = payload.transaction_type;
 
     const newAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [payload.account_id]);
     if (newAccRows.length) {
       const bal = Number(newAccRows[0].balance);
       const appliedBal = newType === 'expense' ? bal - newAmount : bal + newAmount;
-      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [appliedBal, now, payload.account_id]);
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [appliedBal, now, payload.account_id], false);
     }
     if (payload.bucket_id) {
       const newBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [payload.bucket_id]);
       if (newBucketRows.length) {
         const alloc = Number(newBucketRows[0].allocated_balance);
         const appliedAlloc = newType === 'expense' ? alloc - newAmount : alloc + newAmount;
-        execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [appliedAlloc, now, payload.bucket_id]);
+        execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [appliedAlloc, now, payload.bucket_id], false);
       }
     }
 
@@ -231,10 +246,11 @@ export const api = {
       `UPDATE transactions 
        SET amount = ?, transaction_type = ?, description = ?, date = ?, account_id = ?, bucket_id = ?, category_id = ?, updated_at = ?
        WHERE id = ?`,
-      [newAmount, newType, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, id]
+      [newAmount, newType, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, id], false
     );
 
     return { id, ...payload };
+    });
   },
 
   async deleteTransaction(id) {
@@ -242,6 +258,7 @@ export const api = {
     const existingRows = execQuery('SELECT * FROM transactions WHERE id = ?', [id]);
     if (!existingRows.length) return null;
     const oldTx = existingRows[0];
+    return runInTransaction(async () => {
 
     // Revert Account & Bucket impact
     const oldAmount = Number(oldTx.amount);
@@ -250,19 +267,20 @@ export const api = {
     if (oldAccRows.length) {
       const bal = Number(oldAccRows[0].balance);
       const revertedBal = oldType === 'expense' ? bal + oldAmount : bal - oldAmount;
-      execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id]);
+      execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
     }
     if (oldTx.bucket_id) {
       const oldBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [oldTx.bucket_id]);
       if (oldBucketRows.length) {
         const alloc = Number(oldBucketRows[0].allocated_balance);
         const revertedAlloc = oldType === 'expense' ? alloc + oldAmount : alloc - oldAmount;
-        execRun('UPDATE savings_buckets SET allocated_balance = ? WHERE id = ?', [revertedAlloc, oldTx.bucket_id]);
+        execRun('UPDATE savings_buckets SET allocated_balance = ? WHERE id = ?', [revertedAlloc, oldTx.bucket_id], false);
       }
     }
 
-    execRun('DELETE FROM transactions WHERE id = ?', [id]);
+    execRun('DELETE FROM transactions WHERE id = ?', [id], false);
     return { status: "deleted" };
+    });
   },
 
   // ----------------------------------------------------
@@ -275,6 +293,7 @@ export const api = {
 
   async createAccount(payload) {
     await ensureDB();
+    if (!String(payload.name || '').trim()) throw new Error('Account name is required.');
     const id = generateUUID();
     const now = new Date().toISOString();
     execRun(
@@ -298,6 +317,8 @@ export const api = {
 
   async deleteAccount(id) {
     await ensureDB();
+    const usage = execQuery('SELECT COUNT(*) count FROM transactions WHERE account_id = ?', [id])[0]?.count || 0;
+    if (usage > 0) throw new Error(`This account is used by ${usage} transaction(s) and cannot be deleted. Rename it or keep it for historical accuracy.`);
     execRun('DELETE FROM accounts WHERE id = ?', [id]);
     return { status: "deleted" };
   },
@@ -312,6 +333,7 @@ export const api = {
 
   async createCategory(payload) {
     await ensureDB();
+    if (!String(payload.name || '').trim()) throw new Error('Category name is required.');
     const id = generateUUID();
     const now = new Date().toISOString();
     execRun(
@@ -361,6 +383,7 @@ export const api = {
 
   async createBucket(payload) {
     await ensureDB();
+    if (!String(payload.name || '').trim()) throw new Error('Bucket name is required.');
     const id = generateUUID();
     const now = new Date().toISOString();
     execRun(
@@ -393,6 +416,7 @@ export const api = {
     const { from_bucket_id, to_bucket_id, amount } = payload;
     const transferAmt = Number(amount);
     if (!transferAmt || transferAmt <= 0) throw new Error("Transfer amount must be positive.");
+    if (from_bucket_id === to_bucket_id) throw new Error('Source and destination buckets must be different.');
 
     const fromRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [from_bucket_id]);
     const toRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [to_bucket_id]);
@@ -400,12 +424,14 @@ export const api = {
 
     const fromAlloc = Number(fromRows[0].allocated_balance) || 0;
     const toAlloc = Number(toRows[0].allocated_balance) || 0;
+    if (transferAmt > fromAlloc) throw new Error('Transfer amount exceeds the source bucket balance.');
 
     const now = new Date().toISOString();
-    execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [fromAlloc - transferAmt, now, from_bucket_id]);
-    execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [toAlloc + transferAmt, now, to_bucket_id]);
-
-    return { status: "transferred" };
+    return runInTransaction(async () => {
+      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [fromAlloc - transferAmt, now, from_bucket_id], false);
+      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [toAlloc + transferAmt, now, to_bucket_id], false);
+      return { status: "transferred" };
+    });
   },
 
   // ----------------------------------------------------
@@ -423,6 +449,8 @@ export const api = {
 
   async createDebt(payload) {
     await ensureDB();
+    if (!String(payload.person_name || '').trim()) throw new Error('Person name is required.');
+    if (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) <= 0) throw new Error('Debt amount must be positive.');
     const id = generateUUID();
     const now = new Date().toISOString();
     execRun(
@@ -457,13 +485,13 @@ export const api = {
 
   async createVault(name) {
     await ensureDB();
-    const filename = createNewVault(name);
+    const filename = await createNewVault(name);
     return { active_vault: filename, vaults: listVaults() };
   },
 
   async switchVault(filename) {
     await ensureDB();
-    switchActiveVault(filename);
+    await switchActiveVault(filename);
     return { active_vault: filename, vaults: listVaults() };
   },
 
@@ -471,13 +499,15 @@ export const api = {
     await ensureDB();
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    const filename = importDatabaseBlob(file.name, uint8Array);
+    const passphrase = /\.cbbak$/i.test(file.name) ? prompt('Enter the passphrase for this encrypted backup:') : '';
+    if (/\.cbbak$/i.test(file.name) && !passphrase) throw new Error('Import cancelled: a passphrase is required.');
+    const filename = await importDatabaseBlob(file.name, uint8Array, passphrase);
     return { active_vault: filename, vaults: listVaults() };
   },
 
   async deleteVault(filename) {
     await ensureDB();
-    removeVault(filename);
+    await removeVault(filename);
     return { vaults: listVaults() };
   },
 
@@ -494,35 +524,34 @@ export const api = {
 
   async createBackup() {
     await ensureDB();
-    const binary = exportActiveDatabaseBlob();
-    if (!binary) throw new Error("Could not export database.");
-    const dateStr = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
-    const backupFilename = `backup_finance_${dateStr}.db`;
-    importDatabaseBlob(backupFilename, binary);
+    const backupFilename = await createBackupSnapshot();
     return { backup_filename: backupFilename, message: "Backup snapshot saved locally." };
   },
 
   async getBackups() {
     await ensureDB();
-    const vaults = listVaults();
-    return vaults.filter(v => v.filename.startsWith('backup_'));
+    return listBackupSnapshots();
   },
 
   async restoreBackup(filename) {
     await ensureDB();
-    switchActiveVault(filename);
-    return { active_vault: filename, message: "Database restored from backup." };
+    const active = await restoreBackupSnapshot(filename);
+    return { active_vault: active, message: "Database restored from backup." };
   },
 
-  getBackupDownloadUrl(filename) {
-    const binary = exportDatabaseBlobByName(filename);
+  async getBackupDownloadUrl(filename) {
+    const passphrase = prompt('Create a passphrase (at least 8 characters) for this portable encrypted backup:');
+    if (!passphrase) throw new Error('Backup export cancelled.');
+    const binary = await exportBackupBytes(filename, passphrase);
     if (!binary) return '#';
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
     return URL.createObjectURL(blob);
   },
 
   async shareBackupFile(filename) {
-    const binary = exportDatabaseBlobByName(filename);
+    const passphrase = prompt('Create a passphrase (at least 8 characters) for this portable encrypted backup:');
+    if (!passphrase) throw new Error('Backup sharing cancelled.');
+    const binary = await exportBackupBytes(filename, passphrase);
     if (!binary) throw new Error("Backup file not found");
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
     const file = new File([blob], filename, { type: 'application/x-sqlite3' });
@@ -543,9 +572,13 @@ export const api = {
 
     if (!sharedSuccess) {
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      a.href = url;
       a.download = filename;
       a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-  }
+  },
+
+  async checkIntegrity() { await ensureDB(); return checkDatabaseIntegrity(); }
 };

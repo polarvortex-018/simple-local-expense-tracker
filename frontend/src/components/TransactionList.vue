@@ -43,7 +43,7 @@
       </div>
 
       <span class="text-xs text-slate-400 font-medium">
-        Showing <strong>{{ transactions.length }}</strong> transactions
+        Showing <strong>{{ transactions.length }}</strong> of <strong>{{ summary.total_count }}</strong> transactions
       </span>
     </div>
 
@@ -365,6 +365,28 @@
       </div>
     </div>
 
+    <!-- Mobile Pagination -->
+    <div class="sm:hidden sticky bottom-20 z-20 flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-lg">
+      <button
+        @click="prevPage"
+        :disabled="page === 1"
+        class="min-h-11 flex-1 rounded-xl border border-slate-700 px-4 py-2 text-xs font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-35"
+      >
+        Previous
+      </button>
+      <div class="shrink-0 text-center">
+        <p class="text-xs font-bold text-slate-200">Page {{ page }}</p>
+        <p class="text-[10px] text-slate-400">{{ Math.min(page * limit, summary.total_count) }} of {{ summary.total_count }}</p>
+      </div>
+      <button
+        @click="nextPage"
+        :disabled="page * limit >= summary.total_count"
+        class="min-h-11 flex-1 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+      >
+        Next
+      </button>
+    </div>
+
     <!-- Desktop Table Section (Visible on >= sm) -->
     <div class="hidden sm:block bg-slate-900 border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden">
       <div class="w-full overflow-x-auto">
@@ -469,7 +491,7 @@
       <!-- Pagination Footer -->
       <div class="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950/15">
         <p class="text-xs text-slate-400">
-          Showing <span class="font-medium text-slate-300">{{ transactions.length }}</span> items
+          Showing <span class="font-medium text-slate-300">{{ transactions.length }}</span> of <span class="font-medium text-slate-300">{{ summary.total_count }}</span> items
         </p>
         <div class="flex gap-2">
           <button 
@@ -481,7 +503,7 @@
           </button>
           <button 
             @click="nextPage" 
-            :disabled="transactions.length < limit"
+            :disabled="page * limit >= summary.total_count"
             class="px-3 py-1.5 text-xs font-semibold text-slate-300 border border-slate-800 hover:bg-slate-950 rounded-lg disabled:opacity-40 disabled:hover:bg-transparent transition cursor-pointer"
           >
             Next
@@ -524,6 +546,10 @@ const props = defineProps({
   filters: {
     type: Object,
     required: true
+  },
+  summary: {
+    type: Object,
+    default: () => ({ total_count: 0, total_expense: 0, categories_breakdown: [] })
   }
 });
 
@@ -631,23 +657,16 @@ const clearFilters = () => {
   emitFilters();
 };
 
-// Filtered Category Breakdown computation based on active transactions
+// Full filtered breakdown is calculated from all matching database rows, not the page.
 const categorySpending = computed(() => {
-  const expenseTransactions = props.transactions.filter(t => t.transaction_type === 'expense');
-  const totalExp = expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+  const totalExp = Number(props.summary.total_expense) || 0;
   if (totalExp === 0) return [];
-
-  const groupings = {};
-  expenseTransactions.forEach(t => {
-    groupings[t.category_id] = (groupings[t.category_id] || 0) + Number(t.amount);
-  });
-
-  const results = Object.entries(groupings).map(([catId, amount], idx) => {
-    const category = props.categories.find(c => c.id === catId);
+  const results = (props.summary.categories_breakdown || []).map((category, idx) => {
+    const amount = Number(category.total) || 0;
     return {
-      id: catId,
-      name: category ? category.name : 'Uncategorized',
-      color: category ? category.color : '#6366f1',
+      id: category.name,
+      name: category.name || 'Uncategorized',
+      color: category.color || '#6366f1',
       amount,
       percentage: Math.round((amount / totalExp) * 100),
       index: idx
@@ -658,9 +677,7 @@ const categorySpending = computed(() => {
 });
 
 const totalFilteredExpenses = computed(() => {
-  return props.transactions
-    .filter(t => t.transaction_type === 'expense')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+  return Number(props.summary.total_expense) || 0;
 });
 
 // SVG Path-Arc calculation for filtered pie chart

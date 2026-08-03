@@ -99,7 +99,7 @@
           <input 
             type="file" 
             ref="fileInput" 
-            accept=".db,.sqlite" 
+              accept=".db,.sqlite,.cbbak"
             class="hidden" 
             @change="handleFileSelected"
           />
