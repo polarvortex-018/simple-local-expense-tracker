@@ -27,6 +27,13 @@ async function ensureDB() {
   }
 }
 
+function transactionMultiplier(type, adjustmentDirection) {
+  if (type === 'expense') return -1;
+  if (type === 'income') return 1;
+  if (type === 'adjustment') return adjustmentDirection === 'subtract' ? -1 : 1;
+  throw new Error('Invalid transaction type.');
+}
+
 export const api = {
   async init() {
     await ensureDB();
@@ -40,7 +47,7 @@ export const api = {
     
     let sql = `
       SELECT 
-        t.id, t.amount, t.transaction_type, t.description, t.date,
+        t.id, t.amount, t.transaction_type, t.adjustment_direction, t.description, t.date,
         t.account_id, t.bucket_id, t.category_id, t.created_at, t.updated_at,
         a.name as account_name,
         c.name as category_name, c.color as category_color,
@@ -107,6 +114,7 @@ export const api = {
       id: r.id,
       amount: r.amount,
       transaction_type: r.transaction_type,
+      adjustment_direction: r.adjustment_direction,
       description: r.description,
       date: r.date,
       account_id: r.account_id,
@@ -160,7 +168,8 @@ export const api = {
     const type = payload.transaction_type;
 
     if (!amount || amount <= 0) throw new Error("Amount must be a positive number.");
-    if (!['income', 'expense'].includes(type)) throw new Error('Invalid transaction type.');
+    if (!['income', 'expense', 'adjustment'].includes(type)) throw new Error('Invalid transaction type.');
+    if (type === 'adjustment' && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.date || '')) throw new Error('A valid transaction date is required.');
     if (!payload.account_id) throw new Error("Account is required.");
 
@@ -169,7 +178,8 @@ export const api = {
     const accRows = execQuery('SELECT * FROM accounts WHERE id = ?', [payload.account_id]);
     if (!accRows.length) throw new Error("Target account not found.");
     const currentAccBalance = Number(accRows[0].balance) || 0;
-    const newAccBalance = type === 'expense' ? currentAccBalance - amount : currentAccBalance + amount;
+    const multiplier = transactionMultiplier(type, payload.adjustment_direction);
+    const newAccBalance = currentAccBalance + (amount * multiplier);
     execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [newAccBalance, now, payload.account_id], false);
 
     // Update Savings Bucket Allocation (if bucket_id specified)
@@ -177,16 +187,16 @@ export const api = {
       const bucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [payload.bucket_id]);
       if (bucketRows.length) {
         const currentBucketAlloc = Number(bucketRows[0].allocated_balance) || 0;
-        const newBucketAlloc = type === 'expense' ? currentBucketAlloc - amount : currentBucketAlloc + amount;
+        const newBucketAlloc = currentBucketAlloc + (amount * multiplier);
         execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [newBucketAlloc, now, payload.bucket_id], false);
       }
     }
 
     // Insert Transaction Record
     execRun(
-      `INSERT INTO transactions (id, amount, transaction_type, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, amount, type, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, now], false
+      `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, amount, type, type === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, now], false
     );
 
     const created = await this.getTransactions({ limit: 1 });
@@ -201,7 +211,8 @@ export const api = {
     const oldTx = existingRows[0];
     const newAmount = Number(payload.amount);
     if (!Number.isFinite(newAmount) || newAmount <= 0) throw new Error('Amount must be a positive number.');
-    if (!['income', 'expense'].includes(payload.transaction_type)) throw new Error('Invalid transaction type.');
+    if (!['income', 'expense', 'adjustment'].includes(payload.transaction_type)) throw new Error('Invalid transaction type.');
+    if (payload.transaction_type === 'adjustment' && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
     if (!execQuery('SELECT id FROM accounts WHERE id = ?', [payload.account_id]).length) throw new Error('Target account not found.');
     return runInTransaction(async () => {
 
@@ -211,14 +222,14 @@ export const api = {
     const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
     if (oldAccRows.length) {
       const bal = Number(oldAccRows[0].balance);
-      const revertedBal = oldType === 'expense' ? bal + oldAmount : bal - oldAmount;
+      const revertedBal = bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
       execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
     }
     if (oldTx.bucket_id) {
       const oldBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [oldTx.bucket_id]);
       if (oldBucketRows.length) {
         const alloc = Number(oldBucketRows[0].allocated_balance);
-        const revertedAlloc = oldType === 'expense' ? alloc + oldAmount : alloc - oldAmount;
+        const revertedAlloc = alloc - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
         execRun('UPDATE savings_buckets SET allocated_balance = ? WHERE id = ?', [revertedAlloc, oldTx.bucket_id], false);
       }
     }
@@ -230,23 +241,23 @@ export const api = {
     const newAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [payload.account_id]);
     if (newAccRows.length) {
       const bal = Number(newAccRows[0].balance);
-      const appliedBal = newType === 'expense' ? bal - newAmount : bal + newAmount;
+      const appliedBal = bal + (newAmount * transactionMultiplier(newType, payload.adjustment_direction));
       execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [appliedBal, now, payload.account_id], false);
     }
     if (payload.bucket_id) {
       const newBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [payload.bucket_id]);
       if (newBucketRows.length) {
         const alloc = Number(newBucketRows[0].allocated_balance);
-        const appliedAlloc = newType === 'expense' ? alloc - newAmount : alloc + newAmount;
+        const appliedAlloc = alloc + (newAmount * transactionMultiplier(newType, payload.adjustment_direction));
         execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [appliedAlloc, now, payload.bucket_id], false);
       }
     }
 
     execRun(
       `UPDATE transactions 
-       SET amount = ?, transaction_type = ?, description = ?, date = ?, account_id = ?, bucket_id = ?, category_id = ?, updated_at = ?
+       SET amount = ?, transaction_type = ?, adjustment_direction = ?, description = ?, date = ?, account_id = ?, bucket_id = ?, category_id = ?, updated_at = ?
        WHERE id = ?`,
-      [newAmount, newType, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, id], false
+      [newAmount, newType, newType === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, id], false
     );
 
     return { id, ...payload };
@@ -266,14 +277,14 @@ export const api = {
     const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
     if (oldAccRows.length) {
       const bal = Number(oldAccRows[0].balance);
-      const revertedBal = oldType === 'expense' ? bal + oldAmount : bal - oldAmount;
+      const revertedBal = bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
       execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
     }
     if (oldTx.bucket_id) {
       const oldBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [oldTx.bucket_id]);
       if (oldBucketRows.length) {
         const alloc = Number(oldBucketRows[0].allocated_balance);
-        const revertedAlloc = oldType === 'expense' ? alloc + oldAmount : alloc - oldAmount;
+        const revertedAlloc = alloc - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
         execRun('UPDATE savings_buckets SET allocated_balance = ? WHERE id = ?', [revertedAlloc, oldTx.bucket_id], false);
       }
     }
@@ -407,8 +418,15 @@ export const api = {
 
   async deleteBucket(id) {
     await ensureDB();
-    execRun('UPDATE savings_buckets SET is_archived = 1 WHERE id = ?', [id]);
-    return { status: "archived" };
+    const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [id])[0];
+    if (!bucket) throw new Error('Savings bucket not found.');
+    return runInTransaction(async () => {
+      // Preserve ledger and debt history while removing the deleted purpose.
+      execRun('UPDATE transactions SET bucket_id = NULL WHERE bucket_id = ?', [id], false);
+      execRun('UPDATE debts SET bucket_id = NULL WHERE bucket_id = ?', [id], false);
+      execRun('DELETE FROM savings_buckets WHERE id = ?', [id], false);
+      return { status: 'deleted', removed_allocation: Number(bucket.allocated_balance) || 0 };
+    });
   },
 
   async transferBucket(payload) {
@@ -444,35 +462,102 @@ export const api = {
       FROM debts d
       LEFT JOIN accounts a ON d.account_id = a.id
       ORDER BY d.created_at DESC
-    `);
+    `).map(debt => ({ ...debt, type: debt.debt_type }));
   },
 
   async createDebt(payload) {
     await ensureDB();
     if (!String(payload.person_name || '').trim()) throw new Error('Person name is required.');
     if (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) <= 0) throw new Error('Debt amount must be positive.');
+    const debtType = payload.debt_type || payload.type;
+    if (!['lent', 'borrowed'].includes(debtType)) throw new Error('Debt type must be lent or borrowed.');
+    const account = execQuery('SELECT * FROM accounts WHERE id = ?', [payload.account_id])[0];
+    if (!account) throw new Error('Please select a valid account.');
+    const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [payload.bucket_id])[0];
+    if (!bucket) throw new Error('Please select a valid savings bucket.');
     const id = generateUUID();
     const now = new Date().toISOString();
-    execRun(
-      'INSERT INTO debts (id, person_name, amount, debt_type, description, due_date, is_settled, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, payload.person_name.trim(), Number(payload.amount), payload.debt_type, payload.description || null, payload.due_date || null, 0, payload.account_id || null, now, now]
-    );
-    const rows = execQuery('SELECT * FROM debts WHERE id = ?', [id]);
-    return rows[0];
+    const amount = Number(payload.amount);
+    return runInTransaction(async () => {
+      const nextBalance = debtType === 'lent' ? Number(account.balance) - amount : Number(account.balance) + amount;
+      const nextAllocation = debtType === 'lent' ? Number(bucket.allocated_balance) - amount : Number(bucket.allocated_balance) + amount;
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [nextBalance, now, account.id], false);
+      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [nextAllocation, now, bucket.id], false);
+      execRun(
+        'INSERT INTO debts (id, person_name, amount, debt_type, description, due_date, is_settled, account_id, bucket_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [id, payload.person_name.trim(), amount, debtType, payload.description || null, payload.due_date || null, 0, account.id, bucket.id, now, now],
+        false
+      );
+      const debt = execQuery('SELECT * FROM debts WHERE id = ?', [id])[0];
+      return { ...debt, type: debt.debt_type };
+    });
+  },
+
+  async allocateUnassigned(bucketId, amount) {
+    await ensureDB();
+    const allocation = Number(amount);
+    if (!Number.isFinite(allocation) || allocation <= 0) throw new Error('Allocation amount must be positive.');
+    const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [bucketId])[0];
+    if (!bucket) throw new Error('Savings bucket not found.');
+    const accountTotal = Number(execQuery('SELECT COALESCE(SUM(balance), 0) total FROM accounts')[0]?.total) || 0;
+    const bucketTotal = Number(execQuery('SELECT COALESCE(SUM(allocated_balance), 0) total FROM savings_buckets')[0]?.total) || 0;
+    const available = Math.round((accountTotal - bucketTotal) * 100) / 100;
+    if (allocation > available) throw new Error(`Only ₹${available.toFixed(2)} is currently unassigned.`);
+    return runInTransaction(async () => {
+      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [Number(bucket.allocated_balance) + allocation, new Date().toISOString(), bucketId], false);
+      return { status: 'allocated', amount: allocation, bucket_id: bucketId };
+    });
   },
 
   async settleDebt(id, payload = {}) {
     await ensureDB();
+    const debt = execQuery('SELECT * FROM debts WHERE id = ?', [id])[0];
+    if (!debt) throw new Error('Debt record not found.');
+    if (debt.is_settled) throw new Error('This debt is already settled.');
+    const accountId = typeof payload === 'string' ? payload : (payload.account_id || debt.account_id);
+    const account = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId])[0];
+    if (!account) throw new Error('Please select a valid settlement account.');
     const now = new Date().toISOString();
-    execRun('UPDATE debts SET is_settled = 1, updated_at = ? WHERE id = ?', [now, id]);
-    const rows = execQuery('SELECT * FROM debts WHERE id = ?', [id]);
-    return rows[0];
+    return runInTransaction(async () => {
+      const amount = Number(debt.amount);
+      const nextBalance = debt.debt_type === 'lent' ? Number(account.balance) + amount : Number(account.balance) - amount;
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [nextBalance, now, account.id], false);
+      if (debt.bucket_id) {
+        const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [debt.bucket_id])[0];
+        if (bucket) {
+          const nextAllocation = debt.debt_type === 'lent' ? Number(bucket.allocated_balance) + amount : Number(bucket.allocated_balance) - amount;
+          execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [nextAllocation, now, bucket.id], false);
+        }
+      }
+      execRun('UPDATE debts SET is_settled = 1, account_id = ?, updated_at = ? WHERE id = ?', [account.id, now, id], false);
+      return { ...execQuery('SELECT * FROM debts WHERE id = ?', [id])[0], type: debt.debt_type };
+    });
   },
 
   async deleteDebt(id) {
     await ensureDB();
-    execRun('DELETE FROM debts WHERE id = ?', [id]);
-    return { status: "deleted" };
+    const debt = execQuery('SELECT * FROM debts WHERE id = ?', [id])[0];
+    if (!debt) throw new Error('Debt record not found.');
+    return runInTransaction(async () => {
+      if (!debt.is_settled && debt.account_id) {
+        const account = execQuery('SELECT * FROM accounts WHERE id = ?', [debt.account_id])[0];
+        if (account) {
+          const amount = Number(debt.amount);
+          const restored = debt.debt_type === 'lent' ? Number(account.balance) + amount : Number(account.balance) - amount;
+          execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [restored, new Date().toISOString(), account.id], false);
+        }
+      }
+      if (!debt.is_settled && debt.bucket_id) {
+        const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [debt.bucket_id])[0];
+        if (bucket) {
+          const amount = Number(debt.amount);
+          const restored = debt.debt_type === 'lent' ? Number(bucket.allocated_balance) + amount : Number(bucket.allocated_balance) - amount;
+          execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [restored, new Date().toISOString(), bucket.id], false);
+        }
+      }
+      execRun('DELETE FROM debts WHERE id = ?', [id], false);
+      return { status: "deleted" };
+    });
   },
 
   // ----------------------------------------------------

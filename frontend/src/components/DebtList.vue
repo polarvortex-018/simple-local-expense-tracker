@@ -251,6 +251,21 @@
             </select>
           </div>
 
+          <!-- Bucket Selection -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Savings Bucket *</label>
+            <select
+              v-model="newDebt.bucket_id"
+              required
+              class="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition cursor-pointer"
+            >
+              <option value="" disabled>Select Bucket</option>
+              <option v-for="bucket in activeBuckets" :key="bucket.id" :value="bucket.id">
+                {{ bucket.icon || '🪣' }} {{ bucket.name }} (₹{{ formatAmount(bucket.allocated_balance) }})
+              </option>
+            </select>
+          </div>
+
           <!-- Description -->
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Notes / Reason (Optional)</label>
@@ -346,6 +361,10 @@ const props = defineProps({
   accounts: {
     type: Array,
     required: true
+  },
+  buckets: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -365,6 +384,7 @@ const newDebt = ref({
   type: 'lent',
   amount: '',
   account_id: '',
+  bucket_id: '',
   description: ''
 });
 
@@ -404,6 +424,7 @@ const totalYouOwe = computed(() => {
 const netPosition = computed(() => {
   return totalOwedToYou.value - totalYouOwe.value;
 });
+const activeBuckets = computed(() => props.buckets.filter(bucket => !bucket.is_archived));
 
 // Filtered debts list
 const filteredDebts = computed(() => {
@@ -431,13 +452,14 @@ const openAddModal = () => {
     type: 'lent',
     amount: '',
     account_id: props.accounts.length > 0 ? props.accounts[0].id : '',
+    bucket_id: activeBuckets.value.length > 0 ? activeBuckets.value[0].id : '',
     description: ''
   };
   showAddModal.value = true;
 };
 
 const submitAddDebt = async () => {
-  if (!newDebt.value.person_name.trim() || !newDebt.value.amount || !newDebt.value.account_id) return;
+  if (!newDebt.value.person_name.trim() || !newDebt.value.amount || !newDebt.value.account_id || !newDebt.value.bucket_id) return;
   submitting.value = true;
   try {
     emit('create-debt', {
@@ -445,6 +467,7 @@ const submitAddDebt = async () => {
       type: newDebt.value.type,
       amount: Number(newDebt.value.amount),
       account_id: newDebt.value.account_id,
+      bucket_id: newDebt.value.bucket_id,
       description: newDebt.value.description.trim() || null
     });
     showAddModal.value = false;

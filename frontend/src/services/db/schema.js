@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     id TEXT PRIMARY KEY,
     amount REAL NOT NULL,
     transaction_type TEXT NOT NULL,
+    adjustment_direction TEXT NULL,
     description TEXT NULL,
     date TEXT NOT NULL,
     account_id TEXT NOT NULL,
@@ -58,9 +59,11 @@ CREATE TABLE IF NOT EXISTS debts (
     due_date TEXT NULL,
     is_settled INTEGER NOT NULL DEFAULT 0,
     account_id TEXT NULL,
+    bucket_id TEXT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL
+    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL,
+    FOREIGN KEY (bucket_id) REFERENCES savings_buckets (id) ON DELETE SET NULL
 );
 `;
 

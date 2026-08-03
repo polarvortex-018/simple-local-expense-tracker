@@ -36,7 +36,7 @@
     </div>
 
     <!-- 2. PRIMARY METRIC CARDS -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
       <!-- Net Worth -->
       <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/30 p-4 sm:p-5 shadow-xl">
         <div class="absolute right-0 top-0 -mt-3 -mr-3 w-20 h-20 rounded-full bg-indigo-600/10 blur-xl"></div>
@@ -69,16 +69,6 @@
         </p>
       </div>
 
-      <!-- Savings Rate / Health -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-400">Savings Rate</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold tracking-tight truncate" :class="savingsRate >= 0 ? 'text-amber-300' : 'text-rose-400'">
-          {{ savingsRate }}%
-        </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-slate-400 truncate">
-          {{ savingsRate >= 0 ? 'Net positive ratio' : 'Expenses exceed income' }}
-        </p>
-      </div>
     </div>
 
     <!-- 3. SAVINGS BUCKETS BREAKDOWN -->
@@ -92,10 +82,6 @@
             </span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">Where your money is allocated & why it exists</p>
-        </div>
-        <div class="text-right">
-          <span class="text-xs text-slate-400">Total Allocated: </span>
-          <strong class="text-indigo-400 text-sm font-bold">₹{{ formatAmount(totalBucketAllocated) }}</strong>
         </div>
       </div>
 
@@ -273,16 +259,11 @@ const totalExpenses = computed(() => {
     .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 });
 
-const savingsRate = computed(() => {
-  if (totalIncome.value <= 0) return 0;
-  const saved = totalIncome.value - totalExpenses.value;
-  return Math.round((saved / totalIncome.value) * 100);
-});
-
-const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
-const totalBucketAllocated = computed(() => {
-  return activeBuckets.value.reduce((sum, b) => sum + (Number(b.allocated_balance) || 0), 0);
-});
+// This is the single source for both rendered cards and the displayed total.
+const activeBuckets = computed(() => props.buckets.filter(bucket => {
+  if (bucket.is_archived) return false;
+  return Number.isFinite(Number(bucket.allocated_balance));
+}));
 
 // Category Spending Filtered by Dashboard Period Choice
 const filteredCategoryExpenses = computed(() => {

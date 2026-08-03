@@ -207,6 +207,8 @@ function runSchemaAndSeeds() {
     ['categories', 'is_quick_select', 'ALTER TABLE categories ADD COLUMN is_quick_select INTEGER NOT NULL DEFAULT 0'],
     ['categories', 'icon', "ALTER TABLE categories ADD COLUMN icon TEXT NULL DEFAULT '🏷️'"],
     ['savings_buckets', 'sort_order', 'ALTER TABLE savings_buckets ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0']
+    ,['transactions', 'adjustment_direction', 'ALTER TABLE transactions ADD COLUMN adjustment_direction TEXT NULL']
+    ,['debts', 'bucket_id', 'ALTER TABLE debts ADD COLUMN bucket_id TEXT NULL']
   ];
   for (const [table, column, sql] of migrations) {
     const columns = execQuery(`PRAGMA table_info(${table})`).map(row => row.name);

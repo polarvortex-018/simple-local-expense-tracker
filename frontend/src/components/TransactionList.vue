@@ -155,6 +155,7 @@
             <option value="" class="bg-slate-950 text-slate-500">All Types</option>
             <option value="income" class="bg-slate-950 text-slate-200">Income</option>
             <option value="expense" class="bg-slate-950 text-slate-200">Expense</option>
+            <option value="adjustment" class="bg-slate-950 text-slate-200">Adjustment</option>
           </select>
         </div>
 
@@ -325,15 +326,15 @@
           <div class="text-right shrink-0">
             <span 
               class="text-sm font-bold block"
-              :class="tx.transaction_type === 'income' ? 'text-emerald-400' : 'text-rose-400'"
+              :class="transactionAmountClass(tx)"
             >
-              {{ tx.transaction_type === 'income' ? '+' : '-' }}₹{{ formatAmount(tx.amount) }}
+              {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
             </span>
             <span 
               class="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider mt-0.5"
-              :class="tx.transaction_type === 'income' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/40' : 'bg-rose-950 text-rose-400 border border-rose-800/40'"
+              :class="transactionBadgeClass(tx)"
             >
-              {{ tx.transaction_type }}
+              {{ transactionLabel(tx) }}
             </span>
           </div>
         </div>
@@ -357,7 +358,7 @@
             <button @click="$emit('edit-transaction', tx)" class="p-1 text-slate-400 hover:text-indigo-400 text-xs cursor-pointer" title="Edit">
               ✏️
             </button>
-            <button @click="$emit('delete-transaction', tx.id)" class="p-1 text-slate-400 hover:text-rose-400 text-xs cursor-pointer" title="Delete">
+            <button @click="confirmDelete(tx)" class="p-1 text-slate-400 hover:text-rose-400 text-xs cursor-pointer" title="Delete">
               🗑️
             </button>
           </div>
@@ -445,18 +446,18 @@
               <td class="py-2.5 px-3 text-xs whitespace-nowrap">
                 <span 
                   class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                  :class="tx.transaction_type === 'income' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/30' : 'bg-rose-950/80 text-rose-400 border border-rose-800/30'"
+                  :class="transactionBadgeClass(tx)"
                 >
-                  {{ tx.transaction_type === 'income' ? 'Income' : 'Expense' }}
+                  {{ transactionLabel(tx) }}
                 </span>
               </td>
 
               <!-- Amount -->
               <td 
                 class="py-2.5 px-3 text-right text-xs font-bold whitespace-nowrap"
-                :class="tx.transaction_type === 'income' ? 'text-emerald-400' : 'text-slate-200'"
+                :class="transactionAmountClass(tx)"
               >
-                {{ tx.transaction_type === 'income' ? '+' : '-' }}₹{{ formatAmount(tx.amount) }}
+                {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
               </td>
 
               <!-- Actions -->
@@ -750,6 +751,23 @@ const confirmDelete = (tx) => {
     emit('delete-transaction', tx.id);
   }
 };
+
+const transactionSign = tx => {
+  if (tx.transaction_type === 'income') return '+';
+  if (tx.transaction_type === 'adjustment') return tx.adjustment_direction === 'subtract' ? '−' : '+';
+  return '−';
+};
+
+const transactionLabel = tx => tx.transaction_type === 'adjustment'
+  ? `Adjustment ${tx.adjustment_direction === 'subtract' ? '−' : '+'}`
+  : (tx.transaction_type === 'income' ? 'Income' : 'Expense');
+
+const transactionAmountClass = tx => transactionSign(tx) === '+' ? 'text-emerald-400' : 'text-rose-400';
+const transactionBadgeClass = tx => tx.transaction_type === 'adjustment'
+  ? 'bg-amber-950/80 text-amber-300 border border-amber-700/40'
+  : (tx.transaction_type === 'income'
+      ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/30'
+      : 'bg-rose-950/80 text-rose-400 border border-rose-800/30');
 
 // Resolution utilities
 const getAccountName = (id) => {

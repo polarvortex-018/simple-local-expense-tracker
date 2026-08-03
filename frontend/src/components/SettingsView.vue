@@ -39,6 +39,17 @@
           </button>
         </div>
 
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="rounded-xl border border-indigo-900/50 bg-indigo-950/25 p-3">
+            <p class="text-[9px] font-bold uppercase tracking-wider text-indigo-400">Total allocated</p>
+            <p class="mt-1 text-sm font-bold text-indigo-200">₹{{ formatAmount(totalAllocated) }}</p>
+          </div>
+          <div class="rounded-xl border border-amber-900/50 bg-amber-950/25 p-3">
+            <p class="text-[9px] font-bold uppercase tracking-wider text-amber-400">Unassigned</p>
+            <p class="mt-1 text-sm font-bold text-amber-200">₹{{ formatAmount(unassignedAmount) }}</p>
+          </div>
+        </div>
+
         <!-- Add Bucket Form -->
         <form @submit.prevent="submitBucket" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-3">
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add Savings Bucket</p>
@@ -233,6 +244,12 @@
                 </div>
 
                 <div class="flex gap-1.5">
+                  <button
+                    v-if="unassignedAmount > 0 && !bucket.is_archived"
+                    @click="allocateToBucket(bucket)"
+                    class="px-2 py-1.5 rounded-lg border border-amber-800/50 bg-amber-950/40 text-[9px] font-bold text-amber-300"
+                    title="Allocate unassigned money"
+                  >Allocate</button>
                   <button 
                     @click="startEditBucket(bucket)"
                     class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
@@ -878,7 +895,8 @@ const emit = defineEmits([
   'update-bucket',
   'delete-bucket',
   'transfer-bucket',
-  'reorder-buckets'
+  'reorder-buckets',
+  'allocate-unassigned'
 ]);
 
 // Preset Emoji Grid Palette
@@ -913,6 +931,24 @@ const showArchivedBuckets = ref(false);
 const showTransferModal = ref(false);
 
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
+const totalAllocated = computed(() => props.buckets.reduce(
+  (sum, bucket) => sum + Math.round((Number(bucket.allocated_balance) || 0) * 100), 0
+) / 100);
+const netWorth = computed(() => props.accounts.reduce(
+  (sum, account) => sum + Math.round((Number(account.balance) || 0) * 100), 0
+) / 100);
+const unassignedAmount = computed(() => Math.round((netWorth.value - totalAllocated.value) * 100) / 100);
+
+const allocateToBucket = bucket => {
+  const entered = prompt(`Allocate to "${bucket.name}". Available: ₹${formatAmount(unassignedAmount.value)}`, String(unassignedAmount.value));
+  if (entered === null) return;
+  const amount = Number(String(entered).replace(',', '.'));
+  if (!Number.isFinite(amount) || amount <= 0) return alert('Enter a valid positive amount.');
+  if (amount > unassignedAmount.value) return alert(`Only ₹${formatAmount(unassignedAmount.value)} is unassigned.`);
+  if (confirm(`Allocate ₹${formatAmount(amount)} to "${bucket.name}" without changing account balances?`)) {
+    emit('allocate-unassigned', { bucketId: bucket.id, amount });
+  }
+};
 const displayedBuckets = computed(() => {
   if (showArchivedBuckets.value) return props.buckets;
   return activeBuckets.value;
@@ -1117,7 +1153,8 @@ const confirmDeleteCategory = (category) => {
 };
 
 const confirmDeleteBucket = (bucket) => {
-  const confirm = window.confirm(`Are you sure you want to delete/archive the bucket "${bucket.name}"?`);
+  const allocation = formatAmount(bucket.allocated_balance);
+  const confirm = window.confirm(`Permanently delete the bucket "${bucket.name}" and remove its ₹${allocation} allocation? Transaction history will be kept, but it will no longer reference this bucket. This cannot be undone.`);
   if (confirm) {
     emit('delete-bucket', bucket.id);
   }

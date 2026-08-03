@@ -286,7 +286,9 @@ const handleSaveTransaction = async (payload) => {
     }
     showForm.value = false;
     await refreshAll();
-    showSuccess(wasEditing ? 'Transaction updated' : 'Transaction added');
+    showSuccess(payload.transaction_type === 'adjustment'
+      ? (wasEditing ? 'Adjustment updated' : 'Adjustment recorded')
+      : (wasEditing ? 'Transaction updated' : 'Transaction added'));
   } catch (err) {
     alert(err.message || 'Failed to save transaction.');
   }
@@ -380,6 +382,7 @@ const handleDeleteBucket = async (id) => {
   try {
     await api.deleteBucket(id);
     await refreshAll();
+    showSuccess('Bucket permanently deleted');
   } catch (err) {
     alert(err.message || 'Failed to delete savings bucket.');
   }
@@ -391,6 +394,16 @@ const handleTransferBucket = async (payload) => {
     await refreshAll();
   } catch (err) {
     alert(err.message || 'Failed to transfer bucket funds.');
+  }
+};
+
+const handleAllocateUnassigned = async ({ bucketId, amount }) => {
+  try {
+    await api.allocateUnassigned(bucketId, amount);
+    await refreshAll();
+    showSuccess('Unassigned money allocated');
+  } catch (err) {
+    alert(err.message || 'Failed to allocate unassigned money.');
   }
 };
 
@@ -408,6 +421,7 @@ const handleCreateDebt = async (payload) => {
   try {
     await api.createDebt(payload);
     await refreshAll();
+    showSuccess('Debt recorded');
   } catch (err) {
     alert(err.message || 'Failed to record debt entry.');
   }
@@ -417,6 +431,7 @@ const handleSettleDebt = async (id, payload) => {
   try {
     await api.settleDebt(id, payload);
     await refreshAll();
+    showSuccess('Debt settled');
   } catch (err) {
     alert(err.message || 'Failed to settle debt.');
   }
@@ -426,6 +441,7 @@ const handleDeleteDebt = async (id) => {
   try {
     await api.deleteDebt(id);
     await refreshAll();
+    showSuccess('Debt deleted');
   } catch (err) {
     alert(err.message || 'Failed to delete debt.');
   }
@@ -560,6 +576,7 @@ onMounted(() => {
           v-show="currentTab === 'debts'"
           :debts="debts"
           :accounts="accounts"
+          :buckets="buckets"
           @create-debt="handleCreateDebt"
           @settle-debt="handleSettleDebt"
           @delete-debt="handleDeleteDebt"
@@ -581,6 +598,7 @@ onMounted(() => {
           @delete-bucket="handleDeleteBucket"
           @transfer-bucket="handleTransferBucket"
           @reorder-buckets="handleReorderBuckets"
+          @allocate-unassigned="handleAllocateUnassigned"
         />
       </div>
     </main>

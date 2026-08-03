@@ -3,7 +3,7 @@
     class="fixed left-0 top-0 z-50 flex w-full items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm overscroll-behavior-none"
     :style="viewportStyle"
   >
-    <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-full sm:max-h-[90vh] flex flex-col overscroll-contain">
+    <div class="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-full sm:max-h-[90vh] flex flex-col overscroll-contain">
       
       <!-- Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/20 shrink-0">
@@ -29,7 +29,7 @@
       </div>
 
       <!-- Form Body (Scrollable container without bounce-back bug) -->
-      <form @submit.prevent="handleSubmit" class="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 overscroll-contain">
+      <form id="transaction-entry-form" @submit.prevent="handleSubmit" class="p-5 sm:p-6 pb-28 sm:pb-28 space-y-5 overflow-y-auto flex-1 overscroll-contain">
         <!-- Error Alerts -->
         <div v-if="error" class="p-3 bg-rose-950/40 border border-rose-900/50 rounded-xl text-rose-400 text-xs">
           {{ error }}
@@ -45,13 +45,21 @@
           <!-- Savings Bucket Selection (Enlarged Cards Grid with Color Accent Line) -->
           <div class="space-y-2">
             <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-              1. Select Savings Bucket (Purpose) *
+              1. Select Savings Bucket (Purpose) — Optional
             </label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
+              <div
+                @click="form.bucket_id = ''"
+                class="p-3 rounded-2xl border text-xs cursor-pointer transition flex flex-col justify-center space-y-2 border-t-4 border-t-amber-500 shadow-sm"
+                :class="!form.bucket_id ? 'bg-amber-950/70 border-amber-500 text-white ring-2 ring-amber-500/40' : 'bg-slate-950 border-slate-800 text-slate-300'"
+              >
+                <p class="font-bold">Unassigned</p>
+                <p class="text-[10px] text-slate-400">Account only</p>
+              </div>
               <div 
                 v-for="b in activeBuckets" 
                 :key="b.id"
-                @click="form.bucket_id = b.id"
+                @click="form.bucket_id = form.bucket_id === b.id ? '' : b.id"
                 class="p-3 rounded-2xl border text-xs cursor-pointer transition flex flex-col justify-between space-y-2 relative overflow-hidden border-t-4 shadow-sm"
                 :style="{ borderTopColor: b.color || '#6366f1' }"
                 :class="form.bucket_id === b.id ? 'bg-indigo-950/90 border-indigo-500 text-slate-100 ring-2 ring-indigo-500/50' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'"
@@ -72,12 +80,12 @@
             <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block">
               2. Select Account (Storage Location) *
             </label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-48 overflow-y-auto pr-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
               <div 
                 v-for="acc in accounts" 
                 :key="acc.id"
                 @click="form.account_id = acc.id"
-                class="p-3.5 rounded-2xl border text-xs cursor-pointer transition flex items-center justify-between"
+                class="min-h-20 p-4 rounded-2xl border text-xs cursor-pointer transition flex items-center justify-between gap-4"
                 :class="form.account_id === acc.id ? 'bg-indigo-950/80 border-indigo-500 text-slate-100 ring-2 ring-indigo-500/50' : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'"
               >
                 <div class="truncate">
@@ -121,8 +129,8 @@
             <button type="button" @click="currentStep = 1" class="text-xs text-indigo-400 hover:underline cursor-pointer">Edit</button>
           </div>
 
-          <!-- Transaction Type Switch (Styled Green for Income, Red for Expense) -->
-          <div class="grid grid-cols-2 gap-2.5 p-1 bg-slate-950 rounded-2xl border border-slate-800">
+          <!-- Transaction Type Switch -->
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-950 rounded-2xl border border-slate-800">
             <button 
               type="button"
               @click="form.transaction_type = 'expense'"
@@ -139,6 +147,22 @@
             >
               <span>↓ Income</span>
             </button>
+            <button
+              type="button"
+              @click="form.transaction_type = 'adjustment'"
+              class="py-2.5 px-1 text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center"
+              :class="form.transaction_type === 'adjustment' ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30 border border-amber-500' : 'text-slate-400 hover:text-slate-200'"
+            >
+              Adjust
+            </button>
+          </div>
+
+          <div v-if="form.transaction_type === 'adjustment'" class="rounded-2xl border border-amber-700/50 bg-amber-950/25 p-3 space-y-2">
+            <p class="text-[11px] text-amber-200">Correct the selected account and bucket to match reality. Enter the reason in Description.</p>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-xl border py-2.5 text-xs font-bold" :class="form.adjustment_direction === 'add' ? 'border-emerald-500 bg-emerald-950 text-emerald-300' : 'border-slate-700 text-slate-400'">+ Add amount</button>
+              <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-xl border py-2.5 text-xs font-bold" :class="form.adjustment_direction === 'subtract' ? 'border-rose-500 bg-rose-950 text-rose-300' : 'border-slate-700 text-slate-400'">− Subtract amount</button>
+            </div>
           </div>
 
           <!-- Amount and Date in a single row -->
@@ -231,27 +255,26 @@
             ></textarea>
           </div>
 
-          <!-- Footer Actions Step 2 -->
-          <div class="flex justify-between items-center pt-4 border-t border-slate-800">
-            <button 
-              type="button" 
-              @click="isEdit ? $emit('close') : (currentStep = 1)"
-              class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
-            >
-              {{ isEdit ? 'Cancel' : '← Back' }}
-            </button>
-
-            <button 
-              type="submit"
-              :disabled="submitting"
-              class="min-h-12 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
-            </button>
-          </div>
         </div>
       </form>
+
+      <!-- Fixed action overlay above the visible keyboard -->
+      <div v-if="currentStep === 2" class="absolute inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t border-slate-700 bg-slate-900/95 px-5 sm:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-14px_32px_rgba(2,6,23,0.9)] backdrop-blur-xl">
+        <button
+          type="button"
+          @click="isEdit ? $emit('close') : (currentStep = 1)"
+          class="min-h-12 px-4 text-xs font-semibold text-slate-300"
+        >{{ isEdit ? 'Cancel' : '← Back' }}</button>
+        <button
+          form="transaction-entry-form"
+          type="submit"
+          :disabled="submitting"
+          class="min-h-12 flex-1 max-w-64 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -301,6 +324,7 @@ const form = ref({
   date: new Date().toISOString().substring(0, 10),
   description: '',
   transaction_type: props.defaultType || 'expense',
+  adjustment_direction: 'add',
   notes: '',
   account_id: '',
   category_id: '',
@@ -310,7 +334,7 @@ const form = ref({
 // Helper labels
 const selectedBucketName = computed(() => {
   const b = props.buckets.find(b => b.id === form.value.bucket_id);
-  return b ? `${b.icon || '🪣'} ${b.name}` : 'Not Selected';
+  return b ? `${b.icon || '🪣'} ${b.name}` : 'Unassigned';
 });
 
 const selectedAccountName = computed(() => {
@@ -348,6 +372,7 @@ onMounted(() => {
       date: props.transaction.date,
       description: props.transaction.description,
       transaction_type: props.transaction.transaction_type,
+      adjustment_direction: props.transaction.adjustment_direction || 'add',
       notes: props.transaction.notes || '',
       account_id: props.transaction.account_id,
       category_id: props.transaction.category_id,
@@ -373,10 +398,6 @@ onBeforeUnmount(() => {
 
 const goToStep2 = () => {
   error.value = '';
-  if (!form.value.bucket_id) {
-    error.value = 'Please select a Savings Bucket.';
-    return;
-  }
   if (!form.value.account_id) {
     error.value = 'Please select an Account.';
     return;
@@ -393,10 +414,6 @@ const handleSubmit = async () => {
   }
   
   // Validation checks
-  if (!form.value.bucket_id) {
-    error.value = 'Please select a Savings Bucket.';
-    return;
-  }
   if (!form.value.account_id) {
     error.value = 'Please select a valid account.';
     return;
