@@ -1,45 +1,45 @@
 <template>
   <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden transform transition-all">
+    <div class="w-full max-w-md bg-[#131b2e] border border-[#31394d] rounded-lg shadow-xl overflow-hidden transform transition-all">
       <!-- Header -->
-      <div class="px-5 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/10">
-        <h3 class="text-base font-bold text-slate-100">
+      <div class="px-4 py-3 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326]/60">
+        <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">
           {{ type === 'account' ? 'Add Custom Account' : 'Add Custom Category' }}
         </h3>
         <button 
           @click="$emit('close')" 
-          class="text-slate-400 hover:text-slate-200 transition text-sm font-semibold"
+          class="text-[#ccc3d8] hover:text-[#dae2fd] transition text-sm font-bold cursor-pointer"
         >
           ✕
         </button>
       </div>
 
       <!-- Form Body -->
-      <form @submit.prevent="handleSubmit" class="p-5 space-y-4">
+      <form @submit.prevent="handleSubmit" class="p-4 space-y-3">
         <!-- Error alert -->
-        <div v-if="error" class="p-3 bg-rose-950/40 border border-rose-900/50 rounded-xl text-rose-400 text-xs">
+        <div v-if="error" class="p-2.5 bg-rose-950/40 border border-rose-900/50 rounded-md text-[#ffb4ab] text-xs">
           {{ error }}
         </div>
 
         <!-- Name Input -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Name</label>
+        <div class="space-y-1">
+          <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Name</label>
           <input 
             v-model="name"
             type="text" 
             placeholder="e.g. Health & Fitness"
             required
             ref="nameInput"
-            class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-600 rounded-xl text-slate-200 text-sm placeholder-slate-650 focus:outline-none transition"
+            class="w-full px-3 py-1.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-500 focus:outline-none transition"
           />
         </div>
 
         <!-- Account Type Selection (Only for Accounts) -->
-        <div v-if="type === 'account'" class="space-y-1.5">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Account Type</label>
+        <div v-if="type === 'account'" class="space-y-1">
+          <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Account Type</label>
           <select 
             v-model="accountType"
-            class="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-600 rounded-xl text-slate-300 text-sm focus:outline-none transition"
+            class="w-full px-3 py-1.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
           >
             <option value="Checking">Checking</option>
             <option value="Savings">Savings</option>
@@ -50,18 +50,18 @@
         </div>
 
         <!-- Action Footer -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+        <div class="flex justify-end gap-2 pt-3 border-t border-[#31394d]">
           <button 
             type="button" 
             @click="$emit('close')"
-            class="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-850 rounded-xl transition"
+            class="px-4 py-1.5 text-xs font-semibold text-[#ccc3d8] hover:text-[#dae2fd] rounded-full transition cursor-pointer"
           >
             Cancel
           </button>
           <button 
             type="submit" 
             :disabled="submitting"
-            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition disabled:opacity-50"
+            class="px-6 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition disabled:opacity-50 shadow-sm cursor-pointer"
           >
             {{ submitting ? 'Saving...' : 'Save' }}
           </button>
