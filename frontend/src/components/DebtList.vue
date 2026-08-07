@@ -1,58 +1,59 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
       <div>
-        <h2 class="text-2xl font-bold text-slate-100 tracking-tight">Debt Tracker</h2>
-        <p class="text-sm text-slate-400">Keep track of money lent to people and money borrowed from others.</p>
+        <h2 class="text-xl font-bold text-[#dae2fd] tracking-tight">Debt Tracker</h2>
+        <p class="text-xs text-[#ccc3d8]">Track money lent to people and money borrowed from others.</p>
       </div>
       <button 
         @click="openAddModal"
-        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition duration-150 shadow-lg shadow-indigo-600/20 cursor-pointer shrink-0"
+        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
       >
         <span class="text-base font-bold leading-none">+</span> Record New Debt
       </button>
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
       <!-- Owed to You -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-xl">
+      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Owed To You</p>
-          <div class="w-8 h-8 rounded-lg bg-emerald-950/60 border border-emerald-800/40 text-emerald-400 flex items-center justify-center text-xs font-bold">
+          <p class="text-xs font-bold uppercase tracking-wider text-[#4edea3]">Owed To You</p>
+          <div class="w-7 h-7 rounded-md bg-[#00a572]/20 border border-[#00a572]/30 text-[#4edea3] flex items-center justify-center text-xs font-bold">
             ↙
           </div>
         </div>
-        <p class="mt-3 text-3xl font-bold text-slate-100 tracking-tight">
+        <p class="mt-2 text-2xl font-bold text-[#dae2fd] tabular-nums tracking-tight">
           ₹{{ formatAmount(totalOwedToYou) }}
         </p>
-        <p class="mt-1 text-xs text-slate-400">Money you have lent to others (Unsettled)</p>
+        <p class="mt-0.5 text-[10px] text-[#ccc3d8]">Money you lent to others (Unsettled)</p>
       </div>
 
       <!-- You Owe -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-xl">
+      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-semibold uppercase tracking-wider text-rose-400">You Owe</p>
-          <div class="w-8 h-8 rounded-lg bg-rose-950/60 border border-rose-800/40 text-rose-400 flex items-center justify-center text-xs font-bold">
+          <p class="text-xs font-bold uppercase tracking-wider text-[#ffb4ab]">You Owe</p>
+          <div class="w-7 h-7 rounded-md bg-[#93000a]/40 border border-[#ffb4ab]/30 text-[#ffb4ab] flex items-center justify-center text-xs font-bold">
             ↗
           </div>
         </div>
-        <p class="mt-3 text-3xl font-bold text-slate-100 tracking-tight">
+        <p class="mt-2 text-2xl font-bold text-[#dae2fd] tabular-nums tracking-tight">
           ₹{{ formatAmount(totalYouOwe) }}
         </p>
-        <p class="mt-1 text-xs text-slate-400">Money you borrowed from others (Unsettled)</p>
+        <p class="mt-0.5 text-[10px] text-[#ccc3d8]">Money borrowed from others (Unsettled)</p>
       </div>
 
       <!-- Net Debt Position -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/30 p-6 shadow-xl">
-        <div class="absolute right-0 top-0 -mt-4 -mr-4 w-24 h-24 rounded-full bg-indigo-600/10 blur-xl"></div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Net Debt Position</p>
-        <p class="mt-3 text-3xl font-bold tracking-tight" :class="netPosition >= 0 ? 'text-slate-100' : 'text-rose-400'">
+      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-4 shadow-sm flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold uppercase tracking-wider text-[#d2bbff]">Net Debt Position</p>
+        </div>
+        <p class="mt-2 text-2xl font-bold tabular-nums tracking-tight" :class="netPosition >= 0 ? 'text-[#dae2fd]' : 'text-[#ffb4ab]'">
           ₹{{ formatAmount(netPosition) }}
         </p>
-        <p class="mt-1 text-xs text-slate-400">
-          {{ netPosition >= 0 ? 'Net surplus (you are owed more than you owe)' : 'Net liability (you owe more than you are owed)' }}
+        <p class="mt-0.5 text-[10px] text-[#ccc3d8]">
+          {{ netPosition >= 0 ? 'Net surplus' : 'Net liability' }}
         </p>
       </div>
     </div>

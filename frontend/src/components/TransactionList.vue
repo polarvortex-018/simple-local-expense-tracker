@@ -1,17 +1,11 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Header -->
     <div class="flex justify-between items-center">
       <div>
-        <h2 class="text-2xl font-bold text-slate-100 tracking-tight">Transactions</h2>
-        <p class="text-sm text-slate-400">Search and filter your complete transaction history.</p>
+        <h2 class="text-xl font-bold text-[#dae2fd] tracking-tight">Transactions</h2>
+        <p class="text-xs text-[#ccc3d8]">Search and filter complete transaction history.</p>
       </div>
-      <button 
-        @click="$emit('add-transaction')" 
-        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium text-sm rounded-xl transition duration-150 shadow-lg shadow-indigo-600/20 cursor-pointer"
-      >
-        <span class="text-lg font-bold leading-none">+</span> Add Transaction
-      </button>
     </div>
 
     <!-- Filters Section (Collapsible Choose Filters Drawer) -->
@@ -306,32 +300,32 @@
       </div>
     </div>
 
-    <!-- Mobile Card View (Visible on < sm) -->
-    <div v-if="transactions.length > 0" class="sm:hidden space-y-3">
+    <!-- Mobile Card View (Visible on < sm screens) -->
+    <div v-if="transactions.length > 0" class="sm:hidden space-y-2">
       <div 
         v-for="tx in transactions" 
         :key="tx.id" 
-        class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg space-y-2.5"
+        class="bg-[#131b2e] border border-[#31394d] rounded-lg p-3 shadow-sm space-y-2 min-h-[48px] flex flex-col justify-between"
       >
         <div class="flex justify-between items-start">
-          <div class="flex items-center gap-2.5">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-950 border border-slate-800 text-base shrink-0">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#0b1326] border border-[#31394d] text-sm shrink-0">
               {{ getBucketIcon(tx.bucket_id) }}
             </span>
             <div>
-              <p class="text-sm font-bold text-slate-100 truncate max-w-[170px]">{{ tx.description || 'No description' }}</p>
-              <p class="text-[11px] text-slate-400 font-mono mt-0.5">{{ formatDate(tx.date) }}</p>
+              <p class="text-xs font-bold text-[#dae2fd] truncate max-w-[160px]">{{ tx.description || 'No description' }}</p>
+              <p class="text-[10px] text-[#ccc3d8] font-mono mt-0.5">{{ formatDate(tx.date) }}</p>
             </div>
           </div>
           <div class="text-right shrink-0">
             <span 
-              class="text-sm font-bold block"
+              class="text-xs font-bold block tabular-nums"
               :class="transactionAmountClass(tx)"
             >
               {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
             </span>
             <span 
-              class="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider mt-0.5"
+              class="inline-block px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider mt-0.5"
               :class="transactionBadgeClass(tx)"
             >
               {{ transactionLabel(tx) }}
@@ -339,26 +333,26 @@
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-800/60 text-xs">
-          <div class="flex flex-wrap items-center gap-1.5">
+        <div class="flex items-center justify-between gap-2 pt-2 border-t border-[#31394d]/40 text-xs">
+          <div class="flex items-center gap-1.5 overflow-hidden">
             <!-- Category -->
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-950 text-slate-300 text-[10px] border border-slate-800">
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#0b1326] text-[#dae2fd] text-[10px] border border-[#31394d]">
               <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
-              <span class="truncate max-w-[90px]">{{ getCategoryName(tx.category_id) }}</span>
+              <span class="truncate max-w-[80px]">{{ getCategoryName(tx.category_id) }}</span>
             </span>
 
             <!-- Account -->
-            <span class="px-2 py-0.5 rounded-md bg-slate-950 text-slate-400 text-[10px] border border-slate-800">
+            <span class="px-1.5 py-0.5 rounded-md bg-[#0b1326] text-[#ccc3d8] text-[10px] border border-[#31394d]">
               {{ getAccountName(tx.account_id) }}
             </span>
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-2 items-center">
-            <button @click="$emit('edit-transaction', tx)" class="p-1 text-slate-400 hover:text-indigo-400 text-xs cursor-pointer" title="Edit">
+          <div class="flex gap-2 items-center shrink-0">
+            <button @click="$emit('edit-transaction', tx)" class="p-1 text-[#ccc3d8] hover:text-[#d2bbff] text-xs cursor-pointer" title="Edit">
               ✏️
             </button>
-            <button @click="confirmDelete(tx)" class="p-1 text-slate-400 hover:text-rose-400 text-xs cursor-pointer" title="Delete">
+            <button @click="confirmDelete(tx)" class="p-1 text-[#ccc3d8] hover:text-[#ffb4ab] text-xs cursor-pointer" title="Delete">
               🗑️
             </button>
           </div>
@@ -367,76 +361,76 @@
     </div>
 
     <!-- Mobile Pagination -->
-    <div class="sm:hidden sticky bottom-20 z-20 flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-lg">
+    <div class="sm:hidden sticky bottom-20 z-20 flex items-center justify-between gap-3 rounded-lg border border-[#31394d] bg-[#131b2e]/98 p-2.5 shadow-lg backdrop-blur-md">
       <button
         @click="prevPage"
         :disabled="page === 1"
-        class="min-h-11 flex-1 rounded-xl border border-slate-700 px-4 py-2 text-xs font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-35"
+        class="min-h-[44px] flex-1 rounded-md border border-[#31394d] bg-[#0b1326] px-3 py-1.5 text-xs font-bold text-[#dae2fd] disabled:opacity-35 cursor-pointer"
       >
         Previous
       </button>
       <div class="shrink-0 text-center">
-        <p class="text-xs font-bold text-slate-200">Page {{ page }}</p>
-        <p class="text-[10px] text-slate-400">{{ Math.min(page * limit, summary.total_count) }} of {{ summary.total_count }}</p>
+        <p class="text-xs font-bold text-[#dae2fd]">Page {{ page }}</p>
+        <p class="text-[10px] text-[#ccc3d8]">{{ Math.min(page * limit, summary.total_count) }} of {{ summary.total_count }}</p>
       </div>
       <button
         @click="nextPage"
         :disabled="page * limit >= summary.total_count"
-        class="min-h-11 flex-1 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+        class="min-h-[44px] flex-1 rounded-md bg-[#7c3aed] px-3 py-1.5 text-xs font-bold text-white disabled:bg-[#31394d] disabled:text-[#ccc3d8] cursor-pointer"
       >
         Next
       </button>
     </div>
 
     <!-- Desktop Table Section (Visible on >= sm) -->
-    <div class="hidden sm:block bg-slate-900 border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden">
+    <div class="hidden sm:block bg-[#131b2e] border border-[#31394d] rounded-lg shadow-sm overflow-hidden">
       <div class="w-full overflow-x-auto">
         <table class="w-full border-collapse text-left">
           <thead>
-            <tr class="border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-950/30">
-              <th class="py-3 px-3 pl-5 whitespace-nowrap">Date</th>
+            <tr class="border-b border-[#31394d] text-[11px] font-semibold text-[#ccc3d8] uppercase tracking-wider bg-[#0b1326]">
+              <th class="py-3 px-3 pl-4 whitespace-nowrap">Date</th>
               <th class="py-3 px-3">Description</th>
-              <th class="py-3 px-3">Bucket (Purpose)</th>
-              <th class="py-3 px-3">Account (Storage)</th>
+              <th class="py-3 px-3">Bucket</th>
+              <th class="py-3 px-3">Account</th>
               <th class="py-3 px-3">Category</th>
               <th class="py-3 px-3">Type</th>
               <th class="py-3 px-3 text-right">Amount</th>
-              <th class="py-3 px-3 pr-5 text-center whitespace-nowrap">Actions</th>
+              <th class="py-3 px-3 pr-4 text-center whitespace-nowrap">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/50">
+          <tbody class="divide-y divide-[#31394d]/40">
             <tr 
               v-for="tx in transactions" 
               :key="tx.id" 
-              class="hover:bg-slate-950/20 transition duration-150"
+              class="hover:bg-[#171f33]/60 transition min-h-[48px]"
             >
               <!-- Date -->
-              <td class="py-2.5 px-3 pl-5 text-xs text-slate-300 whitespace-nowrap">
+              <td class="py-2.5 px-3 pl-4 text-xs text-[#ccc3d8] whitespace-nowrap font-mono">
                 {{ formatDate(tx.date) }}
               </td>
 
               <!-- Description & Notes -->
               <td class="py-2.5 px-3 text-xs">
-                <p class="font-medium text-slate-200 truncate max-w-[140px] xl:max-w-xs" :title="tx.description">{{ tx.description }}</p>
-                <p v-if="tx.notes" class="text-[10px] text-slate-500 truncate max-w-[140px] xl:max-w-xs mt-0.5" :title="tx.notes">{{ tx.notes }}</p>
+                <p class="font-bold text-[#dae2fd] truncate max-w-[140px] xl:max-w-xs" :title="tx.description">{{ tx.description }}</p>
+                <p v-if="tx.notes" class="text-[10px] text-[#ccc3d8] truncate max-w-[140px] xl:max-w-xs mt-0.5" :title="tx.notes">{{ tx.notes }}</p>
               </td>
 
               <!-- Bucket Badge -->
               <td class="py-2.5 px-3 text-xs whitespace-nowrap">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-950/60 text-indigo-300 border border-indigo-900/40 text-[11px]">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0b1326] text-[#d2bbff] border border-[#31394d] text-[11px]">
                   <span>{{ getBucketIcon(tx.bucket_id) }}</span>
                   <span class="font-medium truncate max-w-[90px]">{{ getBucketName(tx.bucket_id) }}</span>
                 </span>
               </td>
 
               <!-- Account -->
-              <td class="py-2.5 px-3 text-xs text-slate-400 whitespace-nowrap">
+              <td class="py-2.5 px-3 text-xs text-[#ccc3d8] whitespace-nowrap">
                 <span class="truncate max-w-[80px] block">{{ getAccountName(tx.account_id) }}</span>
               </td>
 
               <!-- Category -->
               <td class="py-2.5 px-3 text-xs whitespace-nowrap">
-                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-950 text-slate-300 text-[11px] border border-slate-800">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#0b1326] text-[#dae2fd] text-[11px] border border-[#31394d]">
                   <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
                   <span class="truncate max-w-[85px]">{{ getCategoryName(tx.category_id) }}</span>
                 </span>

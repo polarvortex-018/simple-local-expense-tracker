@@ -1,14 +1,14 @@
 <template>
-  <div class="space-y-8">
+  <div class="space-y-4">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
       <div>
-        <h2 class="text-2xl font-bold text-slate-100 tracking-tight">Settings</h2>
-        <p class="text-sm text-slate-400 mt-1">Manage your storage accounts, categories, and savings buckets.</p>
+        <h2 class="text-xl font-bold text-[#dae2fd] tracking-tight">Settings</h2>
+        <p class="text-xs text-[#ccc3d8]">Manage storage accounts, categories, and savings buckets.</p>
       </div>
       <button 
         @click="showTransferModal = true"
-        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition duration-150 shadow-lg shadow-indigo-600/20 cursor-pointer shrink-0"
+        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
       >
         <span class="text-sm">⇄</span> Transfer Between Buckets
       </button>
@@ -22,37 +22,37 @@
     ></div>
 
     <!-- Main Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       
       <!-- 1. Savings Buckets Management Card -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col space-y-6">
+      <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 shadow-sm flex flex-col space-y-4">
         <div class="flex justify-between items-start">
           <div>
-            <h3 class="text-base font-semibold text-slate-200">Savings Buckets</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Allocate purposes for your money</p>
+            <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">Savings Buckets</h3>
+            <p class="text-xs text-[#ccc3d8]">Allocate purposes for your money</p>
           </div>
           <button 
             @click="showArchivedBuckets = !showArchivedBuckets"
-            class="text-[11px] font-medium text-indigo-400 hover:underline cursor-pointer"
+            class="text-[11px] font-semibold text-[#d2bbff] hover:underline cursor-pointer"
           >
             {{ showArchivedBuckets ? 'Hide Archived' : 'Show Archived' }}
           </button>
         </div>
 
-        <div class="grid grid-cols-2 gap-2.5">
-          <div class="rounded-xl border border-indigo-900/50 bg-indigo-950/25 p-3">
-            <p class="text-[9px] font-bold uppercase tracking-wider text-indigo-400">Total allocated</p>
-            <p class="mt-1 text-sm font-bold text-indigo-200">₹{{ formatAmount(totalAllocated) }}</p>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="rounded-md border border-[#7c3aed]/40 bg-[#0b1326] p-2.5">
+            <p class="text-[9px] font-bold uppercase tracking-wider text-[#d2bbff]">Total allocated</p>
+            <p class="mt-0.5 text-xs font-bold text-[#dae2fd] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
           </div>
-          <div class="rounded-xl border border-amber-900/50 bg-amber-950/25 p-3">
+          <div class="rounded-md border border-amber-900/40 bg-[#0b1326] p-2.5">
             <p class="text-[9px] font-bold uppercase tracking-wider text-amber-400">Unassigned</p>
-            <p class="mt-1 text-sm font-bold text-amber-200">₹{{ formatAmount(unassignedAmount) }}</p>
+            <p class="mt-0.5 text-xs font-bold text-amber-200 tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
           </div>
         </div>
 
         <!-- Add Bucket Form -->
-        <form @submit.prevent="submitBucket" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-3">
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add Savings Bucket</p>
+        <form @submit.prevent="submitBucket" class="p-3 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-2.5">
+          <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add Savings Bucket</p>
           
           <div class="space-y-2">
             <div class="flex gap-2 relative">
@@ -61,7 +61,7 @@
                 <button
                   type="button"
                   @click="showNewEmojiPicker = !showNewEmojiPicker"
-                  class="w-12 h-9 flex items-center justify-center bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-xl text-lg transition cursor-pointer"
+                  class="w-10 h-8 flex items-center justify-center bg-[#131b2e] border border-[#31394d] hover:border-[#7c3aed] rounded-md text-base transition cursor-pointer"
                   title="Click to pick an emoji"
                 >
                   {{ newBucket.icon || '🪣' }}
@@ -70,16 +70,16 @@
                 <!-- Emoji Picker Dropdown Overlay for New Bucket -->
                 <div 
                   v-if="showNewEmojiPicker" 
-                  class="absolute left-0 top-11 z-50 w-64 bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-2xl space-y-2 transform transition-all"
+                  class="absolute left-0 top-10 z-50 w-64 bg-[#131b2e] border border-[#31394d] rounded-lg p-3 shadow-xl space-y-2"
                 >
-                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Bucket Emoji</p>
+                  <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider mb-1">Select Bucket Emoji</p>
                   <div class="grid grid-cols-6 gap-1.5 max-h-48 overflow-y-auto pr-1">
                     <button
                       v-for="emoji in presetEmojis"
                       :key="emoji"
                       type="button"
                       @click="selectNewEmoji(emoji)"
-                      class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-indigo-950 text-base transition cursor-pointer"
+                      class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#0b1326] text-base transition cursor-pointer"
                     >
                       {{ emoji }}
                     </button>
@@ -91,32 +91,32 @@
               <input 
                 v-model="newBucket.name"
                 type="text"
-                placeholder="Bucket Name (e.g. Emergency Fund)"
+                placeholder="Bucket Name"
                 required
-                class="flex-grow px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+                class="flex-grow px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-500 focus:outline-none transition"
               />
             </div>
 
             <div class="flex justify-between items-center pt-1">
               <div class="flex items-center gap-2">
-                <span class="text-[10px] text-slate-400 uppercase font-semibold">Color:</span>
-                <div class="relative w-7 h-7 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+                <span class="text-[10px] text-[#ccc3d8] uppercase font-semibold">Color:</span>
+                <div class="relative w-6 h-6 rounded-md overflow-hidden border border-[#31394d] bg-[#131b2e] flex items-center justify-center shrink-0">
                   <input 
                     v-model="newBucket.color"
                     type="color"
                     class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
                     style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
                   />
-                  <div class="w-3.5 h-3.5 rounded-full border border-white/20" :style="{ backgroundColor: newBucket.color }"></div>
+                  <div class="w-3 h-3 rounded-full border border-white/20" :style="{ backgroundColor: newBucket.color }"></div>
                 </div>
               </div>
 
               <button 
                 type="submit"
                 :disabled="submittingBucket"
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+                class="px-4 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition cursor-pointer disabled:opacity-50 shadow-sm"
               >
-                {{ submittingBucket ? 'Creating...' : 'Create Bucket' }}
+                {{ submittingBucket ? 'Creating...' : '+ Create Bucket' }}
               </button>
             </div>
           </div>
@@ -279,27 +279,27 @@
       </div>
 
       <!-- 2. Account Management Card -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col space-y-6">
+      <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 shadow-sm flex flex-col space-y-4">
         <div>
-          <h3 class="text-base font-semibold text-slate-200">Manage Accounts</h3>
-          <p class="text-xs text-slate-400 mt-1">Create accounts (where money is stored)</p>
+          <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">Manage Accounts</h3>
+          <p class="text-xs text-[#ccc3d8]">Create accounts (where money is stored)</p>
         </div>
 
         <!-- Add Account Form -->
-        <form @submit.prevent="submitAccount" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-4">
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add New Account</p>
+        <form @submit.prevent="submitAccount" class="p-3 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-3">
+          <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add New Account</p>
           
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <input 
               v-model="newAccount.name"
               type="text"
               placeholder="Account Name (e.g. SBI)"
               required
-              class="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+              class="w-full px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-500 focus:outline-none transition"
             />
             <select 
               v-model="newAccount.type"
-              class="w-full px-3 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-850 focus:bg-slate-900 focus:border-indigo-500 rounded-xl text-slate-200 text-xs focus:outline-none transition cursor-pointer"
+              class="w-full px-3 py-1.5 bg-[#131b2e] border border-[#31394d] hover:bg-[#1f2940] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
             >
               <option value="Checking">Checking</option>
               <option value="Savings">Savings</option>
@@ -311,9 +311,9 @@
           <button 
             type="submit"
             :disabled="submittingAccount"
-            class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+            class="w-full py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full shadow-sm transition cursor-pointer disabled:opacity-50"
           >
-            {{ submittingAccount ? 'Creating...' : 'Create Account' }}
+            {{ submittingAccount ? 'Creating...' : '+ Create Account' }}
           </button>
         </form>
 
@@ -402,62 +402,62 @@
       </div>
 
       <!-- 3. Category Management Card -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col space-y-6">
+      <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 shadow-sm flex flex-col space-y-4">
         <div>
-          <h3 class="text-base font-semibold text-slate-200">Manage Categories</h3>
-          <p class="text-xs text-slate-400 mt-1">Create categories (for spending analytics)</p>
+          <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">Manage Categories</h3>
+          <p class="text-xs text-[#ccc3d8]">Create categories (for spending analytics)</p>
         </div>
 
         <!-- Add Category Form -->
-        <form @submit.prevent="submitCategory" class="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl space-y-4">
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add New Category</p>
+        <form @submit.prevent="submitCategory" class="p-3 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-3">
+          <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add New Category</p>
           
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+          <div class="flex gap-2 items-center">
             <input 
               v-model="newCategory.icon"
               type="text"
-              placeholder="Icon (e.g. 🍔)"
-              class="w-16 px-2.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-center text-sm focus:outline-none transition"
+              placeholder="Icon"
+              class="w-12 px-2 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-center text-xs focus:outline-none transition"
             />
 
             <input 
               v-model="newCategory.name"
               type="text"
-              placeholder="Category Name (e.g. Subscriptions)"
+              placeholder="Category Name"
               required
-              class="sm:col-span-2 px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 hover:bg-slate-850 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+              class="flex-grow px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-500 focus:outline-none transition"
             />
           </div>
 
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <label class="flex items-center gap-1.5 text-xs text-[#ccc3d8] cursor-pointer">
               <input 
                 type="checkbox" 
                 v-model="newCategory.is_quick_select" 
-                class="rounded border-slate-800 text-amber-500 focus:ring-amber-500 bg-slate-900 cursor-pointer"
+                class="rounded border-[#31394d] text-amber-500 bg-[#131b2e] cursor-pointer"
               />
-              <span>⭐ Pin as Quick Select in Transaction Form</span>
+              <span class="text-[11px]">⭐ Pin to Quick Select</span>
             </label>
 
-            <div class="flex items-center gap-3 ml-auto">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] text-slate-400 uppercase font-semibold">Color:</span>
-                <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+            <div class="flex items-center gap-2 ml-auto">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] text-[#ccc3d8] uppercase font-semibold">Color:</span>
+                <div class="relative w-6 h-6 rounded-md overflow-hidden border border-[#31394d] bg-[#131b2e] flex items-center justify-center shrink-0">
                   <input 
                     v-model="newCategory.color"
                     type="color"
                     class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
                     style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
                   />
-                  <div class="w-4 h-4 rounded-full border border-white/20" :style="{ backgroundColor: newCategory.color }"></div>
+                  <div class="w-3 h-3 rounded-full border border-white/20" :style="{ backgroundColor: newCategory.color }"></div>
                 </div>
               </div>
               <button 
                 type="submit"
                 :disabled="submittingCategory"
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+                class="px-5 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full shadow-sm transition cursor-pointer disabled:opacity-50"
               >
-                {{ submittingCategory ? 'Creating...' : 'Create' }}
+                {{ submittingCategory ? 'Creating...' : '+ Create Category' }}
               </button>
             </div>
           </div>
