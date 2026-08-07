@@ -1,33 +1,33 @@
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto safe-area-pb">
+    <div class="bg-[#131b2e] border border-[#31394d] rounded-t-2xl sm:rounded-lg w-full max-w-xl p-5 shadow-xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb">
       
       <!-- Header -->
-      <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+      <div class="flex justify-between items-center border-b border-[#31394d] pb-3">
         <div>
-          <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <h3 class="text-base font-bold text-slate-100 flex items-center gap-2 tracking-tight">
             <span>🏦</span> Financial Vaults Management
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Switch between isolated database vaults stored locally in your <code class="text-indigo-400 font-mono">data/</code> folder.</p>
+          <p class="text-xs text-slate-400 mt-0.5">Switch between isolated database vaults stored locally.</p>
         </div>
-        <button @click="$emit('close')" class="text-slate-400 hover:text-slate-200 text-xl font-bold cursor-pointer">✕</button>
+        <button @click="$emit('close')" class="text-slate-400 hover:text-slate-200 text-lg font-bold cursor-pointer">✕</button>
       </div>
 
       <!-- Create Vault Form -->
-      <form @submit.prevent="handleCreate" class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-3">
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Create New Vault</p>
-        <div class="flex gap-3">
+      <form @submit.prevent="handleCreate" class="p-3.5 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-2.5">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Create New Vault</p>
+        <div class="flex gap-2">
           <input 
             v-model="newVaultName"
             type="text"
             placeholder="Vault Name (e.g. Freelance, Family, Business)"
             required
-            class="flex-grow px-3.5 py-2 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+            class="flex-grow px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
           />
           <button 
             type="submit"
             :disabled="creating"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 shrink-0"
+            class="px-4 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition cursor-pointer disabled:opacity-50 shrink-0 shadow-sm"
           >
             {{ creating ? 'Creating...' : '+ Create Vault' }}
           </button>

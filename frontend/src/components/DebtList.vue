@@ -226,10 +226,11 @@
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (₹) *</label>
             <input 
-              v-model.number="newDebt.amount"
-              type="number"
-              step="0.01"
-              min="0.01"
+              v-model="newDebt.amount"
+              type="text"
+              inputmode="decimal"
+              pattern="[0-9]*[.,]?[0-9]*"
+              autocomplete="off"
               placeholder="0.00"
               required
               class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition"

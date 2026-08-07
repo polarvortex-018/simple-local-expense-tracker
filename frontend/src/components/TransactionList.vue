@@ -1,16 +1,16 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Header -->
     <div class="flex justify-between items-center">
       <div>
-        <h2 class="text-2xl font-bold text-slate-100 tracking-tight">Transactions</h2>
-        <p class="text-sm text-slate-400">Search and filter your complete transaction history.</p>
+        <h2 class="text-xl font-bold text-slate-100 tracking-tight">Transactions</h2>
+        <p class="text-xs text-slate-400">Search and filter complete transaction history.</p>
       </div>
       <button 
         @click="$emit('add-transaction')" 
-        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium text-sm rounded-xl transition duration-150 shadow-lg shadow-indigo-600/20 cursor-pointer"
+        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition shadow-sm cursor-pointer"
       >
-        <span class="text-lg font-bold leading-none">+</span> Add Transaction
+        <span class="text-base font-bold leading-none">+</span> Add Transaction
       </button>
     </div>
 
@@ -18,14 +18,14 @@
     <div v-if="showCategoryDropdown" class="fixed inset-0 z-10" @click="showCategoryDropdown = false"></div>
 
     <!-- Filters Trigger Bar -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5 flex-wrap">
+    <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-3 shadow-sm flex flex-wrap items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2 flex-wrap">
         <button 
           @click="showFilterDrawer = !showFilterDrawer"
-          class="px-4 py-2.5 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/60 hover:border-indigo-500 rounded-xl text-xs font-bold text-indigo-200 flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95"
+          class="px-3 py-1.5 bg-[#0b1326] hover:bg-[#1a243b] border border-[#31394d] hover:border-[#7c3aed] rounded-md text-xs font-bold text-purple-200 flex items-center gap-1.5 transition cursor-pointer"
         >
           <span>🔍 Choose Filters</span>
-          <span v-if="activeFilterCount > 0" class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-600 text-white font-bold">
+          <span v-if="activeFilterCount > 0" class="px-1.5 py-0.5 rounded-full text-[10px] bg-[#7c3aed] text-white font-bold">
             {{ activeFilterCount }}
           </span>
           <span class="text-[10px] text-slate-400 transition" :class="{ 'rotate-180': showFilterDrawer }">▼</span>
@@ -35,7 +35,7 @@
         <button 
           v-if="hasActiveFilters"
           @click="clearFilters"
-          class="px-3 py-1.5 bg-rose-950/60 hover:bg-rose-900/60 border border-rose-900/50 rounded-xl text-[11px] font-semibold text-rose-300 transition cursor-pointer flex items-center gap-1"
+          class="px-2.5 py-1.5 bg-rose-950/60 hover:bg-rose-900/60 border border-rose-900/50 rounded-md text-[11px] font-semibold text-rose-300 transition cursor-pointer flex items-center gap-1"
         >
           <span>Clear Filters</span>
           <span class="text-xs">✕</span>
@@ -43,17 +43,17 @@
       </div>
 
       <span class="text-xs text-slate-400 font-medium">
-        Showing <strong>{{ transactions.length }}</strong> of <strong>{{ summary.total_count }}</strong> transactions
+        Showing <strong>{{ transactions.length }}</strong> of <strong>{{ summary.total_count }}</strong>
       </span>
     </div>
 
     <!-- Collapsible Filter Drawer Panel -->
-    <div v-if="showFilterDrawer" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+    <div v-if="showFilterDrawer" class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 shadow-sm space-y-3">
+      <div class="flex justify-between items-center border-b border-[#31394d] pb-2">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
           <span>🔍</span> Filter & Search Controls
         </h3>
-        <button @click="showFilterDrawer = false" class="text-xs text-indigo-400 hover:underline font-semibold cursor-pointer">
+        <button @click="showFilterDrawer = false" class="text-xs text-[#7c3aed] hover:underline font-semibold cursor-pointer">
           Done ✕
         </button>
       </div>

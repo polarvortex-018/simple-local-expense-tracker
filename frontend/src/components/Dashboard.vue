@@ -1,34 +1,32 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
       <div>
-        <h2 class="text-2xl font-bold text-slate-100 tracking-tight">Financial Overview</h2>
-        <p class="text-sm text-slate-400">Real-time summary of your accounts, income, expenses, and savings buckets.</p>
+        <h2 class="text-xl font-bold text-slate-100 tracking-tight">Financial Overview</h2>
+        <p class="text-xs text-slate-400">Real-time summary of accounts, income, expenses, and savings buckets.</p>
       </div>
     </div>
 
-    <!-- 1. HERO FOCUS CTA CARD: ADD TRANSACTION (MAIN FOCUS AT TOP) -->
+    <!-- 1. HERO FOCUS CTA CARD: ADD TRANSACTION (Full-width rounded-pill primary purple) -->
     <div 
       @click="$emit('add-transaction')" 
-      class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900/60 via-purple-900/40 to-slate-900 border border-indigo-500/40 p-5 sm:p-6 shadow-2xl hover:border-indigo-400 transition-all duration-200 cursor-pointer group transform hover:-translate-y-0.5"
+      class="rounded-lg bg-[#131b2e] border border-[#31394d] p-4 shadow-sm hover:border-[#7c3aed] transition cursor-pointer group"
     >
-      <div class="absolute right-0 top-0 -mt-6 -mr-6 w-32 h-32 rounded-full bg-indigo-500/20 blur-2xl group-hover:bg-indigo-500/30 transition"></div>
-      
-      <div class="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-indigo-600/40 shrink-0 group-hover:scale-105 transition">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <div class="w-10 h-10 rounded-full bg-[#7c3aed] flex items-center justify-center text-white text-lg font-bold shrink-0">
             ＋
           </div>
           <div>
-            <h3 class="text-lg font-bold text-slate-100 group-hover:text-indigo-300 transition">Log New Transaction</h3>
-            <p class="text-xs text-slate-300 mt-0.5">Record an expense or income entry in 1 tap</p>
+            <h3 class="text-sm font-bold text-slate-100 group-hover:text-[#7c3aed] transition">Log New Transaction</h3>
+            <p class="text-xs text-slate-400">Record an expense or income entry in 1 tap</p>
           </div>
         </div>
 
         <button 
           type="button"
-          class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2"
+          class="w-full sm:w-auto px-6 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full shadow-sm transition flex items-center justify-center gap-1.5"
         >
           <span>＋ Add Transaction</span>
         </button>
@@ -36,85 +34,80 @@
     </div>
 
     <!-- 2. PRIMARY METRIC CARDS -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
       <!-- Net Worth -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/30 p-4 sm:p-5 shadow-xl">
-        <div class="absolute right-0 top-0 -mt-3 -mr-3 w-20 h-20 rounded-full bg-indigo-600/10 blur-xl"></div>
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-400/80">Net Worth</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold tracking-tight truncate" :class="netWorth >= 0 ? 'text-slate-100' : 'text-rose-400'">
+      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-3.5 shadow-sm">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Net Worth</p>
+        <p class="mt-1 text-lg sm:text-xl font-bold tracking-tight truncate" :class="netWorth >= 0 ? 'text-slate-100' : 'text-[#ef4444]'">
           ₹{{ formatAmount(netWorth) }}
         </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-slate-400 truncate">Total account balances</p>
+        <p class="mt-0.5 text-[10px] text-slate-400 truncate">Total account balances</p>
       </div>
 
       <!-- Income -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-400">Total Income</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold text-slate-100 tracking-tight truncate">
+      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-3.5 shadow-sm">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-[#10b981]">Total Income</p>
+        <p class="mt-1 text-lg sm:text-xl font-bold text-slate-100 tracking-tight truncate">
           ₹{{ formatAmount(totalIncome) }}
         </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-emerald-500/80 flex items-center gap-1 font-medium truncate">
+        <p class="mt-0.5 text-[10px] text-[#10b981] font-medium truncate">
           ▲ All-time earnings
         </p>
       </div>
 
       <!-- Expenses -->
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-xl">
-        <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-rose-400">Total Expenses</p>
-        <p class="mt-1.5 text-lg sm:text-2xl font-bold text-slate-100 tracking-tight truncate">
+      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-3.5 shadow-sm col-span-2 lg:col-span-1">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-[#ef4444]">Total Expenses</p>
+        <p class="mt-1 text-lg sm:text-xl font-bold text-slate-100 tracking-tight truncate">
           ₹{{ formatAmount(totalExpenses) }}
         </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-rose-500/80 flex items-center gap-1 font-medium truncate">
+        <p class="mt-0.5 text-[10px] text-[#ef4444] font-medium truncate">
           ▼ All-time spending
         </p>
       </div>
 
     </div>
 
-    <!-- 3. SAVINGS BUCKETS BREAKDOWN -->
-    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800/80 pb-3.5">
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h3 class="text-base font-bold text-slate-100">Savings Buckets</h3>
-            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-950 text-indigo-300 border border-indigo-900/50">
-              Purpose Allocations
-            </span>
-          </div>
-          <p class="text-xs text-slate-400 mt-0.5">Where your money is allocated & why it exists</p>
+    <!-- 3. SAVINGS BUCKETS BREAKDOWN (High Density Grid) -->
+    <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 space-y-3">
+      <div class="flex justify-between items-center border-b border-[#31394d] pb-2.5">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-bold text-slate-100 tracking-tight">Savings Buckets</h3>
+          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#7c3aed]/20 text-purple-300 border border-[#7c3aed]/30">
+            Purpose Allocations
+          </span>
         </div>
       </div>
 
-      <div v-if="activeBuckets.length === 0" class="text-center py-8 text-xs text-slate-500">
+      <div v-if="activeBuckets.length === 0" class="text-center py-6 text-xs text-slate-500">
         No active savings buckets configured. Go to Settings -> Savings Buckets to add custom buckets.
       </div>
 
-      <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
+      <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
         <div 
           v-for="bucket in activeBuckets" 
           :key="bucket.id"
           @click="$emit('add-transaction', { bucketId: bucket.id, type: 'expense' })"
-          class="group p-3.5 rounded-2xl border border-slate-800/80 bg-slate-950/40 hover:bg-indigo-950/20 hover:border-indigo-500/50 transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 shadow-md hover:shadow-indigo-500/10"
+          class="p-3 rounded-lg border border-[#31394d] bg-[#0b1326] hover:border-[#7c3aed] transition cursor-pointer flex flex-col justify-between space-y-2"
           title="Click to manage transactions for this bucket"
         >
           <!-- Top Row: Icon, Name & Color Indicator -->
-          <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center justify-between gap-1.5">
             <div class="flex items-center gap-2 overflow-hidden">
-              <span class="w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-base shrink-0 shadow-sm group-hover:scale-105 transition">
+              <span class="w-7 h-7 rounded-md bg-[#131b2e] border border-[#31394d] flex items-center justify-center text-sm shrink-0">
                 {{ bucket.icon || '🪣' }}
               </span>
               <div class="overflow-hidden">
-                <p class="text-xs font-bold text-slate-200 group-hover:text-indigo-300 transition truncate">{{ bucket.name }}</p>
-                <span class="text-[9px] text-slate-400 block truncate">Allocation</span>
+                <p class="text-xs font-bold text-slate-200 truncate">{{ bucket.name }}</p>
               </div>
             </div>
-            <span class="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" :style="{ backgroundColor: bucket.color || '#6366f1' }"></span>
+            <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: bucket.color || '#7c3aed' }"></span>
           </div>
 
           <!-- Middle Row: Allocated Balance -->
-          <div class="pt-1">
+          <div class="pt-0.5">
             <span class="text-[10px] text-slate-400 block font-medium">Allocated Balance</span>
-            <span class="text-base font-bold tracking-tight block truncate" :class="bucket.allocated_balance >= 0 ? 'text-emerald-400' : 'text-rose-400'">
+            <span class="text-sm font-bold tracking-tight block truncate" :class="bucket.allocated_balance >= 0 ? 'text-[#10b981]' : 'text-[#ef4444]'">
               ₹{{ formatAmount(bucket.allocated_balance) }}
             </span>
           </div>
@@ -122,14 +115,14 @@
       </div>
     </div>
 
-    <!-- 4. Main Analytics Section (Pie Chart & Accounts) -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Category Breakdown (Default: This Month with Time Filters) -->
-      <div class="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl p-6 shadow-xl space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800/80 pb-4">
+    <!-- 4. Main Analytics Section (Thin-Stroke Donut Chart & Accounts) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Category Breakdown -->
+      <div class="lg:col-span-2 bg-[#131b2e] border border-[#31394d] rounded-lg p-4 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#31394d] pb-2.5">
           <div>
-            <h3 class="text-base font-semibold text-slate-200">Category Spending Breakdown</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Interactive visual breakdown of expenses by category</p>
+            <h3 class="text-sm font-bold text-slate-100 tracking-tight">Category Spending Breakdown</h3>
+            <p class="text-xs text-slate-400">Interactive visual breakdown of expenses</p>
           </div>
 
           <!-- Time Horizon Filter Selector -->
@@ -137,7 +130,7 @@
             <span class="text-xs text-slate-400 font-medium whitespace-nowrap">Period:</span>
             <select 
               v-model="dashboardTimeRange"
-              class="px-3 py-1.5 bg-slate-950 border border-slate-800 hover:bg-slate-850 focus:bg-slate-950 focus:border-indigo-600 rounded-xl text-slate-200 text-xs font-medium focus:outline-none transition cursor-pointer w-full sm:w-auto"
+              class="px-2.5 py-1 bg-[#0b1326] border border-[#31394d] rounded-md text-slate-200 text-xs font-medium focus:outline-none focus:border-[#7c3aed] transition cursor-pointer w-full sm:w-auto"
             >
               <option value="this_month">This Month (Default)</option>
               <option value="last_month">Last Month</option>
@@ -149,25 +142,25 @@
           </div>
         </div>
 
-        <div v-if="filteredCategoryExpenses.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <!-- Pie Chart Canvas Container -->
-          <div class="relative flex items-center justify-center p-2 min-h-[220px]">
-            <canvas ref="chartCanvas" class="max-w-[220px] max-h-[220px]"></canvas>
+        <div v-if="filteredCategoryExpenses.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <!-- Donut Chart Canvas Container -->
+          <div class="relative flex items-center justify-center p-2 min-h-[200px]">
+            <canvas ref="chartCanvas" class="max-w-[200px] max-h-[200px]"></canvas>
             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span class="text-xs font-medium text-slate-400">Total Spent</span>
-              <span class="text-lg font-bold text-slate-100">₹{{ formatAmount(totalFilteredCategoryExpense) }}</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Spent</span>
+              <span class="text-base font-bold text-slate-100 tracking-tight">₹{{ formatAmount(totalFilteredCategoryExpense) }}</span>
             </div>
           </div>
 
           <!-- Category Legend & Percentage Breakdown -->
-          <div class="space-y-2.5 max-h-[240px] overflow-y-auto pr-1">
+          <div class="space-y-1.5 max-h-[200px] overflow-y-auto pr-1">
             <div 
               v-for="cat in categoryLegendList" 
               :key="cat.name"
-              class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/40 border border-slate-800/40 hover:bg-slate-950/80 transition"
+              class="flex items-center justify-between p-2 rounded-md bg-[#0b1326] border border-[#31394d] hover:border-slate-600 transition"
             >
-              <div class="flex items-center gap-2.5 min-w-0">
-                <span class="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm" :style="{ backgroundColor: cat.color }"></span>
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-3 h-3 rounded-full shrink-0" :style="{ backgroundColor: cat.color }"></span>
                 <span class="text-xs font-semibold text-slate-200 truncate">{{ cat.name }}</span>
               </div>
               <div class="text-right shrink-0">
@@ -178,37 +171,32 @@
           </div>
         </div>
 
-        <div v-else class="text-center py-12 text-xs text-slate-500 border border-dashed border-slate-800/60 rounded-xl">
+        <div v-else class="text-center py-8 text-xs text-slate-500 border border-dashed border-[#31394d] rounded-lg">
           No expenses recorded for the selected time period.
         </div>
       </div>
 
       <!-- Accounts List -->
-      <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 shadow-xl space-y-6">
+      <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 space-y-4">
         <div>
-          <h3 class="text-base font-semibold text-slate-200">Storage Accounts</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Where your physical cash/money is stored</p>
+          <h3 class="text-sm font-bold text-slate-100 tracking-tight">Storage Accounts</h3>
+          <p class="text-xs text-slate-400">Where physical cash/money is stored</p>
         </div>
 
-        <div v-if="accounts.length > 0" class="divide-y divide-slate-800/60 border border-slate-800/80 rounded-xl overflow-hidden bg-slate-950/20">
+        <div v-if="accounts.length > 0" class="divide-y divide-[#31394d] border border-[#31394d] rounded-lg overflow-hidden bg-[#0b1326]">
           <div 
             v-for="acc in accounts" 
             :key="acc.id"
-            class="p-3.5 flex items-center justify-between hover:bg-slate-950/40 transition duration-150"
+            class="p-3 flex items-center justify-between hover:bg-[#131b2e] transition"
           >
             <div>
-              <p class="text-xs font-semibold text-slate-200">{{ acc.name }}</p>
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 mt-1 inline-block">
-                {{ acc.type }}
-              </span>
+              <p class="text-xs font-bold text-slate-200">{{ acc.name }}</p>
+              <p class="text-[10px] text-slate-400">{{ acc.type }}</p>
             </div>
-            <span class="text-xs font-bold" :class="acc.balance >= 0 ? 'text-slate-100' : 'text-rose-400'">
+            <span class="text-xs font-bold tracking-tight" :class="acc.balance >= 0 ? 'text-slate-100' : 'text-[#ef4444]'">
               ₹{{ formatAmount(acc.balance) }}
             </span>
           </div>
-        </div>
-        <div v-else class="text-center py-8 text-xs text-slate-500 border border-dashed border-slate-800/60 rounded-xl">
-          No accounts configured yet.
         </div>
       </div>
     </div>

@@ -1,14 +1,11 @@
 <template>
-  <div
-    class="fixed left-0 top-0 z-50 flex w-full items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm overscroll-behavior-none"
-    :style="viewportStyle"
-  >
-    <div class="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-full sm:max-h-[90vh] flex flex-col overscroll-contain">
+  <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="relative w-full max-w-lg bg-[#131b2e] border border-[#31394d] rounded-t-2xl sm:rounded-lg shadow-xl overflow-hidden transform transition-all max-h-[85vh] sm:max-h-[90vh] flex flex-col">
       
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/20 shrink-0">
+      <div class="px-5 py-3.5 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326]/60 shrink-0">
         <div>
-          <h3 class="text-lg font-bold text-slate-100">
+          <h3 class="text-base font-bold text-slate-100 tracking-tight">
             {{ isEdit ? 'Edit Transaction' : 'Add Transaction' }}
           </h3>
           <p v-if="!isEdit" class="text-xs text-slate-400">
@@ -17,19 +14,19 @@
         </div>
         <button 
           @click="$emit('close')" 
-          class="text-slate-400 hover:text-slate-200 transition text-lg font-semibold cursor-pointer p-1"
+          class="text-slate-400 hover:text-slate-200 transition text-base font-semibold cursor-pointer p-1"
         >
           ✕
         </button>
       </div>
 
       <!-- Step Indicator Bar -->
-      <div v-if="!isEdit" class="w-full bg-slate-950 h-1 flex shrink-0">
-        <div class="h-full bg-indigo-600 transition-all duration-300" :style="{ width: currentStep === 1 ? '50%' : '100%' }"></div>
+      <div v-if="!isEdit" class="w-full bg-[#0b1326] h-1 flex shrink-0">
+        <div class="h-full bg-[#7c3aed] transition-all duration-300" :style="{ width: currentStep === 1 ? '50%' : '100%' }"></div>
       </div>
 
-      <!-- Form Body (Scrollable container without bounce-back bug) -->
-      <form id="transaction-entry-form" @submit.prevent="handleSubmit" class="p-5 sm:p-6 pb-28 sm:pb-28 space-y-5 overflow-y-auto flex-1 overscroll-contain">
+      <!-- Form Body (Scrollable flex container) -->
+      <form id="transaction-entry-form" @submit.prevent="handleSubmit" class="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 overscroll-contain">
         <!-- Error Alerts -->
         <div v-if="error" class="p-3 bg-rose-950/40 border border-rose-900/50 rounded-xl text-rose-400 text-xs">
           {{ error }}
@@ -258,18 +255,18 @@
         </div>
       </form>
 
-      <!-- Fixed action overlay above the visible keyboard -->
-      <div v-if="currentStep === 2" class="absolute inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t border-slate-700 bg-slate-900/95 px-5 sm:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-14px_32px_rgba(2,6,23,0.9)] backdrop-blur-xl">
+      <!-- Action Footer (Anchored cleanly at bottom of modal flex container) -->
+      <div v-if="currentStep === 2" class="shrink-0 flex items-center justify-between gap-3 border-t border-slate-800 bg-slate-950/90 px-5 sm:px-6 py-3 shadow-lg backdrop-blur-xl">
         <button
           type="button"
           @click="isEdit ? $emit('close') : (currentStep = 1)"
-          class="min-h-12 px-4 text-xs font-semibold text-slate-300"
+          class="min-h-11 px-4 text-xs font-semibold text-slate-300 hover:text-slate-100 transition cursor-pointer"
         >{{ isEdit ? 'Cancel' : '← Back' }}</button>
         <button
           form="transaction-entry-form"
           type="submit"
           :disabled="submitting"
-          class="min-h-12 flex-1 max-w-64 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
+          class="min-h-11 flex-1 max-w-64 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 disabled:opacity-50 transition cursor-pointer"
         >
           <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
           <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
@@ -308,6 +305,8 @@ const props = defineProps({
     default: 'expense'
   }
 });
+
+
 
 const emit = defineEmits(['close', 'save']);
 
