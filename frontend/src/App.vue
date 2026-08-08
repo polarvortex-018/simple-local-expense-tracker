@@ -119,13 +119,15 @@ const fetchTransactions = async () => {
       filters.value.end_date
     );
 
+    const isCategoryFilterActive = filters.value.category_ids && filters.value.category_ids.length > 0;
+
     const apiParams = {
-      skip: (page.value - 1) * limit,
-      limit: limit,
+      skip: isCategoryFilterActive ? 0 : (page.value - 1) * limit,
+      limit: isCategoryFilterActive ? 1000 : limit,
       search: filters.value.search || undefined,
       account_id: filters.value.account_id || undefined,
       bucket_id: filters.value.bucket_id || undefined,
-      category_id: filters.value.category_ids.length > 0 ? filters.value.category_ids : undefined,
+      category_id: isCategoryFilterActive ? filters.value.category_ids : undefined,
       transaction_type: filters.value.transaction_type || undefined,
       start_date: start_date || undefined,
       end_date: end_date || undefined
@@ -134,6 +136,8 @@ const fetchTransactions = async () => {
     const summaryParams = { ...apiParams };
     delete summaryParams.skip;
     delete summaryParams.limit;
+    delete summaryParams.category_id; // Keep full donut chart breakdown intact for all categories!
+
     [transactions.value, transactionSummary.value] = await Promise.all([
       api.getTransactions(apiParams),
       api.getTransactionSummary(summaryParams)
@@ -291,6 +295,16 @@ const handleSaveTransaction = async (payload) => {
       : (wasEditing ? 'Transaction updated' : 'Transaction added'));
   } catch (err) {
     alert(err.message || 'Failed to save transaction.');
+  }
+};
+
+const handleDirectSaveTransaction = async ({ id, payload }) => {
+  try {
+    await api.updateTransaction(id, payload);
+    await refreshAll();
+    showSuccess('Transaction updated');
+  } catch (err) {
+    alert(err.message || 'Failed to update transaction.');
   }
 };
 
@@ -569,6 +583,7 @@ onMounted(() => {
           :summary="transactionSummary"
           @add-transaction="openAddTransaction"
           @edit-transaction="openEditTransaction"
+          @edit-transaction-save="handleDirectSaveTransaction"
           @delete-transaction="handleDeleteTransaction"
           @update-filters="handleUpdateFilters"
           @update-page="handleUpdatePage"

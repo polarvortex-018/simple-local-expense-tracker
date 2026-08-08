@@ -15,10 +15,6 @@
         <div class="absolute inset-0 bg-gradient-to-br from-[#7c3aed]/10 to-transparent pointer-events-none"></div>
         <div class="flex justify-between items-center z-10">
           <h2 class="text-xs font-semibold text-[#ccc3d8] uppercase tracking-wider">Net Worth</h2>
-          <div class="flex items-center gap-1 bg-[#00a572]/20 text-[#4edea3] px-2 py-0.5 rounded-full text-xs font-bold">
-            <span class="material-symbols-outlined text-[14px]">trending_up</span>
-            <span>+2.4%</span>
-          </div>
         </div>
         <div class="text-2xl font-bold text-[#dae2fd] tabular-nums z-10 tracking-tight" :class="netWorth >= 0 ? 'text-[#dae2fd]' : 'text-[#ffb4ab]'">
           ₹{{ formatAmount(netWorth) }}
@@ -125,33 +121,96 @@
           </div>
         </div>
 
-        <div v-if="filteredCategoryExpenses.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          <!-- Donut Chart Canvas Container -->
-          <div class="relative flex items-center justify-center p-2 min-h-[200px]">
-            <canvas ref="chartCanvas" class="max-w-[200px] max-h-[200px]"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span class="text-[10px] font-semibold text-[#ccc3d8] uppercase tracking-wider">Total Spent</span>
-              <span class="text-base font-bold text-[#dae2fd] tracking-tight tabular-nums">₹{{ formatAmount(totalFilteredCategoryExpense) }}</span>
+        <!-- Interactive Donut Chart + Glow Legend Grid (Matching Screenshot) -->
+        <div v-if="dashboardPiePaths.length > 0" class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center py-2">
+          
+          <!-- Donut Chart SVG (Left Side) -->
+          <div class="sm:col-span-6 flex items-center justify-center">
+            <div class="relative w-60 h-60 flex items-center justify-center shrink-0">
+              <svg class="w-full h-full overflow-visible" viewBox="-24 -24 248 248">
+                <g
+                  v-for="segment in dashboardPiePaths"
+                  :key="segment.name"
+                  class="cursor-pointer"
+                  @mouseenter="hoveredCategoryIndex = segment.originalIndex"
+                  @mouseleave="hoveredCategoryIndex = null"
+                  @click="toggleSelectCategory(segment.originalIndex)"
+                >
+                  <!-- Expanded Invisible Hit Target for Easy Clicking -->
+                  <path
+                    :d="segment.hitD"
+                    fill="transparent"
+                  />
+                  <!-- Visible Thin Donut Ring Arc -->
+                  <path
+                    :d="segment.d"
+                    :fill="segment.color"
+                    class="transition-all duration-300 pointer-events-none"
+                    :style="{
+                      transformOrigin: '100px 100px',
+                      filter: activeDashboardIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
+                      transform: activeDashboardIndex === segment.originalIndex ? 'scale(1.05)' : 'scale(1)',
+                      opacity: activeDashboardIndex === null || activeDashboardIndex === segment.originalIndex ? 1 : 0.45
+                    }"
+                  />
+                </g>
+              </svg>
+
+              <!-- Center Readout -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-3">
+                <span class="text-xs font-semibold text-[#ccc3d8] truncate max-w-[130px]">
+                  {{ activeHoveredCategoryInfo ? activeHoveredCategoryInfo.name : 'Expenses' }}
+                </span>
+                <div class="text-2xl font-bold text-[#dae2fd] tabular-nums tracking-tight mt-0.5">
+                  <span class="text-base text-[#ccc3d8] font-bold">₹</span>{{ formatAmount(activeHoveredCategoryInfo ? activeHoveredCategoryInfo.amount : totalFilteredCategoryExpense) }}
+                </div>
+                <span v-if="activeHoveredCategoryInfo" class="text-xs font-bold text-[#4edea3] mt-0.5 px-2 py-0.5 rounded-full bg-[#4edea3]/10 border border-[#4edea3]/20">
+                  {{ activeHoveredCategoryInfo.percentage }}% of total
+                </span>
+              </div>
             </div>
           </div>
 
-          <!-- Category Legend & Percentage Breakdown -->
-          <div class="space-y-1.5 max-h-[200px] overflow-y-auto pr-1">
+          <!-- Interactive Legend Cards Grid with FLIP Animation (Side-by-Side 2-Column Grid) -->
+          <TransitionGroup 
+            name="flip-list" 
+            tag="div" 
+            class="sm:col-span-6 grid grid-cols-2 gap-2.5 max-h-64 overflow-y-auto p-1.5 pr-2"
+          >
             <div 
-              v-for="cat in categoryLegendList" 
-              :key="cat.name"
-              class="flex items-center justify-between p-2 rounded-md bg-[#0b1326] border border-[#31394d] hover:border-[#7c3aed]/50 transition min-h-[48px]"
+              v-for="item in activeDashboardLegendItems"
+              :key="item.name"
+              @mouseenter="hoveredCategoryIndex = item.originalIndex"
+              @mouseleave="hoveredCategoryIndex = null"
+              @click="toggleSelectCategory(item.originalIndex)"
+              class="p-2.5 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-1.5 hover:border-slate-400"
+              :style="{
+                borderColor: activeDashboardIndex === item.originalIndex ? item.color : '#31394d',
+                backgroundColor: activeDashboardIndex === item.originalIndex ? '#131b2e' : '#0b1326',
+                boxShadow: activeDashboardIndex === item.originalIndex 
+                  ? `0 0 16px ${item.color}60, inset 0 0 12px ${item.color}15` 
+                  : 'none'
+              }"
             >
               <div class="flex items-center gap-2 min-w-0">
-                <span class="w-3 h-3 rounded-full shrink-0" :style="{ backgroundColor: cat.color }"></span>
-                <span class="text-xs font-semibold text-[#dae2fd] truncate">{{ cat.name }}</span>
+                <span 
+                  class="w-3 h-3 rounded-full shrink-0 transition-transform duration-200"
+                  :style="{ 
+                    backgroundColor: item.color,
+                    boxShadow: activeDashboardIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
+                  }"
+                ></span>
+                <p class="text-xs font-bold text-[#dae2fd] truncate leading-tight min-w-0">{{ item.name }}</p>
               </div>
-              <div class="text-right shrink-0">
-                <span class="text-xs font-bold text-[#dae2fd] tabular-nums">₹{{ formatAmount(cat.total) }}</span>
-                <span class="text-[10px] text-[#ccc3d8] block font-normal tabular-nums">{{ cat.percentage }}%</span>
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-[10px] text-[#ccc3d8] font-semibold">{{ item.percentage }}%</span>
+                <span class="text-xs font-bold tabular-nums truncate" :style="{ color: activeDashboardIndex === item.originalIndex ? item.color : '#dae2fd' }">
+                  ₹{{ formatAmount(item.amount) }}
+                </span>
               </div>
             </div>
-          </div>
+          </TransitionGroup>
+
         </div>
 
         <div v-else class="text-center py-8 text-xs text-[#ccc3d8] border border-dashed border-[#31394d] rounded-lg">
@@ -297,66 +356,100 @@ const categoryLegendList = computed(() => {
   }));
 });
 
-// Render Donut/Pie Chart on Canvas
-const renderPieChart = () => {
-  if (!chartCanvas.value) return;
-  const ctx = chartCanvas.value.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  
-  const width = 220;
-  const height = 220;
-  chartCanvas.value.width = width * dpr;
-  chartCanvas.value.height = height * dpr;
-  chartCanvas.value.style.width = `${width}px`;
-  chartCanvas.value.style.height = `${height}px`;
-  ctx.scale(dpr, dpr);
+const hoveredCategoryIndex = ref(null);
+const selectedCategoryIndex = ref(null);
 
-  ctx.clearRect(0, 0, width, height);
+const activeDashboardIndex = computed(() => {
+  return selectedCategoryIndex.value !== null ? selectedCategoryIndex.value : hoveredCategoryIndex.value;
+});
 
-  const data = filteredCategoryExpenses.value;
-  const total = totalFilteredCategoryExpense.value;
-
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const outerRadius = 90;
-  const innerRadius = 60;
-
-  if (data.length === 0 || total <= 0) {
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
-    ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true);
-    ctx.fillStyle = '#1e293b';
-    ctx.fill();
-    return;
+const toggleSelectCategory = (idx) => {
+  if (selectedCategoryIndex.value === idx) {
+    selectedCategoryIndex.value = null;
+    hoveredCategoryIndex.value = null;
+  } else {
+    selectedCategoryIndex.value = idx;
+    hoveredCategoryIndex.value = idx;
   }
-
-  let startAngle = -0.5 * Math.PI;
-
-  data.forEach(item => {
-    const sliceAngle = (item.total / total) * (2 * Math.PI);
-    const endAngle = startAngle + sliceAngle;
-
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, outerRadius, startAngle, endAngle);
-    ctx.arc(centerX, centerY, innerRadius, endAngle, startAngle, true);
-    ctx.closePath();
-    ctx.fillStyle = item.color;
-    ctx.fill();
-
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#131b2e';
-    ctx.stroke();
-
-    startAngle = endAngle;
-  });
 };
 
-watch(filteredCategoryExpenses, () => {
-  nextTick(renderPieChart);
-}, { deep: true });
+const activeHoveredCategoryInfo = computed(() => {
+  const currentIdx = activeDashboardIndex.value;
+  if (currentIdx !== null && dashboardPiePaths.value[currentIdx]) {
+    return dashboardPiePaths.value[currentIdx];
+  }
+  return null;
+});
 
-onMounted(() => {
-  nextTick(renderPieChart);
+const dashboardPiePaths = computed(() => {
+  const total = totalFilteredCategoryExpense.value;
+  if (!total || filteredCategoryExpenses.value.length === 0) return [];
+
+  const cx = 100;
+  const cy = 100;
+
+  // Thin visual ring radii
+  const outerR = 86;
+  const innerR = 74; // Sleek 12px visual ring width!
+
+  // Expanded invisible hit-target radii for easy clicking
+  const hitOuterR = 98;
+  const hitInnerR = 62; // Wide 36px hit target!
+
+  let currentAngle = -Math.PI / 2;
+
+  return filteredCategoryExpenses.value.map((item, idx) => {
+    const fraction = item.total / total;
+    const angleSpan = fraction * 2 * Math.PI;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + angleSpan;
+    const percentage = Math.round((item.total / total) * 100);
+    currentAngle = endAngle;
+
+    const createArcPath = (oR, iR) => {
+      const x1o = cx + oR * Math.cos(startAngle);
+      const y1o = cy + oR * Math.sin(startAngle);
+      const x2o = cx + oR * Math.cos(endAngle);
+      const y2o = cy + oR * Math.sin(endAngle);
+
+      const x1i = cx + iR * Math.cos(startAngle);
+      const y1i = cy + iR * Math.sin(startAngle);
+      const x2i = cx + iR * Math.cos(endAngle);
+      const y2i = cy + iR * Math.sin(endAngle);
+
+      const largeArc = angleSpan > Math.PI ? 1 : 0;
+
+      return [
+        `M ${x1o} ${y1o}`,
+        `A ${oR} ${oR} 0 ${largeArc} 1 ${x2o} ${y2o}`,
+        `L ${x2i} ${y2i}`,
+        `A ${iR} ${iR} 0 ${largeArc} 0 ${x1i} ${y1i}`,
+        'Z'
+      ].join(' ');
+    };
+
+    return {
+      ...item,
+      amount: item.total,
+      percentage,
+      d: createArcPath(outerR, innerR),
+      hitD: createArcPath(hitOuterR, hitInnerR),
+      originalIndex: idx
+    };
+  });
+});
+
+const activeDashboardLegendItems = computed(() => {
+  const items = dashboardPiePaths.value;
+  const currentIdx = activeDashboardIndex.value;
+  if (currentIdx === null) {
+    return items;
+  }
+  const selectedItem = items.find(it => it.originalIndex === currentIdx);
+  if (!selectedItem) return items;
+
+  const rest = items.filter(it => it.originalIndex !== currentIdx);
+  return [selectedItem, ...rest];
 });
 
 const formatAmount = (val) => {
@@ -364,3 +457,11 @@ const formatAmount = (val) => {
   return isNaN(num) ? '0.00' : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 </script>
+
+<style scoped>
+.flip-list-move,
+.flip-list-enter-active,
+.flip-list-leave-active {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>

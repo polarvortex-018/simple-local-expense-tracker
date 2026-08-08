@@ -1,6 +1,6 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-    <div class="bg-[#131b2e] border border-[#31394d] rounded-t-2xl sm:rounded-lg w-full max-w-xl p-5 shadow-xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb">
+  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-slate-950/80 backdrop-blur-sm">
+    <div class="bg-[#131b2e] border border-[#31394d] rounded-2xl w-full max-w-xl p-5 shadow-xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb">
       
       <!-- Header -->
       <div class="flex justify-between items-center border-b border-[#31394d] pb-3">

@@ -1,277 +1,290 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-    <div class="relative w-full max-w-lg bg-[#131b2e] border border-[#31394d] rounded-t-2xl sm:rounded-lg shadow-xl overflow-hidden transform transition-all max-h-[85vh] sm:max-h-[90vh] flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-slate-950/80 backdrop-blur-sm">
+    <div class="relative w-full max-w-md bg-[#0b1326] border border-[#31394d] rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
       
       <!-- Header -->
-      <div class="px-5 py-3.5 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326]/60 shrink-0">
-        <div>
-          <h3 class="text-base font-bold text-slate-100 tracking-tight">
+      <div class="px-5 py-3.5 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326] shrink-0">
+        <div class="flex items-center gap-3">
+          <button 
+            v-if="currentStep === 2 && !isEdit"
+            type="button" 
+            @click="currentStep = 1"
+            class="text-[#ccc3d8] hover:text-[#dae2fd] transition text-sm font-bold cursor-pointer p-1"
+            title="Back to Step 1"
+          >
+            ←
+          </button>
+          <button 
+            @click="$emit('close')" 
+            class="text-[#ccc3d8] hover:text-[#dae2fd] transition text-base font-bold cursor-pointer p-1"
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="text-center">
+          <h3 class="text-base font-bold text-[#d2bbff] tracking-tight">
             {{ isEdit ? 'Edit Transaction' : 'Add Transaction' }}
           </h3>
-          <p v-if="!isEdit" class="text-xs text-slate-400">
-            Step {{ currentStep }} of 2: {{ currentStep === 1 ? 'Select Allocation & Storage' : 'Transaction Details' }}
+          <p v-if="!isEdit" class="text-[11px] font-semibold text-[#ccc3d8]">
+            Step {{ currentStep }} of 2
           </p>
         </div>
-        <button 
-          @click="$emit('close')" 
-          class="text-slate-400 hover:text-slate-200 transition text-base font-semibold cursor-pointer p-1"
-        >
-          ✕
-        </button>
+        <div class="w-10"></div> <!-- Centering layout placeholder -->
       </div>
 
-      <!-- Step Indicator Bar -->
-      <div v-if="!isEdit" class="w-full bg-[#0b1326] h-1 flex shrink-0">
-        <div class="h-full bg-[#7c3aed] transition-all duration-300" :style="{ width: currentStep === 1 ? '50%' : '100%' }"></div>
-      </div>
-
-      <!-- Form Body (Scrollable flex container) -->
-      <form id="transaction-entry-form" @submit.prevent="handleSubmit" class="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 overscroll-contain">
+      <!-- Form Body (Scrollable container) -->
+      <form id="transaction-entry-form" @submit.prevent="handleSubmit" class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
         <!-- Error Alerts -->
-        <div v-if="error" class="p-3 bg-rose-950/40 border border-rose-900/50 rounded-xl text-rose-400 text-xs">
+        <div v-if="error" class="p-3 bg-rose-950/40 border border-rose-900/50 rounded-xl text-[#ffb4ab] text-xs font-semibold">
           {{ error }}
         </div>
 
-        <!-- STEP 1: Bucket & Account Selection -->
-        <div v-if="currentStep === 1" class="space-y-4">
-          <div class="p-3.5 bg-indigo-950/30 border border-indigo-900/40 rounded-2xl text-xs text-slate-300">
-            <p class="font-bold text-indigo-400 mb-0.5">Where and why is this money being moved?</p>
-            <p class="text-slate-400">Select the <strong>Savings Bucket</strong> (purpose) and <strong>Account</strong> (storage location).</p>
-          </div>
-
-          <!-- Savings Bucket Selection (Enlarged Cards Grid with Color Accent Line) -->
+        <!-- STEP 1: Bucket & Account Selection (Matching Image 1) -->
+        <div v-if="currentStep === 1" class="space-y-5">
+          
+          <!-- 1. Select Bucket Section -->
           <div class="space-y-2">
-            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-              1. Select Savings Bucket (Purpose) — Optional
-            </label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
-              <div
+            <h4 class="text-sm font-bold text-[#dae2fd] tracking-tight">Select Bucket</h4>
+            <div class="bg-[#131b2e] border border-[#31394d] rounded-xl overflow-hidden divide-y divide-[#31394d]/60 shadow-sm">
+              
+              <!-- Unassigned Row -->
+              <div 
                 @click="form.bucket_id = ''"
-                class="p-3 rounded-2xl border text-xs cursor-pointer transition flex flex-col justify-center space-y-2 border-t-4 border-t-amber-500 shadow-sm"
-                :class="!form.bucket_id ? 'bg-amber-950/70 border-amber-500 text-white ring-2 ring-amber-500/40' : 'bg-slate-950 border-slate-800 text-slate-300'"
+                class="p-3.5 flex items-center justify-between transition cursor-pointer min-h-[48px]"
+                :class="!form.bucket_id ? 'bg-[#7c3aed]/20 text-white font-bold' : 'hover:bg-[#171f33]/60 text-[#dae2fd]'"
               >
-                <p class="font-bold">Unassigned</p>
-                <p class="text-[10px] text-slate-400">Account only</p>
+                <div class="flex items-center gap-3">
+                  <span class="w-1 h-5 rounded-full bg-amber-500 shrink-0"></span>
+                  <span class="text-lg">🪣</span>
+                  <span class="text-xs font-semibold">Unassigned (Account Only)</span>
+                </div>
+                <span class="text-xs font-bold tabular-nums text-amber-400">₹0.00</span>
               </div>
+
+              <!-- Active Buckets Rows -->
               <div 
                 v-for="b in activeBuckets" 
                 :key="b.id"
-                @click="form.bucket_id = form.bucket_id === b.id ? '' : b.id"
-                class="p-3 rounded-2xl border text-xs cursor-pointer transition flex flex-col justify-between space-y-2 relative overflow-hidden border-t-4 shadow-sm"
-                :style="{ borderTopColor: b.color || '#6366f1' }"
-                :class="form.bucket_id === b.id ? 'bg-indigo-950/90 border-indigo-500 text-slate-100 ring-2 ring-indigo-500/50' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'"
+                @click="form.bucket_id = b.id"
+                class="p-3.5 flex items-center justify-between transition cursor-pointer min-h-[48px]"
+                :class="form.bucket_id === b.id ? 'bg-[#7c3aed]/20 text-white font-bold' : 'hover:bg-[#171f33]/60 text-[#dae2fd]'"
               >
-                <div class="flex items-center gap-2 overflow-hidden">
-                  <span class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-sm shrink-0">
-                    {{ b.icon || '🪣' }}
-                  </span>
-                  <p class="font-bold text-slate-100 text-xs truncate">{{ b.name }}</p>
+                <div class="flex items-center gap-3 overflow-hidden">
+                  <span class="w-1 h-5 rounded-full shrink-0" :style="{ backgroundColor: b.color || '#7c3aed' }"></span>
+                  <span class="text-lg shrink-0">{{ b.icon || '🪣' }}</span>
+                  <span class="text-xs font-semibold truncate">{{ b.name }}</span>
                 </div>
-                <p class="text-[10px] text-slate-400">Allocated: <strong class="text-indigo-400 font-semibold">₹{{ formatAmount(b.allocated_balance) }}</strong></p>
+                <span class="text-xs font-bold tabular-nums shrink-0" :class="b.allocated_balance >= 0 ? 'text-[#4edea3]' : 'text-[#ffb4ab]'">
+                  ₹{{ formatAmount(b.allocated_balance) }}
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Account Selection -->
+          <!-- 2. From Account Section -->
           <div class="space-y-2">
-            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-              2. Select Account (Storage Location) *
-            </label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
+            <h4 class="text-sm font-bold text-[#dae2fd] tracking-tight">From Account</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div 
                 v-for="acc in accounts" 
                 :key="acc.id"
                 @click="form.account_id = acc.id"
-                class="min-h-20 p-4 rounded-2xl border text-xs cursor-pointer transition flex items-center justify-between gap-4"
-                :class="form.account_id === acc.id ? 'bg-indigo-950/80 border-indigo-500 text-slate-100 ring-2 ring-indigo-500/50' : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'"
+                class="p-3 rounded-xl border text-xs cursor-pointer transition flex flex-col justify-between space-y-2 relative min-h-[64px]"
+                :class="form.account_id === acc.id ? 'bg-[#7c3aed]/20 border-[#d2bbff] text-white ring-2 ring-[#7c3aed]' : 'bg-[#131b2e] border-[#31394d] text-[#ccc3d8] hover:border-slate-500'"
               >
-                <div class="truncate">
-                  <p class="font-bold text-slate-200 text-sm truncate">{{ acc.name }}</p>
-                  <p class="text-[10px] text-slate-400 mt-0.5">{{ acc.type }}</p>
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-[11px] uppercase tracking-wider truncate pr-1 text-[#dae2fd]">{{ acc.name }}</span>
+                  <span v-if="form.account_id === acc.id" class="w-4 h-4 rounded-full bg-[#7c3aed] text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
                 </div>
-                <span class="font-bold text-slate-200 shrink-0">₹{{ formatAmount(acc.balance) }}</span>
+                <span class="text-xs font-bold tabular-nums tracking-tight" :class="acc.balance >= 0 ? 'text-[#dae2fd]' : 'text-[#ffb4ab]'">
+                  ₹{{ formatAmount(acc.balance) }}
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Footer Actions Step 1 -->
-          <div class="sticky bottom-0 z-20 -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 flex items-center justify-between border-t border-[#31394d] bg-[#131b2e] px-5 sm:px-6 py-3 shadow-md">
-            <button 
-              type="button" 
-              @click="$emit('close')"
-              class="px-4 py-2 text-xs font-semibold text-[#ccc3d8] hover:text-[#dae2fd] transition cursor-pointer"
-            >
-              Cancel
-            </button>
+          <!-- Step 1 Sticky Footer Action CTA -->
+          <div class="sticky bottom-0 z-20 -mx-5 -mb-5 bg-[#0b1326] p-4 border-t border-[#31394d] shadow-lg">
             <button 
               type="button"
               @click="goToStep2"
-              class="px-6 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full shadow-sm transition cursor-pointer flex items-center gap-1.5"
+              class="w-full py-3.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2"
             >
-              <span>Next: Details</span>
+              <span>Next</span>
               <span>→</span>
             </button>
           </div>
         </div>
 
-        <!-- STEP 2: Transaction Details -->
-        <div v-else class="space-y-3">
-          <!-- Summary of Step 1 Selection -->
-          <div v-if="!isEdit" class="flex items-center justify-between p-2.5 bg-[#0b1326] border border-[#31394d] rounded-md text-xs">
-            <div class="flex items-center gap-2">
-              <span>Bucket: <strong class="text-[#d2bbff]">{{ selectedBucketName }}</strong></span>
-              <span>•</span>
-              <span>Account: <strong class="text-[#dae2fd]">{{ selectedAccountName }}</strong></span>
+        <!-- STEP 2: Details, Hero Amount, Type Switcher & Category Grid (Matching Image 2) -->
+        <div v-else class="space-y-4">
+          
+          <!-- Selected Allocation Badges Bar (Fully Visible, No Truncation) -->
+          <div v-if="!isEdit" class="flex items-center justify-between gap-2 p-2.5 bg-[#131b2e] border border-[#31394d] rounded-lg text-xs">
+            <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-[#7c3aed]/20 text-[#d2bbff] font-bold uppercase text-[10px] tracking-wider break-words">{{ selectedBucketName }}</span>
+              <span class="text-[#ccc3d8] shrink-0">•</span>
+              <span class="px-2 py-0.5 rounded bg-[#0b1326] border border-[#31394d] text-[#dae2fd] font-bold uppercase text-[10px] tracking-wider break-words">{{ selectedAccountName }}</span>
             </div>
-            <button type="button" @click="currentStep = 1" class="text-xs text-[#d2bbff] hover:underline font-semibold cursor-pointer">Edit</button>
+            <button type="button" @click="currentStep = 1" class="text-xs text-[#d2bbff] hover:underline font-semibold cursor-pointer shrink-0 ml-auto">Edit</button>
           </div>
 
-          <!-- Transaction Type Switch -->
-          <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#0b1326] rounded-full border border-[#31394d]">
+          <!-- Transaction Type Switcher -->
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#131b2e] rounded-full border border-[#31394d]">
             <button 
               type="button"
               @click="form.transaction_type = 'expense'"
-              class="py-1.5 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
+              class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
               :class="form.transaction_type === 'expense' ? 'bg-[#ef4444] text-white shadow-sm' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
             >
-              <span>↑ Expense</span>
+              <span>↓ Expense</span>
             </button>
             <button 
               type="button"
               @click="form.transaction_type = 'income'"
-              class="py-1.5 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
+              class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
               :class="form.transaction_type === 'income' ? 'bg-[#10b981] text-white shadow-sm' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
             >
-              <span>↓ Income</span>
+              <span>↑ Income</span>
             </button>
             <button
               type="button"
               @click="form.transaction_type = 'adjustment'"
-              class="py-1.5 px-1 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center"
+              class="py-2 px-1 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
               :class="form.transaction_type === 'adjustment' ? 'bg-amber-600 text-white shadow-sm' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
             >
-              Adjust
+              <span>⇄ Adjust</span>
             </button>
           </div>
 
-          <div v-if="form.transaction_type === 'adjustment'" class="rounded-md border border-amber-900/50 bg-[#0b1326] p-2.5 space-y-2">
-            <p class="text-[11px] text-amber-200">Correct selected account/bucket to match reality. Enter reason in Description.</p>
+          <!-- Adjustment direction logic if adjustment type selected -->
+          <div v-if="form.transaction_type === 'adjustment'" class="rounded-lg border border-amber-900/50 bg-[#131b2e] p-2.5 space-y-2">
+            <p class="text-[11px] text-amber-200">Reconcile account balance to match reality. Enter reason in Description.</p>
             <div class="grid grid-cols-2 gap-2">
-              <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-full border py-1.5 text-xs font-bold" :class="form.adjustment_direction === 'add' ? 'border-[#10b981] bg-[#10b981]/20 text-[#4edea3]' : 'border-[#31394d] text-[#ccc3d8]'">+ Add amount</button>
-              <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-full border py-1.5 text-xs font-bold" :class="form.adjustment_direction === 'subtract' ? 'border-[#ef4444] bg-[#ef4444]/20 text-[#ffb4ab]' : 'border-[#31394d] text-[#ccc3d8]'">− Subtract amount</button>
+              <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-full border py-1.5 text-xs font-bold cursor-pointer" :class="form.adjustment_direction === 'add' ? 'border-[#10b981] bg-[#10b981]/20 text-[#4edea3]' : 'border-[#31394d] text-[#ccc3d8]'">+ Add amount</button>
+              <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-full border py-1.5 text-xs font-bold cursor-pointer" :class="form.adjustment_direction === 'subtract' ? 'border-[#ef4444] bg-[#ef4444]/20 text-[#ffb4ab]' : 'border-[#31394d] text-[#ccc3d8]'">− Subtract amount</button>
             </div>
           </div>
 
-          <!-- Amount and Date in a single row -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Amount -->
+          <!-- Amount and Date Side-by-Side in 2 Columns (Matching Screenshot Exactly) -->
+          <div class="grid grid-cols-2 gap-4 items-end">
+            <!-- Amount Input (Left) -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Amount (₹) *</label>
-              <input 
-                v-model="form.amount"
-                type="text"
-                inputmode="decimal"
-                pattern="[0-9]*[.,]?[0-9]*"
-                autocomplete="off"
-                enterkeyhint="next"
-                placeholder="0.00"
-                required
-                class="w-full px-3 py-1.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-sm font-bold tabular-nums placeholder-slate-600 focus:outline-none transition"
-              />
+              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">AMOUNT</label>
+              <div class="flex items-center gap-1 border-b border-[#31394d] focus-within:border-[#7c3aed] pb-1">
+                <span class="text-base font-bold text-[#ccc3d8]">₹</span>
+                <input 
+                  v-model="form.amount"
+                  type="text"
+                  inputmode="decimal"
+                  pattern="[0-9]*[.,]?[0-9]*"
+                  autocomplete="off"
+                  placeholder="124.50"
+                  required
+                  class="w-full text-base sm:text-lg font-bold text-[#dae2fd] tabular-nums bg-transparent focus:outline-none transition"
+                />
+              </div>
             </div>
 
-            <!-- Date -->
+            <!-- Date Selector (Right) -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Date *</label>
+              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">DATE</label>
               <input 
                 v-model="form.date"
                 @click="$event.target.showPicker?.()"
                 type="date" 
                 required
-                class="w-full px-3 py-1.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
+                class="w-full px-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs font-semibold focus:outline-none transition cursor-pointer [color-scheme:dark]"
               />
             </div>
           </div>
 
-          <!-- Description -->
-          <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Description *</label>
-            <input 
-              v-model="form.description"
-              type="text" 
-              placeholder="e.g. Weekly Groceries"
-              required
-              class="w-full px-3 py-1.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-600 focus:outline-none transition"
-            />
-          </div>
-
-          <!-- Quick Select Categories Grid + Dropdown -->
-          <div class="space-y-1.5">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Category *</label>
-
-            <!-- Quick Select Category Cards -->
-            <div v-if="quickSelectCategories.length > 0" class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 mb-1.5">
-              <button 
-                type="button"
-                v-for="cat in quickSelectCategories" 
-                :key="cat.id"
-                @click="form.category_id = cat.id"
-                class="p-2 rounded-md border text-xs font-semibold transition flex flex-col items-center justify-center gap-1 text-center cursor-pointer relative overflow-hidden border-t-2 shadow-sm"
-                :style="{ 
-                  borderTopColor: cat.color || '#7c3aed',
-                  borderColor: form.category_id === cat.id ? (cat.color || '#7c3aed') : undefined
-                }"
-                :class="form.category_id === cat.id ? 'bg-[#7c3aed]/20 text-white ring-2 ring-[#7c3aed]' : 'bg-[#0b1326] border-[#31394d] text-[#dae2fd] hover:border-slate-500'"
-              >
-                <span class="text-base">{{ cat.icon || '🏷️' }}</span>
-                <span class="text-[10px] truncate max-w-full leading-tight font-bold">{{ cat.name }}</span>
-              </button>
+          <!-- Category Selection Grid (3x2 Grid) -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">CATEGORY</label>
             </div>
 
-            <!-- Dropdown for All Categories -->
-            <select 
-              v-model="form.category_id" 
-              required
-              class="w-full px-3 py-1.5 bg-[#0b1326] border border-[#31394d] hover:bg-[#131b2e] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
-            >
-              <option value="" disabled class="bg-[#0b1326] text-slate-500">Select category...</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id" class="bg-[#0b1326] text-[#dae2fd]">
-                {{ cat.icon || '🏷️' }} {{ cat.name }}
-              </option>
-            </select>
+            <!-- Quick Category Grid (Displays categories pinned to Quick Select in Settings) -->
+            <div class="grid grid-cols-3 gap-2">
+              <button 
+                type="button"
+                v-for="cat in displayedQuickCategories" 
+                :key="cat.id"
+                @click="form.category_id = cat.id"
+                class="p-2.5 rounded-xl border text-xs font-semibold transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[72px]"
+                :class="form.category_id === cat.id ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white ring-2 ring-[#7c3aed]' : 'bg-[#131b2e] border-[#31394d] text-[#dae2fd] hover:border-slate-500'"
+              >
+                <span class="w-8 h-8 rounded-lg bg-[#0b1326] border border-[#31394d] flex items-center justify-center text-base">{{ cat.icon || '🏷️' }}</span>
+                <span class="text-xs font-bold truncate max-w-full leading-tight">{{ cat.name }}</span>
+              </button>
+
+              <!-- Category Dropdown / More Trigger -->
+              <div class="relative">
+                <select 
+                  v-model="form.category_id" 
+                  required
+                  class="w-full h-full min-h-[72px] p-2 bg-[#131b2e] border border-[#31394d] hover:border-slate-500 focus:border-[#7c3aed] rounded-xl text-transparent text-xs font-bold focus:outline-none transition cursor-pointer appearance-none text-center"
+                >
+                  <option value="" disabled class="bg-[#0b1326] text-slate-500">••• More</option>
+                  <option v-for="cat in categories" :key="cat.id" :value="cat.id" class="bg-[#0b1326] text-[#dae2fd]">
+                    {{ cat.icon || '🏷️' }} {{ cat.name }}
+                  </option>
+                </select>
+                <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-1">
+                  <span class="w-8 h-8 rounded-lg bg-[#0b1326] border border-[#31394d] flex items-center justify-center text-xs text-[#ccc3d8]">•••</span>
+                  <span class="text-xs font-bold text-[#ccc3d8]">More</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Notes -->
+          <!-- Description Field -->
           <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Notes (Optional)</label>
-            <textarea 
-              v-model="form.notes"
-              rows="2"
-              placeholder="Additional details..."
-              class="w-full px-3 py-1.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-600 focus:outline-none transition resize-none"
-            ></textarea>
+            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">DESCRIPTION</label>
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-[#ccc3d8] text-xs">≡</span>
+              <input 
+                v-model="form.description"
+                type="text" 
+                placeholder="Optional description"
+                required
+                class="w-full pl-8 pr-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs placeholder-slate-600 focus:outline-none transition"
+              />
+            </div>
+          </div>
+
+          <!-- Note Field -->
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">NOTE</label>
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-[#ccc3d8] text-xs">≡</span>
+              <textarea 
+                v-model="form.notes"
+                rows="2"
+                placeholder="Optional note"
+                class="w-full pl-8 pr-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs placeholder-slate-600 focus:outline-none transition resize-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Step 2 Save Transaction Action CTA -->
+          <div class="pt-4 border-t border-[#31394d]">
+            <button
+              form="transaction-entry-form"
+              type="submit"
+              :disabled="submitting"
+              class="w-full py-3.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <span v-if="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span v-else class="w-4 h-4 rounded-full border border-white flex items-center justify-center text-[10px] font-bold">✓</span>
+              <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
+            </button>
           </div>
 
         </div>
       </form>
-
-      <!-- Fixed action overlay above the visible keyboard -->
-      <div v-if="currentStep === 2" class="flex items-center justify-between gap-3 border-t border-[#31394d] bg-[#131b2e] px-5 sm:px-6 py-3 shadow-md">
-        <button
-          type="button"
-          @click="isEdit ? $emit('close') : (currentStep = 1)"
-          class="px-4 py-2 text-xs font-semibold text-[#ccc3d8] hover:text-[#dae2fd] transition cursor-pointer"
-        >{{ isEdit ? 'Cancel' : '← Back' }}</button>
-        <button
-          form="transaction-entry-form"
-          type="submit"
-          :disabled="submitting"
-          class="flex-1 max-w-64 px-6 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-        >
-          <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -317,6 +330,10 @@ const error = ref('');
 
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
 const quickSelectCategories = computed(() => props.categories.filter(c => c.is_quick_select == 1));
+const displayedQuickCategories = computed(() => {
+  const pinned = quickSelectCategories.value;
+  return pinned.length > 0 ? pinned : props.categories.slice(0, 5);
+});
 
 const form = ref({
   amount: '',

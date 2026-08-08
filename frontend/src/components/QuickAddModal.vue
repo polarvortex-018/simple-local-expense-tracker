@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-md bg-[#131b2e] border border-[#31394d] rounded-lg shadow-xl overflow-hidden transform transition-all">
+  <div class="fixed inset-0 z-[60] flex items-start justify-center p-3 sm:p-4 pt-4 sm:pt-12 bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-md bg-[#131b2e] border border-[#31394d] rounded-2xl shadow-xl overflow-hidden transform transition-all">
       <!-- Header -->
       <div class="px-4 py-3 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326]/60">
         <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">
