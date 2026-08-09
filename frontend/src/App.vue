@@ -113,34 +113,9 @@ const calculateDates = (timeRange, customStart, customEnd) => {
 
 const fetchTransactions = async () => {
   try {
-    const { start_date, end_date } = calculateDates(
-      filters.value.time_range,
-      filters.value.start_date,
-      filters.value.end_date
-    );
-
-    const isCategoryFilterActive = filters.value.category_ids && filters.value.category_ids.length > 0;
-
-    const apiParams = {
-      skip: isCategoryFilterActive ? 0 : (page.value - 1) * limit,
-      limit: isCategoryFilterActive ? 1000 : limit,
-      search: filters.value.search || undefined,
-      account_id: filters.value.account_id || undefined,
-      bucket_id: filters.value.bucket_id || undefined,
-      category_id: isCategoryFilterActive ? filters.value.category_ids : undefined,
-      transaction_type: filters.value.transaction_type || undefined,
-      start_date: start_date || undefined,
-      end_date: end_date || undefined
-    };
-
-    const summaryParams = { ...apiParams };
-    delete summaryParams.skip;
-    delete summaryParams.limit;
-    delete summaryParams.category_id; // Keep full donut chart breakdown intact for all categories!
-
     [transactions.value, transactionSummary.value] = await Promise.all([
-      api.getTransactions(apiParams),
-      api.getTransactionSummary(summaryParams)
+      api.getTransactions({ limit: 10000 }),
+      api.getTransactionSummary({ limit: 10000 })
     ]);
   } catch (err) {
     error.value = 'Failed to load transactions: ' + err.message;
