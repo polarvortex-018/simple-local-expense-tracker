@@ -9,252 +9,473 @@
     @mouseup="onTouchEnd"
     @mouseleave="onTouchEnd"
   >
-    <!-- Single Ultra-Compact Control & Navigation Strip -->
-    <div class="bg-[#131b2e] border border-[#31394d] rounded-xl p-2 shadow-sm flex flex-wrap items-center justify-between gap-2">
-      <!-- Left: Month Navigator & Range Toggle -->
-      <div class="flex items-center gap-1.5 flex-wrap">
-        <!-- Month Navigator -->
-        <div v-if="timeMode === 'monthly'" class="flex items-center gap-0.5 bg-[#0b1326] border border-[#31394d] rounded-lg p-0.5 shadow-inner">
-          <button 
-            @click="prevMonth"
-            class="w-6 h-6 rounded bg-[#131b2e] hover:bg-[#1f2b48] text-[#dae2fd] flex items-center justify-center text-[10px] font-bold transition cursor-pointer active:scale-95"
-            title="Previous Month"
-          >
-            ◀
-          </button>
-          <span class="px-2 text-xs font-bold text-[#dae2fd] min-w-[105px] text-center select-none tracking-tight">
-            {{ formattedMonthYear }}
-          </span>
-          <button 
-            @click="nextMonth"
-            class="w-6 h-6 rounded bg-[#131b2e] hover:bg-[#1f2b48] text-[#dae2fd] flex items-center justify-center text-[10px] font-bold transition cursor-pointer active:scale-95"
-            title="Next Month"
-          >
-            ▶
-          </button>
-        </div>
-
-        <!-- Custom Range Toggle -->
+    <!-- Top Header Strip Card Container -->
+    <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-3 shadow-sm space-y-2.5">
+      <!-- Centered Header: < Month Year > -->
+      <div class="flex items-center justify-between px-0.5">
         <button 
-          @click="toggleTimeMode"
-          class="h-7 px-2.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-sm border"
-          :class="timeMode === 'range' 
-            ? 'bg-[#7c3aed] text-white border-[#7c3aed]' 
-            : 'bg-[#0b1326] text-[#d2bbff] border-[#31394d] hover:border-[#7c3aed]'"
-          :title="timeMode === 'monthly' ? 'Switch to Custom Range' : 'Switch back to Monthly View'"
+          @click="prevMonth"
+          class="w-7 h-7 rounded-lg bg-[#0f0f15] hover:bg-[#191924] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold transition cursor-pointer active:scale-95 border border-[#29293a]"
+          title="Previous Month"
         >
-          <span>{{ timeMode === 'range' ? '📅 Monthly View' : '📆 Custom Range' }}</span>
+          ❮
         </button>
 
-        <!-- Choose Filters Button -->
-        <button 
-          @click="showFilterDrawer = !showFilterDrawer"
-          class="h-7 px-2.5 bg-[#0b1326] hover:bg-[#1a243b] border border-[#31394d] hover:border-[#7c3aed] rounded-lg text-xs font-bold text-[#d2bbff] flex items-center gap-1 transition cursor-pointer"
-        >
-          <span>🔍 Filters</span>
-          <span v-if="activeFilterCount > 0" class="px-1.5 py-0.2 rounded-full text-[9px] bg-[#7c3aed] text-white font-bold">
-            {{ activeFilterCount }}
-          </span>
-          <span class="text-[9px] text-[#ccc3d8] transition" :class="{ 'rotate-180': showFilterDrawer }">▼</span>
-        </button>
-
-        <!-- Sort Control Dropdown -->
-        <div class="flex items-center gap-0.5 bg-[#0b1326] border border-[#31394d] focus-within:border-[#7c3aed] rounded-lg px-2 h-7 transition">
-          <span class="text-xs text-[#d2bbff] font-bold">⇅</span>
-          <select 
-            v-model="sortBy"
-            class="bg-transparent text-[#dae2fd] text-xs font-bold focus:outline-none cursor-pointer pr-0.5"
-          >
-            <option value="date_desc" class="bg-[#0b1326] text-[#dae2fd]">Newest First</option>
-            <option value="date_asc" class="bg-[#0b1326] text-[#dae2fd]">Oldest First</option>
-            <option value="amount_desc" class="bg-[#0b1326] text-[#dae2fd]">Most Expensive</option>
-            <option value="amount_asc" class="bg-[#0b1326] text-[#dae2fd]">Least Expensive</option>
-          </select>
-        </div>
+        <h2 class="text-base sm:text-lg font-semibold text-[#f1f0f5] tracking-tight select-none">
+          {{ formattedMonthYear }}
+        </h2>
 
         <button 
-          v-if="hasActiveFilters"
-          @click="clearFilters"
-          class="h-7 px-2 bg-[#ffb4ab]/10 hover:bg-[#ffb4ab]/20 border border-[#ffb4ab]/30 rounded-lg text-xs font-bold text-[#ffb4ab] transition cursor-pointer flex items-center gap-0.5"
-          title="Clear all active filters"
+          @click="nextMonth"
+          class="w-7 h-7 rounded-lg bg-[#0f0f15] hover:bg-[#191924] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold transition cursor-pointer active:scale-95 border border-[#29293a]"
+          title="Next Month"
         >
-          <span>Clear</span>
-          <span class="text-xs">✕</span>
+          ❯
         </button>
       </div>
 
-      <!-- Right: Chart View Mode Segmented Toggle -->
-      <div class="inline-flex p-0.5 bg-[#0b1326] border border-[#31394d] rounded-lg text-[10px] font-bold">
-        <button 
-          @click="chartViewMode = 'both'"
-          class="px-2 py-0.5 rounded transition cursor-pointer"
-          :class="chartViewMode === 'both' ? 'bg-[#7c3aed] text-white' : 'text-[#ccc3d8] hover:text-white'"
-        >
-          Both
-        </button>
-        <button 
-          @click="chartViewMode = 'expense'"
-          class="px-2 py-0.5 rounded transition cursor-pointer"
-          :class="chartViewMode === 'expense' ? 'bg-[#ffb4ab]/30 text-[#ffb4ab] border border-[#ffb4ab]/40' : 'text-[#ccc3d8] hover:text-white'"
-        >
-          Expenses
-        </button>
-        <button 
-          @click="chartViewMode = 'income'"
-          class="px-2 py-0.5 rounded transition cursor-pointer"
-          :class="chartViewMode === 'income' ? 'bg-[#4edea3]/30 text-[#4edea3] border border-[#4edea3]/40' : 'text-[#ccc3d8] hover:text-white'"
-        >
-          Income
-        </button>
+      <!-- Compact Controls Row: Forced onto the SAME single horizontal line -->
+      <div class="flex items-center justify-between gap-1.5 flex-nowrap overflow-x-auto scrollbar-none py-0.5">
+        <!-- Segmented Mode Toggle [ Monthly | Custom ▾ ] -->
+        <div class="inline-flex p-0.5 bg-[#0f0f15] border border-[#29293a] rounded-lg text-[10px] font-semibold shrink-0">
+          <button 
+            @click="timeMode = 'monthly'"
+            class="px-2 py-0.5 rounded-md transition cursor-pointer"
+            :class="timeMode === 'monthly' ? 'bg-[#191924] text-[#f1f0f5] border border-[#D4BFFF]/40 shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+          >
+            Monthly
+          </button>
+          <button 
+            @click="openCustomRangeModal"
+            class="px-2 py-0.5 rounded-md transition cursor-pointer flex items-center gap-1"
+            :class="timeMode === 'range' ? 'bg-[#191924] text-[#D4BFFF] border border-[#D4BFFF]/40 shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+          >
+            <span>Custom</span>
+            <span class="text-[9px] text-[#D4BFFF]">▾</span>
+          </button>
+        </div>
+
+        <!-- Filter, Sort & Chart View Mode Action Strip -->
+        <div class="flex items-center gap-1 shrink-0 ml-auto">
+          <!-- Choose Filters Button -->
+          <button 
+            @click="showFilterDrawer = !showFilterDrawer"
+            class="h-6.5 px-2 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/60 rounded-lg text-[10px] font-semibold text-[#D4BFFF] flex items-center justify-center gap-1 transition cursor-pointer"
+            title="Toggle Filter Options"
+          >
+            <span>🔍</span>
+            <span v-if="activeFilterCount > 0" class="px-1 py-0.1 rounded-full text-[8px] bg-[#D4BFFF] text-[#0f0f15] font-bold">
+              {{ activeFilterCount }}
+            </span>
+          </button>
+
+          <!-- Sort Selector Dropdown -->
+          <div class="flex items-center gap-0.5 bg-[#0f0f15] border border-[#29293a] focus-within:border-[#D4BFFF] rounded-lg px-1.5 h-6.5 transition">
+            <span class="text-[9px] text-[#D4BFFF] font-semibold">⇅</span>
+            <select 
+              v-model="sortBy"
+              class="bg-transparent text-[#f1f0f5] text-[10px] font-semibold focus:outline-none cursor-pointer pr-0"
+            >
+              <option value="date_desc" class="bg-[#0f0f15] text-[#f1f0f5]">Newest</option>
+              <option value="date_asc" class="bg-[#0f0f15] text-[#f1f0f5]">Oldest</option>
+              <option value="amount_desc" class="bg-[#0f0f15] text-[#f1f0f5]">Highest</option>
+              <option value="amount_asc" class="bg-[#0f0f15] text-[#f1f0f5]">Lowest</option>
+            </select>
+          </div>
+
+          <!-- Chart View Mode (Ultra Space-Efficient Pill Toggle - No Emojis) -->
+          <div class="inline-flex p-0.5 bg-[#0f0f15] border border-[#29293a] rounded-lg text-[9px] font-semibold shrink-0">
+            <button 
+              @click="chartViewMode = 'both'"
+              class="px-1.5 py-0.5 rounded transition cursor-pointer"
+              :class="chartViewMode === 'both' ? 'bg-[#D4BFFF] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+              title="Show Both Expenses & Income Charts"
+            >
+              All
+            </button>
+            <button 
+              @click="chartViewMode = 'expense'"
+              class="px-1.5 py-0.5 rounded transition cursor-pointer"
+              :class="chartViewMode === 'expense' ? 'bg-[#FFD1B3] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+              title="Show Expenses Breakdown Chart Only"
+            >
+              Exp
+            </button>
+            <button 
+              @click="chartViewMode = 'income'"
+              class="px-1.5 py-0.5 rounded transition cursor-pointer"
+              :class="chartViewMode === 'income' ? 'bg-[#B3F5E1] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+              title="Show Income Breakdown Chart Only"
+            >
+              Inc
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Range Selector Drawer (Visible when timeMode === 'range') -->
+    <!-- Sleek Custom Time Range & Month/Year Pop-up Modal Sheet (Only opens on click) -->
     <Transition name="fade-slide">
-      <div v-if="timeMode === 'range'" class="bg-[#131b2e] border border-[#31394d] rounded-xl p-3 shadow-sm space-y-3">
-        <div class="flex flex-col sm:flex-row items-center gap-3">
-          <div class="flex-1 space-y-1 w-full">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Select Time Range</label>
-            <select 
-              v-model="rangeTimeChoice"
-              class="h-8 px-2.5 bg-[#0b1326] border border-[#31394d] rounded-lg text-[#dae2fd] text-xs font-semibold focus:outline-none focus:border-[#7c3aed] transition cursor-pointer w-full"
-            >
-              <option value="this_month">This Month</option>
-              <option value="last_month">Last Month</option>
-              <option value="last_3_months">Last 3 Months</option>
-              <option value="last_6_months">Last 6 Months</option>
-              <option value="this_year">This Year</option>
-              <option value="custom">Custom Date Range...</option>
-            </select>
+      <div v-if="showCustomRangeModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 pb-20 sm:pb-4 bg-[#0f0f15]/80 backdrop-blur-md">
+        <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col p-4 space-y-3.5">
+          
+          <!-- Header -->
+          <div class="flex items-center justify-between border-b border-[#29293a] pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-sm">📅</span>
+              <h3 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Select Time Range Horizon</h3>
+            </div>
+            <button @click="showCustomRangeModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-sm font-bold cursor-pointer p-1">
+              ✕
+            </button>
           </div>
-        </div>
 
-        <!-- Custom Date Inputs (Visible when rangeTimeChoice === 'custom') -->
-        <div v-if="rangeTimeChoice === 'custom'" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#31394d]">
-          <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Start Date</label>
-            <input 
-              v-model="startDateInput"
-              type="date"
-              @click="$event.target.showPicker?.()"
-              class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
-            />
+          <!-- 1-Tap Preset Chip Options -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">Quick Presets</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                @click="selectRangeChoice('this_month')"
+                class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer"
+                :class="rangeTimeChoice === 'this_month' ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:border-[#29293a]'"
+              >
+                This Month
+              </button>
+              <button
+                type="button"
+                @click="selectRangeChoice('last_month')"
+                class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer"
+                :class="rangeTimeChoice === 'last_month' ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:border-[#29293a]'"
+              >
+                Last Month
+              </button>
+              <button
+                type="button"
+                @click="selectRangeChoice('last_3_months')"
+                class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer"
+                :class="rangeTimeChoice === 'last_3_months' ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:border-[#29293a]'"
+              >
+                Last 3 Months
+              </button>
+              <button
+                type="button"
+                @click="selectRangeChoice('last_6_months')"
+                class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer"
+                :class="rangeTimeChoice === 'last_6_months' ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:border-[#29293a]'"
+              >
+                Last 6 Months
+              </button>
+              <button
+                type="button"
+                @click="selectRangeChoice('this_year')"
+                class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer"
+                :class="rangeTimeChoice === 'this_year' ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:border-[#29293a]'"
+              >
+                This Year
+              </button>
+              <button
+                type="button"
+                @click="rangeTimeChoice = 'specific_month'"
+                class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                :class="rangeTimeChoice === 'specific_month' ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:border-[#29293a]'"
+              >
+                <span>📅</span>
+                <span>Month/Year Grid</span>
+              </button>
+              <button
+                type="button"
+                @click="rangeTimeChoice = 'custom'"
+                class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer"
+                :class="rangeTimeChoice === 'custom' ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:border-[#29293a]'"
+              >
+                Custom Dates...
+              </button>
+            </div>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">End Date</label>
-            <input 
-              v-model="endDateInput"
-              type="date"
-              @click="$event.target.showPicker?.()"
-              class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
-            />
+
+          <!-- Sleek Month/Year Matrix Picker (Visible when rangeTimeChoice === 'specific_month') -->
+          <div v-if="rangeTimeChoice === 'specific_month'" class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl space-y-2.5">
+            <div class="flex items-center justify-between border-b border-[#29293a] pb-2">
+              <button 
+                type="button"
+                @click="changePickerYear(-1)"
+                class="w-7 h-7 rounded-lg bg-[#14141d] hover:bg-[#191924] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold border border-[#29293a] transition cursor-pointer"
+              >
+                ❮
+              </button>
+              <span class="text-sm font-semibold text-[#D4BFFF]">{{ pickerYear }}</span>
+              <button 
+                type="button"
+                @click="changePickerYear(1)"
+                class="w-7 h-7 rounded-lg bg-[#14141d] hover:bg-[#191924] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold border border-[#29293a] transition cursor-pointer"
+              >
+                ❯
+              </button>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1.5">
+              <button
+                v-for="(mName, idx) in monthNames"
+                :key="mName"
+                type="button"
+                @click="selectMonthAndYearModal(idx)"
+                class="py-2 rounded-lg border text-xs font-semibold transition cursor-pointer text-center"
+                :class="isCurrentSelectedMonth(idx) ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF] font-bold' : 'bg-[#14141d] border-[#29293a] text-[#f1f0f5] hover:bg-[#191924]'"
+              >
+                {{ mName }}
+              </button>
+            </div>
           </div>
+
+          <!-- Custom Date Range Inputs (Visible when rangeTimeChoice === 'custom') -->
+          <div v-if="rangeTimeChoice === 'custom'" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-[#29293a]">
+            <div class="space-y-1">
+              <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider">Start Date</label>
+              <input 
+                v-model="startDateInput"
+                type="date"
+                @click="$event.target.showPicker?.()"
+                class="w-full h-8 px-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
+              />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider">End Date</label>
+              <input 
+                v-model="endDateInput"
+                type="date"
+                @click="$event.target.showPicker?.()"
+                class="w-full h-8 px-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
+              />
+            </div>
+          </div>
+
+          <!-- Modal Action Footer -->
+          <div class="pt-2 border-t border-[#29293a] flex items-center justify-end gap-2">
+            <button
+              type="button"
+              @click="showCustomRangeModal = false"
+              class="px-5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-semibold text-xs rounded-full shadow-md transition cursor-pointer"
+            >
+              Apply Range
+            </button>
+          </div>
+
         </div>
       </div>
     </Transition>
 
-        <!-- Collapsible Multi-Select Filter Drawer Panel (Opened directly under control bar) -->
+        <!-- Sleek UI Filter Modal Prompt Sheet (Fixed Viewport Spacing & Zero Cutoff) -->
         <Transition name="fade-slide">
-          <div v-if="showFilterDrawer" class="bg-[#131b2e] border border-[#31394d] rounded-xl p-3.5 shadow-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-[#31394d] pb-2">
-              <h3 class="text-xs font-bold text-[#dae2fd] uppercase tracking-wider flex items-center gap-1.5">
-                <span>🔍</span> Filter & Search Controls
-              </h3>
-              <button @click="showFilterDrawer = false" class="text-xs text-[#7c3aed] hover:underline font-bold cursor-pointer">
-                Done ✕
-              </button>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <!-- Search Input -->
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Search</label>
-                <input 
-                  v-model="filters.search"
-                  type="text" 
-                  placeholder="Search description/notes..."
-                  class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs placeholder-[#ccc3d8]/50 focus:outline-none transition"
-                />
-              </div>
-
-              <!-- Bucket Filter -->
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Savings Bucket</label>
-                <select 
-                  v-model="filters.bucket_id" 
-                  class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] hover:bg-[#131b2e] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
+          <div v-if="showFilterDrawer" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 pb-20 sm:pb-4 bg-[#0f0f15]/80 backdrop-blur-md">
+            <div class="relative w-full max-w-lg bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[72vh] sm:max-h-[80vh]">
+              
+              <!-- Modal Header -->
+              <div class="px-5 py-3 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">🔍</span>
+                  <h3 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Filter & Search Transactions</h3>
+                  <span v-if="activeFilterCount > 0" class="px-2 py-0.5 rounded-full text-[9px] bg-[#D4BFFF] text-[#0f0f15] font-bold">
+                    {{ activeFilterCount }} active
+                  </span>
+                </div>
+                <button 
+                  @click="showFilterDrawer = false" 
+                  class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-sm font-bold cursor-pointer p-1"
+                  title="Close Filters"
                 >
-                  <option value="" class="bg-[#0b1326] text-[#ccc3d8]">All Buckets</option>
-                  <option v-for="b in buckets" :key="b.id" :value="b.id" class="bg-[#0b1326] text-[#dae2fd]">
-                    {{ b.icon || '🪣' }} {{ b.name }}
-                  </option>
-                </select>
+                  ✕
+                </button>
               </div>
 
-              <!-- Account Filter -->
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Account</label>
-                <select 
-                  v-model="filters.account_id" 
-                  class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] hover:bg-[#131b2e] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
-                >
-                  <option value="" class="bg-[#0b1326] text-[#ccc3d8]">All Accounts</option>
-                  <option v-for="acc in accounts" :key="acc.id" :value="acc.id" class="bg-[#0b1326] text-[#dae2fd]">{{ acc.name }}</option>
-                </select>
-              </div>
-
-              <!-- Category Filter (Multi-select) -->
-              <div class="space-y-1">
-                <div class="flex justify-between items-center">
-                  <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Categories</label>
-                  <div class="flex items-center gap-1.5 text-[10px] font-bold">
+              <!-- Modal Body (Scrollable with compact spacing) -->
+              <div class="p-3.5 sm:p-4 space-y-3 overflow-y-auto flex-1 overscroll-contain">
+                
+                <!-- Search Input -->
+                <div class="space-y-1">
+                  <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">Search</label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-[#9e9cae] text-xs">🔍</span>
+                    <input 
+                      v-model="filters.search"
+                      type="text" 
+                      placeholder="Search description or notes..."
+                      class="w-full pl-8 pr-8 py-1.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/60 focus:outline-none transition"
+                    />
                     <button 
-                      type="button"
-                      @click="selectAllCategories" 
-                      class="text-[#7c3aed] hover:underline cursor-pointer"
+                      v-if="filters.search" 
+                      @click="filters.search = ''"
+                      class="absolute right-3 top-2 text-[#9e9cae] hover:text-[#f1f0f5] text-xs"
                     >
-                      Select All
-                    </button>
-                    <span class="text-[#31394d]">|</span>
-                    <button 
-                      type="button"
-                      @click="deselectAllCategories" 
-                      class="text-[#ccc3d8] hover:text-[#ffb4ab] hover:underline cursor-pointer"
-                    >
-                      Clear
+                      ✕
                     </button>
                   </div>
                 </div>
-                <div class="p-2 bg-[#0b1326] border border-[#31394d] rounded-lg max-h-36 overflow-y-auto space-y-1">
-                  <label 
-                    v-for="cat in categories" 
-                    :key="cat.id"
-                    class="flex items-center gap-2 px-1.5 py-0.5 rounded hover:bg-[#131b2e] cursor-pointer text-xs text-[#dae2fd]"
-                  >
-                    <input 
-                      type="checkbox"
-                      :value="cat.id"
-                      v-model="filters.category_ids"
-                      class="rounded border-[#31394d] text-[#7c3aed] focus:ring-[#7c3aed] bg-[#131b2e] cursor-pointer"
-                    />
-                    <span>{{ cat.icon || '🏷️' }} {{ cat.name }}</span>
-                  </label>
+
+                <!-- Savings Buckets Table Grid Matrix -->
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">Savings Buckets</label>
+                    <div class="flex items-center gap-2 text-[10px] font-semibold">
+                      <button type="button" @click="selectAllBuckets" class="text-[#D4BFFF] hover:underline cursor-pointer">Select All</button>
+                      <span class="text-[#29293a]">|</span>
+                      <button type="button" @click="deselectAllBuckets" class="text-[#9e9cae] hover:text-[#FFD1B3] hover:underline cursor-pointer">Clear</button>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto p-0.5">
+                    <button
+                      type="button"
+                      @click="deselectAllBuckets"
+                      class="px-2 py-1.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-1.5 h-8"
+                      :class="filters.bucket_ids.length === 0 ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF] font-semibold' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
+                    >
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-xs">🪣</span>
+                        <span class="truncate text-[11px]">All Buckets</span>
+                      </div>
+                    </button>
+                    <button
+                      v-for="b in buckets"
+                      :key="b.id"
+                      type="button"
+                      @click="toggleBucketFilter(b.id)"
+                      class="px-2 py-1.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-1.5 h-8"
+                      :class="filters.bucket_ids.includes(b.id) ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF] font-semibold' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
+                    >
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-xs shrink-0">{{ b.icon || '🪣' }}</span>
+                        <span class="truncate text-[11px]">{{ b.name }}</span>
+                      </div>
+                      <span v-if="filters.bucket_ids.includes(b.id)" class="text-[10px] font-bold text-[#D4BFFF] shrink-0">✓</span>
+                    </button>
+                  </div>
                 </div>
+
+                <!-- Storage Accounts Table Grid Matrix -->
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">Storage Accounts</label>
+                    <div class="flex items-center gap-2 text-[10px] font-semibold">
+                      <button type="button" @click="selectAllAccounts" class="text-[#D4BFFF] hover:underline cursor-pointer">Select All</button>
+                      <span class="text-[#29293a]">|</span>
+                      <button type="button" @click="deselectAllAccounts" class="text-[#9e9cae] hover:text-[#FFD1B3] hover:underline cursor-pointer">Clear</button>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-32 overflow-y-auto p-0.5">
+                    <button
+                      type="button"
+                      @click="deselectAllAccounts"
+                      class="px-2 py-1.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-1.5 h-8"
+                      :class="filters.account_ids.length === 0 ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF] font-semibold' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
+                    >
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-xs">💳</span>
+                        <span class="truncate text-[11px]">All Accounts</span>
+                      </div>
+                    </button>
+                    <button
+                      v-for="acc in accounts"
+                      :key="acc.id"
+                      type="button"
+                      @click="toggleAccountFilter(acc.id)"
+                      class="px-2 py-1.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-1.5 h-8"
+                      :class="filters.account_ids.includes(acc.id) ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF] font-semibold' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
+                    >
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="truncate text-[11px]">{{ acc.name }}</span>
+                      </div>
+                      <span v-if="filters.account_ids.includes(acc.id)" class="text-[10px] font-bold text-[#D4BFFF] shrink-0">✓</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Categories Table Grid Matrix -->
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">Categories</label>
+                    <div class="flex items-center gap-2 text-[10px] font-semibold">
+                      <button type="button" @click="selectAllCategories" class="text-[#D4BFFF] hover:underline cursor-pointer">Select All</button>
+                      <span class="text-[#29293a]">|</span>
+                      <button type="button" @click="deselectAllCategories" class="text-[#9e9cae] hover:text-[#FFD1B3] hover:underline cursor-pointer">Clear</button>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto p-1 bg-[#0f0f15] border border-[#29293a] rounded-xl">
+                    <button
+                      v-for="cat in categories"
+                      :key="cat.id"
+                      type="button"
+                      @click="toggleCategoryFilter(cat.id)"
+                      class="px-2 py-1.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-1.5 h-8"
+                      :class="filters.category_ids.includes(cat.id) ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF] font-semibold' : 'bg-[#14141d] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
+                    >
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-xs shrink-0">{{ cat.icon || '🏷️' }}</span>
+                        <span class="truncate text-[11px]">{{ cat.name }}</span>
+                      </div>
+                      <span v-if="filters.category_ids.includes(cat.id)" class="text-[10px] font-bold text-[#D4BFFF] shrink-0">✓</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Transaction Type Structured Table Row -->
+                <div class="space-y-1">
+                  <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">Transaction Type</label>
+                  <div class="grid grid-cols-4 gap-1 p-0.5 bg-[#0f0f15] rounded-xl border border-[#29293a]">
+                    <button
+                      type="button"
+                      @click="filters.transaction_type = ''"
+                      class="py-1 text-xs font-semibold rounded-lg transition cursor-pointer text-center"
+                      :class="!filters.transaction_type ? 'bg-[#14141d] text-[#f1f0f5] border border-[#29293a]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      @click="filters.transaction_type = 'expense'"
+                      class="py-1 text-xs font-semibold rounded-lg transition cursor-pointer text-center"
+                      :class="filters.transaction_type === 'expense' ? 'bg-[#FFD1B3] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                    >
+                      Expense
+                    </button>
+                    <button
+                      type="button"
+                      @click="filters.transaction_type = 'income'"
+                      class="py-1 text-xs font-semibold rounded-lg transition cursor-pointer text-center"
+                      :class="filters.transaction_type === 'income' ? 'bg-[#B3F5E1] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                    >
+                      Income
+                    </button>
+                    <button
+                      type="button"
+                      @click="filters.transaction_type = 'adjustment'"
+                      class="py-1 text-xs font-semibold rounded-lg transition cursor-pointer text-center"
+                      :class="filters.transaction_type === 'adjustment' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                    >
+                      Adjust
+                    </button>
+                  </div>
+                </div>
+
               </div>
 
-              <!-- Type Filter -->
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Type</label>
-                <select 
-                  v-model="filters.transaction_type" 
-                  class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] hover:bg-[#131b2e] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
+              <!-- Modal Footer Action Strip -->
+              <div class="p-3 border-t border-[#29293a] bg-[#14141d] flex items-center justify-between gap-3 shrink-0">
+                <button
+                  type="button"
+                  @click="resetAllFilters"
+                  class="px-3 py-1.5 text-xs font-semibold text-[#9e9cae] hover:text-[#FFD1B3] transition cursor-pointer"
                 >
-                  <option value="" class="bg-[#0b1326] text-[#ccc3d8]">All Types</option>
-                  <option value="income" class="bg-[#0b1326] text-[#dae2fd]">Income</option>
-                  <option value="expense" class="bg-[#0b1326] text-[#dae2fd]">Expense</option>
-                  <option value="adjustment" class="bg-[#0b1326] text-[#dae2fd]">Adjustment</option>
-                </select>
+                  Reset Filters
+                </button>
+                <button
+                  type="button"
+                  @click="showFilterDrawer = false"
+                  class="px-5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-semibold text-xs rounded-full shadow-md transition cursor-pointer"
+                >
+                  Apply Filters
+                </button>
               </div>
+
             </div>
           </div>
         </Transition>
@@ -272,24 +493,24 @@
         @mouseup="onTouchEnd"
         @mouseleave="onTouchEnd"
       >
-        <!-- Expenses Breakdown Donut Chart -->
+        <!-- Expenses Breakdown Donut Chart Card -->
         <section 
           v-if="chartViewMode === 'both' || chartViewMode === 'expense'"
-          class="bg-[#131b2e] border border-[#31394d] rounded-xl p-4 space-y-4 shadow-sm"
+          class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 space-y-4 shadow-sm"
         >
-          <div class="border-b border-[#31394d] pb-2">
-            <h2 class="text-sm font-bold text-[#dae2fd] tracking-tight">Expenses Breakdown</h2>
+          <div class="border-b border-[#29293a] pb-2">
+            <h2 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Expenses Breakdown</h2>
           </div>
 
-          <div v-if="expensePiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#ccc3d8]">
+          <div v-if="expensePiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#9e9cae]">
             No expense records found for this period.
           </div>
 
           <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
             <!-- SVG Donut Ring -->
             <div class="md:col-span-6 flex items-center justify-center">
-              <div class="relative w-52 h-52 sm:w-60 sm:h-60 flex items-center justify-center shrink-0">
-                <svg class="w-full h-full overflow-visible" viewBox="-24 -24 248 248">
+              <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
                   <g
                     v-for="segment in expensePiePaths"
                     :key="segment.name"
@@ -315,24 +536,24 @@
 
                 <!-- Center Readout -->
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-3">
-                  <span class="text-xs font-semibold text-[#ccc3d8] truncate max-w-[130px]">
-                    {{ activeHoveredExpenseInfo ? activeHoveredExpenseInfo.name : 'Expenses' }}
+                  <span class="text-xs font-semibold text-[#9e9cae] truncate max-w-[130px]">
+                    {{ activeHoveredExpenseInfo ? activeHoveredExpenseInfo.name : 'Total Spent' }}
                   </span>
-                  <div class="text-xl sm:text-2xl font-bold text-[#dae2fd] tabular-nums tracking-tight mt-0.5">
-                    <span class="text-sm text-[#ccc3d8] font-bold">₹</span>{{ formatAmount(activeHoveredExpenseInfo ? activeHoveredExpenseInfo.amount : totalFilteredCategoryExpense) }}
+                  <div class="text-xl sm:text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight mt-0.5">
+                    <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredExpenseInfo ? activeHoveredExpenseInfo.amount : totalFilteredCategoryExpense) }}
                   </div>
-                  <span v-if="activeHoveredExpenseInfo" class="text-xs font-bold text-[#ffb4ab] mt-0.5 px-2 py-0.5 rounded-full bg-[#ffb4ab]/10 border border-[#ffb4ab]/20">
+                  <span v-if="activeHoveredExpenseInfo" class="text-xs font-bold text-[#FFD1B3] mt-0.5 px-2 py-0.5 rounded-full bg-[#FFD1B3]/10 border border-[#FFD1B3]/20">
                     {{ activeHoveredExpenseInfo.percentage }}% of total
                   </span>
                 </div>
               </div>
             </div>
 
-            <!-- Interactive Borderless Legend List -->
+            <!-- Interactive Borderless Legend List (Matching Reference Image 2) -->
             <TransitionGroup 
               name="flip-list" 
               tag="div" 
-              class="md:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 max-h-56 overflow-y-auto p-1"
+              class="md:col-span-6 space-y-1.5 max-h-56 overflow-y-auto p-1"
             >
               <div 
                 v-for="item in activeExpenseLegendItems"
@@ -340,11 +561,11 @@
                 @mouseenter="hoveredExpenseIndex = item.originalIndex"
                 @mouseleave="hoveredExpenseIndex = null"
                 @click="toggleSelectExpenseCategory(item.originalIndex)"
-                class="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#171f33]"
-                :class="activeExpenseIndex === item.originalIndex ? 'bg-[#171f33] ring-1 ring-[#7c3aed]/50' : ''"
+                class="flex items-center justify-between py-2 px-2.5 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#191924]"
+                :class="activeExpenseIndex === item.originalIndex ? 'bg-[#191924] ring-1 ring-[#D4BFFF]/50' : ''"
               >
                 <!-- Left: Color dot + Category Name -->
-                <div class="flex items-center gap-2 min-w-0">
+                <div class="flex items-center gap-2.5 min-w-0">
                   <span 
                     class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
                     :style="{ 
@@ -352,13 +573,13 @@
                       boxShadow: activeExpenseIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
                     }"
                   ></span>
-                  <span class="text-xs font-bold text-[#dae2fd] truncate leading-none">{{ item.name }}</span>
+                  <span class="text-xs font-extrabold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
                 </div>
 
-                <!-- Right: Percentage + Amount -->
-                <div class="flex items-center gap-2 shrink-0 tabular-nums">
-                  <span class="text-[10px] font-semibold text-[#ccc3d8] bg-[#0b1326] px-1.5 py-0.2 rounded border border-[#31394d]">{{ item.percentage }}%</span>
-                  <span class="text-xs font-bold" :style="{ color: activeExpenseIndex === item.originalIndex ? item.color : '#dae2fd' }">
+                <!-- Right: Percentage Badge + Amount (Reference Image 2) -->
+                <div class="flex items-center gap-2.5 shrink-0 tabular-nums">
+                  <span class="text-[10px] font-bold text-[#9e9cae] bg-[#0f0f15] px-2 py-0.5 rounded-md border border-[#29293a]">{{ item.percentage }}%</span>
+                  <span class="text-xs sm:text-sm font-extrabold text-[#f1f0f5]">
                     ₹{{ formatAmount(item.amount) }}
                   </span>
                 </div>
@@ -367,13 +588,13 @@
           </div>
         </section>
 
-        <!-- Income Breakdown Donut Chart -->
+        <!-- Income Breakdown Donut Chart Card -->
         <section 
           v-if="chartViewMode === 'both' || chartViewMode === 'income'"
-          class="bg-[#131b2e] border border-[#31394d] rounded-xl p-4 space-y-4 shadow-sm"
+          class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 space-y-4 shadow-sm"
         >
-          <div class="border-b border-[#31394d] pb-2">
-            <h2 class="text-sm font-bold text-[#dae2fd] tracking-tight">Income Breakdown</h2>
+          <div class="border-b border-[#29293a] pb-2">
+            <h2 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Income Breakdown</h2>
           </div>
 
           <div v-if="incomePiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#ccc3d8]">
@@ -383,8 +604,8 @@
           <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
             <!-- SVG Donut Ring -->
             <div class="md:col-span-6 flex items-center justify-center">
-              <div class="relative w-52 h-52 sm:w-60 sm:h-60 flex items-center justify-center shrink-0">
-                <svg class="w-full h-full overflow-visible" viewBox="-24 -24 248 248">
+              <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
                   <g
                     v-for="segment in incomePiePaths"
                     :key="segment.name"
@@ -473,53 +694,53 @@
         :key="group.dateStr" 
         class="space-y-1.5"
       >
-        <!-- Group Date Header (Larger font, no calendar emoji, minimal borderless header) -->
-        <div class="flex items-center justify-between px-1 py-1.5 border-b border-[#31394d]/50 text-xs sm:text-sm font-bold sticky top-14 z-10 bg-[#0b1326]/95 backdrop-blur-md">
-          <span class="text-[#dae2fd] font-bold tracking-tight">{{ formatDateHeader(group.dateStr) }}</span>
-          <div class="flex items-center gap-2 tabular-nums text-xs font-bold">
-            <span v-if="group.totalExpense > 0" class="text-[#ffb4ab]">Spent: ₹{{ formatAmount(group.totalExpense) }}</span>
-            <span v-if="group.totalIncome > 0" class="text-[#4edea3]">Income: ₹{{ formatAmount(group.totalIncome) }}</span>
+        <!-- Group Date Header (Thinner typography) -->
+        <div class="flex items-center justify-between px-1 py-1.5 border-b border-[#29293a] text-xs sm:text-sm font-semibold sticky top-14 z-10 bg-[#0f0f15]/95 backdrop-blur-md">
+          <span class="text-[#f1f0f5] font-semibold tracking-tight">{{ formatDateHeader(group.dateStr) }}</span>
+          <div class="flex items-center gap-2 tabular-nums text-xs font-medium">
+            <span v-if="group.totalExpense > 0" class="text-[#FFD1B3]">Spent: ₹{{ formatAmount(group.totalExpense) }}</span>
+            <span v-if="group.totalIncome > 0" class="text-[#B3F5E1]">Income: ₹{{ formatAmount(group.totalIncome) }}</span>
           </div>
         </div>
 
         <!-- Group Records Unified Container with Hairline Dividers -->
-        <div class="bg-[#131b2e] border border-[#31394d] rounded-xl overflow-hidden divide-y divide-[#31394d]/30 shadow-sm">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-xl overflow-hidden divide-y divide-[#29293a] shadow-sm">
           <div 
             v-for="tx in group.transactions" 
             :key="tx.id" 
             @click="viewTransactionDetails(tx)"
-            class="px-3 py-2.5 hover:bg-[#171f33] transition cursor-pointer flex items-center justify-between gap-2.5 min-h-[44px] active:bg-[#171f33]"
+            class="px-3 py-2.5 hover:bg-[#191924] transition cursor-pointer flex items-center justify-between gap-2.5 min-h-[44px] active:bg-[#191924]"
           >
             <!-- Left: Bucket Icon & Description Details -->
             <div class="flex items-center gap-2.5 min-w-0 flex-1">
-              <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#0b1326] border border-[#31394d] text-sm shrink-0">
+              <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#0f0f15] border border-[#29293a] text-sm shrink-0">
                 {{ getBucketIcon(tx.bucket_id) }}
               </span>
 
               <!-- Center: Description & Metadata -->
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-[#dae2fd] truncate leading-tight">{{ tx.description || 'No description' }}</p>
-                <div class="flex items-center gap-1.5 text-[10px] text-[#ccc3d8] truncate mt-0.5">
+                <p class="text-xs font-extrabold text-[#f1f0f5] truncate leading-tight">{{ tx.description || 'No description' }}</p>
+                <div class="flex items-center gap-1.5 text-[10px] text-[#9e9cae] truncate mt-0.5">
                   <span class="inline-flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
-                    <span class="truncate font-medium">{{ getCategoryName(tx.category_id) }}</span>
+                    <span class="truncate font-semibold">{{ getCategoryName(tx.category_id) }}</span>
                   </span>
                   <span>•</span>
-                  <span class="truncate text-[#94a3b8] font-medium">{{ getAccountName(tx.account_id) }}</span>
+                  <span class="truncate text-[#9e9cae] font-medium">{{ getAccountName(tx.account_id) }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Right: Amount (Clean & bold, without redundant badge pills) -->
             <div class="flex items-center gap-2 shrink-0 text-right">
-              <span class="text-xs sm:text-sm font-bold block tabular-nums" :class="transactionAmountClass(tx)">
+              <span class="text-xs sm:text-sm font-extrabold block tabular-nums" :class="transactionAmountClass(tx)">
                 {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
               </span>
 
               <!-- Quick Edit/Delete Actions for Desktop -->
               <div class="hidden sm:flex gap-1 items-center ml-1">
-                <button @click.stop="$emit('edit-transaction', tx)" class="p-1 text-[#d2bbff] hover:text-white text-xs cursor-pointer" title="Edit">✏️</button>
-                <button @click.stop="confirmDelete(tx)" class="p-1 text-[#ffb4ab] hover:text-rose-300 text-xs cursor-pointer" title="Delete">🗑️</button>
+                <button @click.stop="$emit('edit-transaction', tx)" class="p-1 text-[#D4BFFF] hover:text-white text-xs cursor-pointer" title="Edit">✏️</button>
+                <button @click.stop="confirmDelete(tx)" class="p-1 text-[#FFD1B3] hover:text-rose-300 text-xs cursor-pointer" title="Delete">🗑️</button>
               </div>
             </div>
           </div>
@@ -898,11 +1119,47 @@ const showFilterDrawer = ref(false);
 const sortBy = ref('date_desc'); // 'date_desc', 'date_asc', 'amount_desc', 'amount_asc'
 const filters = ref({
   search: '',
-  bucket_id: '',
-  account_id: '',
+  bucket_ids: [],
+  account_ids: [],
   category_ids: [],
   transaction_type: ''
 });
+
+// Sleek Custom Range Modal State & Methods
+const showCustomRangeModal = ref(false);
+const pickerYear = ref(new Date().getFullYear());
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const openCustomRangeModal = () => {
+  timeMode.value = 'range';
+  pickerYear.value = currentMonthDate.value.getFullYear();
+  showCustomRangeModal.value = true;
+};
+
+const selectRangeChoice = (choice) => {
+  rangeTimeChoice.value = choice;
+  showCustomRangeModal.value = false;
+};
+
+const changePickerYear = (delta) => {
+  pickerYear.value += delta;
+};
+
+const selectMonthAndYearModal = (monthIndex) => {
+  currentMonthDate.value = new Date(pickerYear.value, monthIndex, 1);
+  showCustomRangeModal.value = false;
+};
+
+const isCurrentSelectedMonth = (idx) => {
+  return currentMonthDate.value.getFullYear() === pickerYear.value && currentMonthDate.value.getMonth() === idx;
+};
+
+const jumpToThisMonth = () => {
+  const now = new Date();
+  currentMonthDate.value = new Date(now.getFullYear(), now.getMonth(), 1);
+  pickerYear.value = now.getFullYear();
+  showCustomRangeModal.value = false;
+};
 
 // Chart View Mode State (Default to 'expense')
 const chartViewMode = ref('expense'); // 'expense', 'both', 'income'
@@ -982,8 +1239,8 @@ const nextMonth = () => {
 const activeFilterCount = computed(() => {
   let count = 0;
   if (filters.value.search) count++;
-  if (filters.value.bucket_id) count++;
-  if (filters.value.account_id) count++;
+  if (filters.value.bucket_ids.length > 0) count += filters.value.bucket_ids.length;
+  if (filters.value.account_ids.length > 0) count += filters.value.account_ids.length;
   if (filters.value.category_ids.length > 0) count += filters.value.category_ids.length;
   if (filters.value.transaction_type) count++;
   if (rangeTimeChoice.value === 'custom' && (startDateInput.value || endDateInput.value)) count++;
@@ -995,8 +1252,8 @@ const hasActiveFilters = computed(() => activeFilterCount.value > 0);
 const clearFilters = () => {
   filters.value = {
     search: '',
-    bucket_id: '',
-    account_id: '',
+    bucket_ids: [],
+    account_ids: [],
     category_ids: [],
     transaction_type: ''
   };
@@ -1007,12 +1264,58 @@ const clearFilters = () => {
   selectedChartCategoryRecordId.value = null;
 };
 
+const resetAllFilters = clearFilters;
+
+// Multi-Select Helpers
+const selectAllBuckets = () => {
+  filters.value.bucket_ids = props.buckets.map(b => b.id);
+};
+
+const deselectAllBuckets = () => {
+  filters.value.bucket_ids = [];
+};
+
+const toggleBucketFilter = (bId) => {
+  const idx = filters.value.bucket_ids.indexOf(bId);
+  if (idx > -1) {
+    filters.value.bucket_ids.splice(idx, 1);
+  } else {
+    filters.value.bucket_ids.push(bId);
+  }
+};
+
+const selectAllAccounts = () => {
+  filters.value.account_ids = props.accounts.map(a => a.id);
+};
+
+const deselectAllAccounts = () => {
+  filters.value.account_ids = [];
+};
+
+const toggleAccountFilter = (accId) => {
+  const idx = filters.value.account_ids.indexOf(accId);
+  if (idx > -1) {
+    filters.value.account_ids.splice(idx, 1);
+  } else {
+    filters.value.account_ids.push(accId);
+  }
+};
+
 const selectAllCategories = () => {
   filters.value.category_ids = props.categories.map(c => c.id);
 };
 
 const deselectAllCategories = () => {
   filters.value.category_ids = [];
+};
+
+const toggleCategoryFilter = (catId) => {
+  const idx = filters.value.category_ids.indexOf(catId);
+  if (idx > -1) {
+    filters.value.category_ids.splice(idx, 1);
+  } else {
+    filters.value.category_ids.push(catId);
+  }
 };
 
 const parseYearMonth = (dateStr) => {
@@ -1093,13 +1396,13 @@ const isMatchingTransaction = (t) => {
     if (!desc.includes(q) && !notes.includes(q)) return false;
   }
 
-  // 3. Bucket Filter
-  if (filters.value.bucket_id && t.bucket_id !== filters.value.bucket_id) {
+  // 3. Bucket Filter (Multi-select)
+  if (filters.value.bucket_ids.length > 0 && !filters.value.bucket_ids.includes(t.bucket_id)) {
     return false;
   }
 
-  // 4. Account Filter
-  if (filters.value.account_id && t.account_id !== filters.value.account_id) {
+  // 4. Account Filter (Multi-select)
+  if (filters.value.account_ids.length > 0 && !filters.value.account_ids.includes(t.account_id)) {
     return false;
   }
 
@@ -1295,10 +1598,10 @@ const generatePiePaths = (items, totalSum) => {
 
   const cx = 100;
   const cy = 100;
-  const outerR = 86;
-  const innerR = 74;
-  const hitOuterR = 98;
-  const hitInnerR = 62;
+  const outerR = 103;
+  const innerR = 89;
+  const hitOuterR = 118;
+  const hitInnerR = 74;
 
   let currentAngle = -Math.PI / 2;
 

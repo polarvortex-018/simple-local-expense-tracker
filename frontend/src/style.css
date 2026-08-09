@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  --bg-surface: #0b1326;
-  --bg-container-low: #131b2e;
-  --bg-container: #171f33;
-  --bg-container-high: #222a3d;
-  --color-border: #31394d;
-  --color-primary: #d2bbff;
-  --color-primary-container: #7c3aed;
-  --color-secondary: #4edea3;
+  font-family: 'Sora', 'Inter', system-ui, -apple-system, sans-serif;
+  --bg-surface: #0f0f15;
+  --bg-container-low: #14141d;
+  --bg-container: #191924;
+  --bg-container-high: #232332;
+  --color-border: #29293a;
+  --color-primary: #D4BFFF;
+  --color-primary-container: #8b5cf6;
+  --color-secondary: #FFD1B3;
+  --color-tertiary: #B3F5E1;
   --color-error: #ffb4ab;
-  --color-on-surface: #dae2fd;
-  --color-on-surface-variant: #ccc3d8;
+  --color-on-surface: #f1f0f5;
+  --color-on-surface-variant: #9e9cae;
 }
 
 body {
-  background-color: #0b1326;
-  color: #dae2fd;
+  font-family: 'Sora', 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #0f0f15;
+  color: #f1f0f5;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thin Typography Overrides for Sleek Aesthetic */
+h1, h2, h3, h4, h5, h6, .font-extrabold, .font-black {
+  font-weight: 600 !important;
+}
+
+body, p, span, div, button, input, select, textarea, .font-bold {
+  font-weight: 500 !important;
+}
+
+.font-medium, .font-semibold {
+  font-weight: 400 !important;
 }
 
 .material-symbols-outlined {

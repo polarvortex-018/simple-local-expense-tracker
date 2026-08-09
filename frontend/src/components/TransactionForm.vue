@@ -1,32 +1,32 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-slate-950/80 backdrop-blur-sm">
-    <div class="relative w-full max-w-md bg-[#0b1326] border border-[#31394d] rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm">
+    <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
       
       <!-- Header -->
-      <div class="px-5 py-3.5 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326] shrink-0">
+      <div class="px-5 py-3.5 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
         <div class="flex items-center gap-3">
           <button 
             v-if="currentStep === 2 && !isEdit"
             type="button" 
             @click="currentStep = 1"
-            class="text-[#ccc3d8] hover:text-[#dae2fd] transition text-sm font-bold cursor-pointer p-1"
+            class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-sm font-bold cursor-pointer p-1"
             title="Back to Step 1"
           >
             ←
           </button>
           <button 
             @click="$emit('close')" 
-            class="text-[#ccc3d8] hover:text-[#dae2fd] transition text-base font-bold cursor-pointer p-1"
+            class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-base font-bold cursor-pointer p-1"
             title="Close"
           >
             ✕
           </button>
         </div>
         <div class="text-center">
-          <h3 class="text-base font-bold text-[#d2bbff] tracking-tight">
+          <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">
             {{ isEdit ? 'Edit Transaction' : 'Add Transaction' }}
           </h3>
-          <p v-if="!isEdit" class="text-[11px] font-semibold text-[#ccc3d8]">
+          <p v-if="!isEdit" class="text-[11px] font-semibold text-[#9e9cae]">
             Step {{ currentStep }} of 2
           </p>
         </div>
@@ -45,21 +45,21 @@
           
           <!-- 1. Select Bucket Section -->
           <div class="space-y-2">
-            <h4 class="text-sm font-bold text-[#dae2fd] tracking-tight">Select Bucket</h4>
-            <div class="bg-[#131b2e] border border-[#31394d] rounded-xl overflow-hidden divide-y divide-[#31394d]/60 shadow-sm">
+            <h4 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Select Bucket</h4>
+            <div class="bg-[#0f0f15] border border-[#29293a] rounded-xl overflow-hidden divide-y divide-[#29293a] shadow-sm">
               
               <!-- Unassigned Row -->
               <div 
                 @click="form.bucket_id = ''"
                 class="p-3.5 flex items-center justify-between transition cursor-pointer min-h-[48px]"
-                :class="!form.bucket_id ? 'bg-[#7c3aed]/20 text-white font-bold' : 'hover:bg-[#171f33]/60 text-[#dae2fd]'"
+                :class="!form.bucket_id ? 'bg-[#D4BFFF]/20 text-[#D4BFFF] font-bold' : 'hover:bg-[#191924] text-[#f1f0f5]'"
               >
                 <div class="flex items-center gap-3">
-                  <span class="w-1 h-5 rounded-full bg-amber-500 shrink-0"></span>
+                  <span class="w-1 h-5 rounded-full bg-[#FFD1B3] shrink-0"></span>
                   <span class="text-lg">🪣</span>
                   <span class="text-xs font-semibold">Unassigned (Account Only)</span>
                 </div>
-                <span class="text-xs font-bold tabular-nums text-amber-400">₹0.00</span>
+                <span class="text-xs font-bold tabular-nums text-[#FFD1B3]">₹0.00</span>
               </div>
 
               <!-- Active Buckets Rows -->
@@ -68,14 +68,14 @@
                 :key="b.id"
                 @click="form.bucket_id = b.id"
                 class="p-3.5 flex items-center justify-between transition cursor-pointer min-h-[48px]"
-                :class="form.bucket_id === b.id ? 'bg-[#7c3aed]/20 text-white font-bold' : 'hover:bg-[#171f33]/60 text-[#dae2fd]'"
+                :class="form.bucket_id === b.id ? 'bg-[#D4BFFF]/20 text-[#D4BFFF] font-bold' : 'hover:bg-[#191924] text-[#f1f0f5]'"
               >
                 <div class="flex items-center gap-3 overflow-hidden">
-                  <span class="w-1 h-5 rounded-full shrink-0" :style="{ backgroundColor: b.color || '#7c3aed' }"></span>
+                  <span class="w-1 h-5 rounded-full shrink-0" :style="{ backgroundColor: b.color || '#D4BFFF' }"></span>
                   <span class="text-lg shrink-0">{{ b.icon || '🪣' }}</span>
                   <span class="text-xs font-semibold truncate">{{ b.name }}</span>
                 </div>
-                <span class="text-xs font-bold tabular-nums shrink-0" :class="b.allocated_balance >= 0 ? 'text-[#4edea3]' : 'text-[#ffb4ab]'">
+                <span class="text-xs font-bold tabular-nums shrink-0" :class="b.allocated_balance >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
                   ₹{{ formatAmount(b.allocated_balance) }}
                 </span>
               </div>
@@ -84,20 +84,20 @@
 
           <!-- 2. From Account Section -->
           <div class="space-y-2">
-            <h4 class="text-sm font-bold text-[#dae2fd] tracking-tight">From Account</h4>
+            <h4 class="text-sm font-bold text-[#f1f0f5] tracking-tight">From Account</h4>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div 
                 v-for="acc in accounts" 
                 :key="acc.id"
                 @click="form.account_id = acc.id"
                 class="p-3 rounded-xl border text-xs cursor-pointer transition flex flex-col justify-between space-y-2 relative min-h-[64px]"
-                :class="form.account_id === acc.id ? 'bg-[#7c3aed]/20 border-[#d2bbff] text-white ring-2 ring-[#7c3aed]' : 'bg-[#131b2e] border-[#31394d] text-[#ccc3d8] hover:border-slate-500'"
+                :class="form.account_id === acc.id ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#f1f0f5] ring-1 ring-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
               >
                 <div class="flex items-center justify-between">
-                  <span class="font-bold text-[11px] uppercase tracking-wider truncate pr-1 text-[#dae2fd]">{{ acc.name }}</span>
-                  <span v-if="form.account_id === acc.id" class="w-4 h-4 rounded-full bg-[#7c3aed] text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                  <span class="font-bold text-[11px] uppercase tracking-wider truncate pr-1 text-[#f1f0f5]">{{ acc.name }}</span>
+                  <span v-if="form.account_id === acc.id" class="w-4 h-4 rounded-full bg-[#D4BFFF] text-[#0f0f15] flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
                 </div>
-                <span class="text-xs font-bold tabular-nums tracking-tight" :class="acc.balance >= 0 ? 'text-[#dae2fd]' : 'text-[#ffb4ab]'">
+                <span class="text-xs font-bold tabular-nums tracking-tight" :class="acc.balance >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
                   ₹{{ formatAmount(acc.balance) }}
                 </span>
               </div>
@@ -105,11 +105,11 @@
           </div>
 
           <!-- Step 1 Sticky Footer Action CTA -->
-          <div class="sticky bottom-0 z-20 -mx-5 -mb-5 bg-[#0b1326] p-4 border-t border-[#31394d] shadow-lg">
+          <div class="sticky bottom-0 z-20 -mx-5 -mb-5 bg-[#14141d] p-4 border-t border-[#29293a] shadow-lg">
             <button 
               type="button"
               @click="goToStep2"
-              class="w-full py-3.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+              class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2"
             >
               <span>Next</span>
               <span>→</span>
@@ -270,15 +270,15 @@
           </div>
 
           <!-- Step 2 Save Transaction Action CTA -->
-          <div class="pt-4 border-t border-[#31394d]">
+          <div class="pt-4 border-t border-[#29293a]">
             <button
               form="transaction-entry-form"
               type="submit"
               :disabled="submitting"
-              class="w-full py-3.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span v-if="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span v-else class="w-4 h-4 rounded-full border border-white flex items-center justify-center text-[10px] font-bold">✓</span>
+              <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
+              <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
               <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
             </button>
           </div>

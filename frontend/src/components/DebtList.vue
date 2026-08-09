@@ -3,84 +3,84 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
       <div>
-        <h2 class="text-xl font-bold text-[#dae2fd] tracking-tight">Debt Tracker</h2>
-        <p class="text-xs text-[#ccc3d8]">Track money lent to people and money borrowed from others.</p>
+        <h2 class="text-xl font-black text-[#f1f0f5] tracking-tight">Debt Tracker</h2>
+        <p class="text-xs text-[#9e9cae]">Track money lent to people and money borrowed from others.</p>
       </div>
       <button 
         @click="openAddModal"
-        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
+        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
       >
-        <span class="text-base font-bold leading-none">+</span> Record New Debt
+        <span class="text-base font-black leading-none">+</span> Record New Debt
       </button>
     </div>
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
       <!-- Owed to You -->
-      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-4 shadow-sm flex flex-col justify-between">
+      <div class="rounded-xl bg-[#14141d] border border-[#29293a] p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-bold uppercase tracking-wider text-[#4edea3]">Owed To You</p>
-          <div class="w-7 h-7 rounded-md bg-[#00a572]/20 border border-[#00a572]/30 text-[#4edea3] flex items-center justify-center text-xs font-bold">
+          <p class="text-xs font-black uppercase tracking-wider text-[#B3F5E1]">Owed To You</p>
+          <div class="w-7 h-7 rounded-lg bg-[#B3F5E1]/20 border border-[#B3F5E1]/30 text-[#B3F5E1] flex items-center justify-center text-xs font-black">
             ↙
           </div>
         </div>
-        <p class="mt-2 text-2xl font-bold text-[#dae2fd] tabular-nums tracking-tight">
+        <p class="mt-2 text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight">
           ₹{{ formatAmount(totalOwedToYou) }}
         </p>
-        <p class="mt-0.5 text-[10px] text-[#ccc3d8]">Money you lent to others (Unsettled)</p>
+        <p class="mt-0.5 text-[10px] text-[#9e9cae]">Money you lent to others (Unsettled)</p>
       </div>
 
       <!-- You Owe -->
-      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-4 shadow-sm flex flex-col justify-between">
+      <div class="rounded-xl bg-[#14141d] border border-[#29293a] p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-bold uppercase tracking-wider text-[#ffb4ab]">You Owe</p>
-          <div class="w-7 h-7 rounded-md bg-[#93000a]/40 border border-[#ffb4ab]/30 text-[#ffb4ab] flex items-center justify-center text-xs font-bold">
+          <p class="text-xs font-black uppercase tracking-wider text-[#FFD1B3]">You Owe</p>
+          <div class="w-7 h-7 rounded-lg bg-[#FFD1B3]/20 border border-[#FFD1B3]/30 text-[#FFD1B3] flex items-center justify-center text-xs font-black">
             ↗
           </div>
         </div>
-        <p class="mt-2 text-2xl font-bold text-[#dae2fd] tabular-nums tracking-tight">
+        <p class="mt-2 text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight">
           ₹{{ formatAmount(totalYouOwe) }}
         </p>
-        <p class="mt-0.5 text-[10px] text-[#ccc3d8]">Money borrowed from others (Unsettled)</p>
+        <p class="mt-0.5 text-[10px] text-[#9e9cae]">Money borrowed from others (Unsettled)</p>
       </div>
 
       <!-- Net Debt Position -->
-      <div class="rounded-lg bg-[#131b2e] border border-[#31394d] p-4 shadow-sm flex flex-col justify-between">
+      <div class="rounded-xl bg-[#14141d] border border-[#29293a] p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-bold uppercase tracking-wider text-[#d2bbff]">Net Debt Position</p>
+          <p class="text-xs font-black uppercase tracking-wider text-[#D4BFFF]">Net Debt Position</p>
         </div>
-        <p class="mt-2 text-2xl font-bold tabular-nums tracking-tight" :class="netPosition >= 0 ? 'text-[#dae2fd]' : 'text-[#ffb4ab]'">
+        <p class="mt-2 text-2xl font-black tabular-nums tracking-tight" :class="netPosition >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
           ₹{{ formatAmount(netPosition) }}
         </p>
-        <p class="mt-0.5 text-[10px] text-[#ccc3d8]">
+        <p class="mt-0.5 text-[10px] text-[#9e9cae]">
           {{ netPosition >= 0 ? 'Net surplus' : 'Net liability' }}
         </p>
       </div>
     </div>
 
     <!-- Debt Controls (Tabs & Search) -->
-    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-4">
+    <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm space-y-4">
       <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
         <!-- Tabs -->
-        <div class="flex gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800/80">
+        <div class="flex gap-1 bg-[#0f0f15] p-1 rounded-xl border border-[#29293a]">
           <button 
             @click="activeTab = 'active'"
-            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer"
-            :class="activeTab === 'active' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'"
+            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition cursor-pointer"
+            :class="activeTab === 'active' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             Active (Unsettled)
           </button>
           <button 
             @click="activeTab = 'settled'"
-            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer"
-            :class="activeTab === 'settled' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'"
+            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition cursor-pointer"
+            :class="activeTab === 'settled' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             Settled
           </button>
           <button 
             @click="activeTab = 'all'"
-            class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer"
-            :class="activeTab === 'all' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'"
+            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition cursor-pointer"
+            :class="activeTab === 'all' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             All
           </button>
@@ -92,58 +92,58 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search person or description..."
-            class="w-full pl-9 pr-3.5 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+            class="w-full pl-9 pr-3.5 py-2 bg-[#0f0f15] border border-[#29293a] hover:border-[#D4BFFF]/50 focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition"
           />
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-2.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-2.5 text-[#9e9cae]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
       </div>
 
       <!-- Debt Records List -->
-      <div v-if="filteredDebts.length > 0" class="divide-y divide-slate-800/80 border border-slate-800/80 rounded-xl overflow-hidden bg-slate-950/20">
+      <div v-if="filteredDebts.length > 0" class="divide-y divide-[#29293a] border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]">
         <div 
           v-for="debt in filteredDebts" 
           :key="debt.id"
-          class="p-4 hover:bg-slate-950/40 transition duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          class="p-4 hover:bg-[#191924] transition duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         >
           <div class="flex items-start gap-3.5">
             <!-- Icon -->
             <div 
-              class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm"
-              :class="debt.type === 'lent' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40' : 'bg-rose-950/60 text-rose-400 border border-rose-800/40'"
+              class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-extrabold text-sm"
+              :class="debt.type === 'lent' ? 'bg-[#B3F5E1]/20 text-[#B3F5E1] border border-[#B3F5E1]/30' : 'bg-[#FFD1B3]/20 text-[#FFD1B3] border border-[#FFD1B3]/30'"
             >
               {{ debt.type === 'lent' ? '↗' : '↘' }}
             </div>
 
             <div>
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-sm font-bold text-slate-100">{{ debt.person_name }}</span>
+                <span class="text-sm font-extrabold text-[#f1f0f5]">{{ debt.person_name }}</span>
                 <span 
-                  class="px-2 py-0.5 rounded-full text-[10px] font-semibold border uppercase tracking-wider"
-                  :class="debt.type === 'lent' ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800/40' : 'bg-rose-950/60 text-rose-400 border-rose-800/40'"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border uppercase tracking-wider"
+                  :class="debt.type === 'lent' ? 'bg-[#B3F5E1]/20 text-[#B3F5E1] border-[#B3F5E1]/30' : 'bg-[#FFD1B3]/20 text-[#FFD1B3] border-[#FFD1B3]/30'"
                 >
                   {{ debt.type === 'lent' ? 'Lent (Owed to you)' : 'Borrowed (You owe)' }}
                 </span>
                 <span 
-                  class="px-2 py-0.5 rounded-full text-[10px] font-semibold border"
-                  :class="debt.is_settled ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-amber-950/60 text-amber-400 border-amber-800/40'"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
+                  :class="debt.is_settled ? 'bg-[#191924] text-[#9e9cae] border-[#29293a]' : 'bg-[#D4BFFF]/20 text-[#D4BFFF] border-[#D4BFFF]/30'"
                 >
                   {{ debt.is_settled ? '✓ Settled' : '● Unsettled' }}
                 </span>
               </div>
 
-              <div class="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-3">
-                <span>Account: <strong class="text-slate-300">{{ getAccountName(debt.account_id) }}</strong></span>
+              <div class="text-xs text-[#9e9cae] mt-1 flex flex-wrap items-center gap-3">
+                <span>Account: <strong class="text-[#f1f0f5]">{{ getAccountName(debt.account_id) }}</strong></span>
                 <span>Date: {{ formatDate(debt.created_at) }}</span>
-                <span v-if="debt.description" class="text-slate-400 italic">"{{ debt.description }}"</span>
+                <span v-if="debt.description" class="text-[#9e9cae] italic">"{{ debt.description }}"</span>
               </div>
             </div>
           </div>
 
           <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
             <div class="text-left sm:text-right">
-              <p class="text-base font-bold" :class="debt.type === 'lent' ? 'text-emerald-400' : 'text-rose-400'">
+              <p class="text-base font-extrabold tabular-nums" :class="debt.type === 'lent' ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
                 ₹{{ formatAmount(debt.amount) }}
               </p>
             </div>
@@ -152,13 +152,13 @@
               <button 
                 v-if="!debt.is_settled"
                 @click="openSettleModal(debt)"
-                class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg transition cursor-pointer shadow-md shadow-emerald-600/20"
+                class="px-3.5 py-1.5 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-extrabold text-xs rounded-lg transition cursor-pointer shadow-sm"
               >
                 Settle
               </button>
               <button 
                 @click="confirmDelete(debt)"
-                class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 rounded-lg transition cursor-pointer"
+                class="p-1.5 text-[#9e9cae] hover:text-[#FFD1B3] hover:bg-[#FFD1B3]/10 rounded-lg transition cursor-pointer"
                 title="Delete Debt"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -171,8 +171,8 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500 space-y-2">
-        <p class="text-sm text-slate-400 font-medium">No debts found matching your filters.</p>
+      <div v-else class="text-center py-12 border border-dashed border-[#29293a] rounded-xl text-xs text-[#9e9cae] space-y-2">
+        <p class="text-sm text-[#f1f0f5] font-bold">No debts found matching your filters.</p>
         <p>Click "Record New Debt" to add a new debt entry.</p>
       </div>
     </div>

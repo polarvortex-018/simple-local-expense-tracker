@@ -3,12 +3,12 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
       <div>
-        <h2 class="text-xl font-bold text-[#dae2fd] tracking-tight">Settings</h2>
-        <p class="text-xs text-[#ccc3d8]">Manage storage accounts, categories, and savings buckets.</p>
+        <h2 class="text-xl font-black text-[#f1f0f5] tracking-tight">Settings</h2>
+        <p class="text-xs text-[#9e9cae]">Manage storage accounts, categories, and savings buckets.</p>
       </div>
       <button 
         @click="showTransferModal = true"
-        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
+        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
       >
         <span class="text-sm">⇄</span> Transfer Between Buckets
       </button>
@@ -25,28 +25,28 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       
       <!-- 1. Savings Buckets Management Card -->
-      <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 shadow-sm flex flex-col space-y-4">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
         <div class="flex justify-between items-start">
           <div>
-            <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">Savings Buckets</h3>
-            <p class="text-xs text-[#ccc3d8]">Allocate purposes for your money</p>
+            <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Savings Buckets</h3>
+            <p class="text-xs text-[#9e9cae]">Allocate purposes for your money</p>
           </div>
           <button 
             @click="showArchivedBuckets = !showArchivedBuckets"
-            class="text-[11px] font-semibold text-[#d2bbff] hover:underline cursor-pointer"
+            class="text-[11px] font-bold text-[#D4BFFF] hover:underline cursor-pointer"
           >
             {{ showArchivedBuckets ? 'Hide Archived' : 'Show Archived' }}
           </button>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
-          <div class="rounded-md border border-[#7c3aed]/40 bg-[#0b1326] p-2.5">
-            <p class="text-[9px] font-bold uppercase tracking-wider text-[#d2bbff]">Total allocated</p>
-            <p class="mt-0.5 text-xs font-bold text-[#dae2fd] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
+          <div class="rounded-xl border border-[#29293a] bg-[#0f0f15] p-2.5">
+            <p class="text-[9px] font-bold uppercase tracking-wider text-[#D4BFFF]">Total allocated</p>
+            <p class="mt-0.5 text-xs font-black text-[#f1f0f5] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
           </div>
-          <div class="rounded-md border border-amber-900/40 bg-[#0b1326] p-2.5">
-            <p class="text-[9px] font-bold uppercase tracking-wider text-amber-400">Unassigned</p>
-            <p class="mt-0.5 text-xs font-bold text-amber-200 tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+          <div class="rounded-xl border border-[#29293a] bg-[#0f0f15] p-2.5">
+            <p class="text-[9px] font-bold uppercase tracking-wider text-[#FFD1B3]">Unassigned</p>
+            <p class="mt-0.5 text-xs font-black text-[#FFD1B3] tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
           </div>
         </div>
 
@@ -279,14 +279,14 @@
       </div>
 
       <!-- 2. Account Management Card -->
-      <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 shadow-sm flex flex-col space-y-4">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
         <div>
-          <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">Manage Accounts</h3>
-          <p class="text-xs text-[#ccc3d8]">Create accounts (where money is stored)</p>
+          <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Manage Accounts</h3>
+          <p class="text-xs text-[#9e9cae]">Create accounts (where money is stored)</p>
         </div>
 
         <!-- Add Account Form -->
-        <form @submit.prevent="submitAccount" class="p-3 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-3">
+        <form @submit.prevent="submitAccount" class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl space-y-3">
           <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add New Account</p>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -402,14 +402,14 @@
       </div>
 
       <!-- 3. Category Management Card -->
-      <div class="bg-[#131b2e] border border-[#31394d] rounded-lg p-4 shadow-sm flex flex-col space-y-4">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
         <div>
-          <h3 class="text-sm font-bold text-[#dae2fd] tracking-tight">Manage Categories</h3>
-          <p class="text-xs text-[#ccc3d8]">Create categories (for spending analytics)</p>
+          <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Manage Categories</h3>
+          <p class="text-xs text-[#9e9cae]">Create categories (for spending analytics)</p>
         </div>
 
         <!-- Add Category Form -->
-        <form @submit.prevent="submitCategory" class="p-3 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-3">
+        <form @submit.prevent="submitCategory" class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl space-y-3">
           <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add New Category</p>
           
           <div class="flex gap-2 items-center">

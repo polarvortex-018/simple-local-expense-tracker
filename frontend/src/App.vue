@@ -461,56 +461,56 @@ onMounted(() => {
         ✓ {{ successMessage }}
       </div>
     </Transition>    <!-- Navbar / TopAppBar -->
-    <header class="bg-[#0b1326] border-b border-[#31394d] sticky top-0 z-40 safe-area-pt">
+    <header class="bg-[#0f0f15] border-b border-[#29293a] sticky top-0 z-40 safe-area-pt">
       <div class="max-w-6xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <img src="/cashbuddy-logo.svg" alt="Cash Buddy Logo" class="w-8 h-8 object-contain" />
           <div class="flex flex-col">
-            <span class="font-bold text-[#d2bbff] tracking-tight text-lg leading-tight">Cash Buddy</span>
+            <span class="font-extrabold text-[#D4BFFF] tracking-tight text-lg leading-tight">Cash Buddy</span>
           </div>
           
-          <!-- Vault Switcher Pill Button -->
+          <!-- Vault Switcher Icon-Only Trigger (Option C) -->
           <button 
             @click="showVaultModal = true"
-            class="ml-1 sm:ml-2 px-2.5 py-1 bg-[#131b2e] hover:bg-[#222a3d] border border-[#31394d] hover:border-[#7c3aed] rounded-full text-xs font-semibold text-[#dae2fd] flex items-center gap-1.5 transition cursor-pointer shadow-sm"
-            title="Click to switch or manage database vaults"
+            class="ml-1 px-2 py-1 bg-[#14141d] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF] rounded-full text-xs font-semibold text-[#f1f0f5] flex items-center gap-1 transition cursor-pointer shadow-sm"
+            :title="`Active Vault: ${activeVaultName}. Click to switch database.`"
           >
-            <span class="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse"></span>
-            <span class="truncate max-w-[100px] sm:max-w-none">🏦 <strong class="text-[#d2bbff]">{{ activeVaultName }}</strong></span>
-            <span class="text-[10px] text-[#ccc3d8]">▾</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#B3F5E1]"></span>
+            <span>🏦</span>
+            <span class="text-[9px] text-[#9e9cae]">▾</span>
           </button>
         </div>
 
         <!-- Desktop Navigation Tabs -->
-        <nav class="hidden sm:flex gap-1 bg-[#131b2e] p-1 rounded-xl border border-[#31394d]">
+        <nav class="hidden sm:flex gap-1 bg-[#14141d] p-1 rounded-xl border border-[#29293a]">
           <button 
             @click="currentTab = 'dashboard'"
-            class="px-3.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
-            :class="currentTab === 'dashboard' ? 'bg-[#7c3aed] text-white' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
+            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            :class="currentTab === 'dashboard' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             <span class="material-symbols-outlined text-[16px]">dashboard</span>
             <span>Dashboard</span>
           </button>
           <button 
             @click="currentTab = 'transactions'"
-            class="px-3.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
-            :class="currentTab === 'transactions' ? 'bg-[#7c3aed] text-white' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
+            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            :class="currentTab === 'transactions' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             <span class="material-symbols-outlined text-[16px]">receipt_long</span>
             <span>Transactions</span>
           </button>
           <button 
             @click="currentTab = 'debts'"
-            class="px-3.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
-            :class="currentTab === 'debts' ? 'bg-[#7c3aed] text-white' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
+            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            :class="currentTab === 'debts' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
             <span>Debt List</span>
           </button>
           <button 
             @click="currentTab = 'settings'"
-            class="px-3.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
-            :class="currentTab === 'settings' ? 'bg-[#7c3aed] text-white' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
+            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             <span class="material-symbols-outlined text-[16px]">settings</span>
             <span>Settings</span>
@@ -595,12 +595,12 @@ onMounted(() => {
       </div>
     </main>
 
-    <!-- BottomNavBar (Material 3 Theme) -->
-    <nav class="bg-[#171f33] border-t border-[#31394d] fixed bottom-0 w-full z-50 flex justify-around items-center h-16 px-4 md:hidden safe-area-pb">
+    <!-- BottomNavBar (Material 3 Dark Pastel Theme) -->
+    <nav class="bg-[#14141d] border-t border-[#29293a] fixed bottom-0 w-full z-50 flex justify-around items-center h-16 px-4 md:hidden safe-area-pb">
       <button 
         @click="currentTab = 'dashboard'"
-        class="flex flex-col items-center justify-center font-semibold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'dashboard' ? 'bg-[#7c3aed] text-white rounded-xl px-3 py-1' : 'text-[#ccc3d8] hover:text-[#d2bbff]'"
+        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
+        :class="currentTab === 'dashboard' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
         <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'dashboard' ? '\'FILL\' 1' : '\'FILL\' 0' }">dashboard</span>
         <span>Home</span>
@@ -608,8 +608,8 @@ onMounted(() => {
 
       <button 
         @click="currentTab = 'transactions'"
-        class="flex flex-col items-center justify-center font-semibold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'transactions' ? 'bg-[#7c3aed] text-white rounded-xl px-3 py-1' : 'text-[#ccc3d8] hover:text-[#d2bbff]'"
+        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
+        :class="currentTab === 'transactions' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
         <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'transactions' ? '\'FILL\' 1' : '\'FILL\' 0' }">receipt_long</span>
         <span>History</span>
@@ -618,7 +618,7 @@ onMounted(() => {
       <!-- Quick Log Action Button -->
       <button 
         @click="openAddTransaction()"
-        class="w-11 h-11 -mt-4 rounded-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white flex items-center justify-center font-bold text-lg shadow-md border-2 border-[#0b1326] transition active:scale-95 cursor-pointer shrink-0"
+        class="w-11 h-11 -mt-4 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center font-black text-lg shadow-lg border-2 border-[#0f0f15] transition active:scale-95 cursor-pointer shrink-0"
         title="Add Transaction"
       >
         <span class="material-symbols-outlined text-[24px]">add</span>
@@ -626,8 +626,8 @@ onMounted(() => {
 
       <button 
         @click="currentTab = 'debts'"
-        class="flex flex-col items-center justify-center font-semibold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'debts' ? 'bg-[#7c3aed] text-white rounded-xl px-3 py-1' : 'text-[#ccc3d8] hover:text-[#d2bbff]'"
+        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
+        :class="currentTab === 'debts' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
         <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'debts' ? '\'FILL\' 1' : '\'FILL\' 0' }">account_balance_wallet</span>
         <span>Debt</span>
@@ -635,8 +635,8 @@ onMounted(() => {
 
       <button 
         @click="currentTab = 'settings'"
-        class="flex flex-col items-center justify-center font-semibold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'settings' ? 'bg-[#7c3aed] text-white rounded-xl px-3 py-1' : 'text-[#ccc3d8] hover:text-[#d2bbff]'"
+        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
+        :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
         <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'settings' ? '\'FILL\' 1' : '\'FILL\' 0' }">settings</span>
         <span>Settings</span>
