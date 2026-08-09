@@ -28,20 +28,6 @@ const activeVaultName = computed(() => {
   return v ? v.name : 'Personal';
 });
 
-// Pagination & filters
-const filters = ref({
-  search: '',
-  account_id: '',
-  bucket_id: '',
-  category_ids: [],
-  transaction_type: '',
-  time_range: '',
-  start_date: '',
-  end_date: ''
-});
-const page = ref(1);
-const limit = 20;
-
 // Modal control
 const showForm = ref(false);
 const editingTransaction = ref(null);
@@ -58,57 +44,6 @@ const showSuccess = (message) => {
   successTimer = setTimeout(() => {
     successMessage.value = '';
   }, 1800);
-};
-
-// Helper to calculate start and end dates from a relative range choice
-const calculateDates = (timeRange, customStart, customEnd) => {
-  if (timeRange === 'custom') {
-    return {
-      start_date: customStart || null,
-      end_date: customEnd || null
-    };
-  }
-
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth(); // 0-indexed
-
-  const formatDateStr = (dObj) => {
-    const y = dObj.getFullYear();
-    const m = String(dObj.getMonth() + 1).padStart(2, '0');
-    const d = String(dObj.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  };
-
-  switch (timeRange) {
-    case 'this_month': {
-      const start = new Date(year, month, 1);
-      const end = new Date(year, month + 1, 0);
-      return { start_date: formatDateStr(start), end_date: formatDateStr(end) };
-    }
-    case 'last_month': {
-      const start = new Date(year, month - 1, 1);
-      const end = new Date(year, month, 0);
-      return { start_date: formatDateStr(start), end_date: formatDateStr(end) };
-    }
-    case 'last_3_months': {
-      const start = new Date(year, month - 3, 1);
-      const end = new Date(year, month + 1, 0);
-      return { start_date: formatDateStr(start), end_date: formatDateStr(end) };
-    }
-    case 'last_6_months': {
-      const start = new Date(year, month - 6, 1);
-      const end = new Date(year, month + 1, 0);
-      return { start_date: formatDateStr(start), end_date: formatDateStr(end) };
-    }
-    case 'this_year': {
-      const start = new Date(year, 0, 1);
-      const end = new Date(year, 11, 31);
-      return { start_date: formatDateStr(start), end_date: formatDateStr(end) };
-    }
-    default:
-      return { start_date: null, end_date: null };
-  }
 };
 
 const fetchTransactions = async () => {

@@ -219,6 +219,7 @@ function runSchemaAndSeeds() {
   db.run('CREATE INDEX IF NOT EXISTS ix_transactions_account ON transactions(account_id)');
   db.run('CREATE INDEX IF NOT EXISTS ix_transactions_category ON transactions(category_id)');
   db.run('CREATE INDEX IF NOT EXISTS ix_transactions_bucket ON transactions(bucket_id)');
+  db.run('CREATE INDEX IF NOT EXISTS ix_transactions_date_created ON transactions(date DESC, created_at DESC)');
   const now = new Date().toISOString();
   if (execQuery('SELECT COUNT(*) count FROM categories')[0]?.count === 0) {
     for (const cat of DEFAULT_CATEGORIES) db.run('INSERT INTO categories (id,name,color,icon,is_quick_select,created_at,updated_at) VALUES (?,?,?,?,?,?,?)', [generateUUID(), cat.name, cat.color, cat.icon || '🏷️', cat.is_quick_select || 0, now, now]);
@@ -249,9 +250,14 @@ export function execRun(sql, params = [], persist = true) {
   if (persist) queuePersistence();
 }
 
+let persistTimeout = null;
+
 function queuePersistence() {
-  persistChain = persistChain.then(() => persistCurrentDatabase());
-  persistChain.catch(error => globalThis.dispatchEvent?.(new CustomEvent('cashbuddy-storage-error', { detail: error.message })));
+  clearTimeout(persistTimeout);
+  persistTimeout = setTimeout(() => {
+    persistChain = persistChain.then(() => persistCurrentDatabase());
+    persistChain.catch(error => globalThis.dispatchEvent?.(new CustomEvent('cashbuddy-storage-error', { detail: error.message })));
+  }, 100);
   return persistChain;
 }
 

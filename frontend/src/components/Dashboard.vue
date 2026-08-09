@@ -80,15 +80,8 @@
 
     <!-- 3. Current Month Expenses Breakdown Section Card -->
     <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 space-y-4 shadow-sm">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#29293a] pb-2.5">
-        <div>
-          <h2 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Current Month Expenses Breakdown</h2>
-          <p class="text-xs text-[#9e9cae]">Interactive category breakdown of expenses for this month</p>
-        </div>
-        <div class="text-right">
-          <span class="text-xs text-[#9e9cae]">Total Expenses: </span>
-          <strong class="text-[#FFD1B3] text-xs font-semibold tabular-nums">₹{{ formatAmount(totalFilteredCategoryExpense) }}</strong>
-        </div>
+      <div class="border-b border-[#29293a] pb-2.5">
+        <h2 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Current Month Expenses Breakdown</h2>
       </div>
 
       <div v-if="dashboardPiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#9e9cae]">

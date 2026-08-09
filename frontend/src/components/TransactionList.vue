@@ -1741,33 +1741,17 @@ const confirmDelete = (tx) => {
   }
 };
 
-// Helper Lookup Methods
-const getCategoryName = (id) => {
-  const cat = props.categories.find(c => c.id === id);
-  return cat ? cat.name : 'Uncategorized';
-};
+// Computed O(1) Lookup Maps for High Performance
+const categoryMap = computed(() => new Map(props.categories.map(c => [c.id, c])));
+const accountMap = computed(() => new Map(props.accounts.map(a => [a.id, a])));
+const bucketMap = computed(() => new Map(props.buckets.map(b => [b.id, b])));
 
-const getCategoryColor = (id) => {
-  const cat = props.categories.find(c => c.id === id);
-  return cat ? cat.color : '#64748b';
-};
-
-const getAccountName = (id) => {
-  const acc = props.accounts.find(a => a.id === id);
-  return acc ? acc.name : 'Unknown Account';
-};
-
-const getBucketName = (id) => {
-  if (!id) return 'General';
-  const b = props.buckets.find(item => item.id === id);
-  return b ? b.name : 'General';
-};
-
-const getBucketIcon = (id) => {
-  if (!id) return '🪣';
-  const b = props.buckets.find(item => item.id === id);
-  return b?.icon || '🪣';
-};
+// Helper Lookup Methods (O(1) Speed)
+const getCategoryName = (id) => categoryMap.value.get(id)?.name || 'Uncategorized';
+const getCategoryColor = (id) => categoryMap.value.get(id)?.color || '#64748b';
+const getAccountName = (id) => accountMap.value.get(id)?.name || 'Unknown Account';
+const getBucketName = (id) => (id ? bucketMap.value.get(id)?.name || 'General' : 'General');
+const getBucketIcon = (id) => (id ? bucketMap.value.get(id)?.icon || '🪣' : '🪣');
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';

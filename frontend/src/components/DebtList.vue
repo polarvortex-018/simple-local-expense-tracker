@@ -100,74 +100,43 @@
         </div>
       </div>
 
-      <!-- Debt Records List -->
-      <div v-if="filteredDebts.length > 0" class="divide-y divide-[#29293a] border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]">
-        <div 
-          v-for="debt in filteredDebts" 
+      <!-- Compact Debt Rows -->
+      <div v-if="filteredDebts.length > 0" class="divide-y divide-[#29293a] border border-[#29293a] rounded-xl overflow-hidden">
+        <button
+          v-for="debt in filteredDebts"
           :key="debt.id"
-          class="p-4 hover:bg-[#191924] transition duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          @click="openDetailModal(debt)"
+          class="w-full flex items-center gap-3 px-3.5 py-2.5 hover:bg-[#191924] transition duration-150 text-left cursor-pointer"
         >
-          <div class="flex items-start gap-3.5">
-            <!-- Icon -->
-            <div 
-              class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-extrabold text-sm"
-              :class="debt.type === 'lent' ? 'bg-[#B3F5E1]/20 text-[#B3F5E1] border border-[#B3F5E1]/30' : 'bg-[#FFD1B3]/20 text-[#FFD1B3] border border-[#FFD1B3]/30'"
-            >
-              {{ debt.type === 'lent' ? '↗' : '↘' }}
-            </div>
+          <!-- Type Badge -->
+          <span
+            class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-black shrink-0"
+            :class="debt.type === 'lent' ? 'bg-[#B3F5E1]/15 text-[#B3F5E1]' : 'bg-[#FFD1B3]/15 text-[#FFD1B3]'"
+          >{{ debt.type === 'lent' ? '↗' : '↘' }}</span>
 
-            <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-sm font-extrabold text-[#f1f0f5]">{{ debt.person_name }}</span>
-                <span 
-                  class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border uppercase tracking-wider"
-                  :class="debt.type === 'lent' ? 'bg-[#B3F5E1]/20 text-[#B3F5E1] border-[#B3F5E1]/30' : 'bg-[#FFD1B3]/20 text-[#FFD1B3] border-[#FFD1B3]/30'"
-                >
-                  {{ debt.type === 'lent' ? 'Lent (Owed to you)' : 'Borrowed (You owe)' }}
-                </span>
-                <span 
-                  class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
-                  :class="debt.is_settled ? 'bg-[#191924] text-[#9e9cae] border-[#29293a]' : 'bg-[#D4BFFF]/20 text-[#D4BFFF] border-[#D4BFFF]/30'"
-                >
-                  {{ debt.is_settled ? '✓ Settled' : '● Unsettled' }}
-                </span>
-              </div>
-
-              <div class="text-xs text-[#9e9cae] mt-1 flex flex-wrap items-center gap-3">
-                <span>Account: <strong class="text-[#f1f0f5]">{{ getAccountName(debt.account_id) }}</strong></span>
-                <span>Date: {{ formatDate(debt.created_at) }}</span>
-                <span v-if="debt.description" class="text-[#9e9cae] italic">"{{ debt.description }}"</span>
-              </div>
-            </div>
+          <!-- Name + meta -->
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ debt.person_name }}</p>
+            <p class="text-[10px] text-[#9e9cae] truncate mt-0.5">
+              {{ getAccountName(debt.account_id) }} · {{ formatDate(debt.created_at) }}
+            </p>
           </div>
 
-          <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
-            <div class="text-left sm:text-right">
-              <p class="text-base font-extrabold tabular-nums" :class="debt.type === 'lent' ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
-                ₹{{ formatAmount(debt.amount) }}
-              </p>
-            </div>
+          <!-- Description pill -->
+          <span v-if="debt.description" class="hidden sm:inline text-[10px] text-[#9e9cae] italic truncate max-w-[120px]">{{ debt.description }}</span>
 
-            <div class="flex items-center gap-2">
-              <button 
-                v-if="!debt.is_settled"
-                @click="openSettleModal(debt)"
-                class="px-3.5 py-1.5 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-extrabold text-xs rounded-lg transition cursor-pointer shadow-sm"
-              >
-                Settle
-              </button>
-              <button 
-                @click="confirmDelete(debt)"
-                class="p-1.5 text-[#9e9cae] hover:text-[#FFD1B3] hover:bg-[#FFD1B3]/10 rounded-lg transition cursor-pointer"
-                title="Delete Debt"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
+          <!-- Status dot -->
+          <span
+            class="w-1.5 h-1.5 rounded-full shrink-0"
+            :class="debt.is_settled ? 'bg-[#29293a]' : 'bg-[#D4BFFF]'"
+          ></span>
+
+          <!-- Amount -->
+          <span
+            class="text-xs font-black tabular-nums shrink-0"
+            :class="debt.type === 'lent' ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'"
+          >₹{{ formatAmount(debt.amount) }}</span>
+        </button>
       </div>
 
       <!-- Empty State -->
@@ -355,8 +324,80 @@
         </div>
       </div>
     </div>
+    <!-- Debt Detail Modal -->
+    <Transition name="modal-fade">
+      <div v-if="selectedDebt" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="selectedDebt = null">
+        <div class="relative w-full sm:max-w-sm bg-[#14141d] border border-[#29293a] sm:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden mb-16 sm:mb-0">
+
+          <!-- Top accent bar -->
+          <div class="h-1 w-full" :class="selectedDebt.type === 'lent' ? 'bg-[#B3F5E1]' : 'bg-[#FFD1B3]'"></div>
+
+          <!-- Header -->
+          <div class="px-5 pt-4 pb-3 flex items-start justify-between border-b border-[#29293a]">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
+                :class="selectedDebt.type === 'lent' ? 'bg-[#B3F5E1]/20 text-[#B3F5E1] border border-[#B3F5E1]/30' : 'bg-[#FFD1B3]/20 text-[#FFD1B3] border border-[#FFD1B3]/30'"
+              >{{ selectedDebt.type === 'lent' ? '↗' : '↘' }}</div>
+              <div>
+                <p class="text-sm font-black text-[#f1f0f5]">{{ selectedDebt.person_name }}</p>
+                <p class="text-[10px] text-[#9e9cae] mt-0.5">{{ selectedDebt.type === 'lent' ? 'Lent · Owed to you' : 'Borrowed · You owe' }}</p>
+              </div>
+            </div>
+            <button @click="selectedDebt = null" class="text-[#9e9cae] hover:text-[#f1f0f5] p-1 cursor-pointer transition">✕</button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-5 py-4 space-y-3">
+            <!-- Amount -->
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-[#9e9cae] text-sm font-bold">₹</span>
+              <span class="text-3xl font-black tabular-nums tracking-tight" :class="selectedDebt.type === 'lent' ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">{{ formatAmount(selectedDebt.amount) }}</span>
+              <span
+                class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
+                :class="selectedDebt.is_settled ? 'bg-[#191924] text-[#9e9cae] border-[#29293a]' : 'bg-[#D4BFFF]/15 text-[#D4BFFF] border-[#D4BFFF]/25'"
+              >{{ selectedDebt.is_settled ? '✓ Settled' : '● Active' }}</span>
+            </div>
+
+            <!-- Meta rows -->
+            <div class="space-y-2 pt-1">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">Account</span>
+                <span class="text-xs font-semibold text-[#f1f0f5]">{{ getAccountName(selectedDebt.account_id) }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">Date</span>
+                <span class="text-xs font-semibold text-[#f1f0f5]">{{ formatDate(selectedDebt.created_at) }}</span>
+              </div>
+              <div v-if="selectedDebt.description" class="flex items-start justify-between gap-4">
+                <span class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider shrink-0">Notes</span>
+                <span class="text-xs text-[#ccc3d8] italic text-right">{{ selectedDebt.description }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="px-5 pb-5 flex gap-2">
+            <button
+              v-if="!selectedDebt.is_settled"
+              @click="openSettleModal(selectedDebt); selectedDebt = null"
+              class="flex-1 py-2.5 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-black text-xs rounded-xl transition cursor-pointer shadow-sm"
+            >Settle Debt</button>
+            <button
+              @click="confirmDelete(selectedDebt); selectedDebt = null"
+              class="px-4 py-2.5 bg-[#FFD1B3]/10 hover:bg-[#FFD1B3]/20 text-[#FFD1B3] border border-[#FFD1B3]/20 font-bold text-xs rounded-xl transition cursor-pointer"
+            >Delete</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; transform: translateY(16px); }
+</style>
 
 <script setup>
 import { ref, computed } from 'vue';
@@ -385,7 +426,10 @@ const searchQuery = ref('');
 // Modal states
 const showAddModal = ref(false);
 const showSettleModal = ref(false);
+const selectedDebt = ref(null);
 const submitting = ref(false);
+
+const openDetailModal = (debt) => { selectedDebt.value = debt; };
 
 const newDebt = ref({
   person_name: '',

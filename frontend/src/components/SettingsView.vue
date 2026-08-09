@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-4">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -124,11 +124,11 @@
 
         <!-- Bucket List -->
         <div class="flex-grow">
-          <div v-if="displayedBuckets.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20">
+          <div v-if="displayedBuckets.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
             <div 
               v-for="(bucket, idx) in displayedBuckets" 
               :key="bucket.id"
-              class="p-3.5 hover:bg-slate-950/30 transition duration-150"
+              class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
             >
               <!-- Editing Mode -->
               <div v-if="editingBucketId === bucket.id" class="space-y-3">
@@ -138,7 +138,7 @@
                     <button
                       type="button"
                       @click="activeEditEmojiPickerId = activeEditEmojiPickerId === bucket.id ? null : bucket.id"
-                      class="w-10 h-8 flex items-center justify-center bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-lg text-sm transition cursor-pointer"
+                      class="w-10 h-8 flex items-center justify-center bg-[#14141d] border border-[#29293a] hover:border-[#D4BFFF] rounded-lg text-sm transition cursor-pointer"
                     >
                       {{ editBucketIcon || '🪣' }}
                     </button>
@@ -146,16 +146,16 @@
                     <!-- Edit Emoji Picker Overlay -->
                     <div 
                       v-if="activeEditEmojiPickerId === bucket.id" 
-                      class="absolute left-0 top-10 z-50 w-64 bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-2xl space-y-2"
+                      class="absolute left-0 top-10 z-50 w-64 bg-[#14141d] border border-[#29293a] rounded-2xl p-3 shadow-2xl space-y-2"
                     >
-                      <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Bucket Emoji</p>
+                      <p class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider mb-1">Select Bucket Emoji</p>
                       <div class="grid grid-cols-6 gap-1.5 max-h-48 overflow-y-auto pr-1">
                         <button
                           v-for="emoji in presetEmojis"
                           :key="emoji"
                           type="button"
                           @click="selectEditEmoji(emoji)"
-                          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-indigo-950 text-base transition cursor-pointer"
+                          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#1a1030] text-base transition cursor-pointer"
                         >
                           {{ emoji }}
                         </button>
@@ -167,10 +167,10 @@
                     v-model="editBucketName"
                     type="text"
                     required
-                    class="flex-grow px-3 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-xs focus:outline-none transition"
+                    class="flex-grow px-3 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
                   />
                   <!-- Color -->
-                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-[#29293a] bg-[#14141d] flex items-center justify-center shrink-0">
                     <input 
                       v-model="editBucketColor"
                       type="color"
@@ -182,8 +182,8 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                  <label class="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
-                    <input type="checkbox" v-model="editBucketArchived" class="rounded border-slate-800 text-indigo-600 bg-slate-900" />
+                  <label class="flex items-center gap-1.5 text-xs text-[#9e9cae] cursor-pointer">
+                    <input type="checkbox" v-model="editBucketArchived" class="rounded border-[#29293a] text-indigo-600 bg-[#14141d]" />
                     <span>Archive Bucket</span>
                   </label>
 
@@ -191,14 +191,14 @@
                     <button 
                       type="button"
                       @click="editingBucketId = null"
-                      class="px-2.5 py-1 text-[10px] font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+                      class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button 
                       type="button"
                       @click="saveBucketEdit(bucket)"
-                      class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                      class="px-2.5 py-1 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
                     >
                       Save
                     </button>
@@ -215,7 +215,7 @@
                       type="button"
                       @click="moveBucketPriority(idx, -1)"
                       :disabled="idx === 0"
-                      class="text-[10px] leading-none p-0.5 text-slate-400 hover:text-indigo-400 disabled:opacity-20 cursor-pointer"
+                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
                       title="Move Priority Up in Grid"
                     >
                       ▲
@@ -224,7 +224,7 @@
                       type="button"
                       @click="moveBucketPriority(idx, 1)"
                       :disabled="idx === displayedBuckets.length - 1"
-                      class="text-[10px] leading-none p-0.5 text-slate-400 hover:text-indigo-400 disabled:opacity-20 cursor-pointer"
+                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
                       title="Move Priority Down in Grid"
                     >
                       ▼
@@ -234,11 +234,11 @@
                   <span class="text-base">{{ bucket.icon || '🪣' }}</span>
                   <div>
                     <div class="flex items-center gap-1.5">
-                      <p class="text-xs font-semibold text-slate-200">{{ bucket.name }}</p>
+                      <p class="text-xs font-semibold text-[#dae2fd]">{{ bucket.name }}</p>
                       <span v-if="bucket.is_archived" class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-amber-950/60 text-amber-400 border border-amber-800/40">Archived</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">
-                      Allocated: <span class="text-indigo-400 font-semibold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
+                    <p class="text-[10px] text-[#9e9cae] font-medium mt-0.5">
+                      Allocated: <span class="text-[#D4BFFF] font-semibold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
                     </p>
                   </div>
                 </div>
@@ -252,7 +252,7 @@
                   >Allocate</button>
                   <button 
                     @click="startEditBucket(bucket)"
-                    class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-2 rounded-lg transition cursor-pointer"
                     title="Edit Bucket"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,7 +261,7 @@
                   </button>
                   <button 
                     @click="confirmDeleteBucket(bucket)"
-                    class="text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
                     title="Delete / Archive Bucket"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,7 +272,7 @@
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+          <div v-else class="text-center py-12 border border-dashed border-[#29293a] rounded-xl text-xs text-[#6b6a7d]">
             No savings buckets found.
           </div>
         </div>
@@ -319,11 +319,11 @@
 
         <!-- Account List -->
         <div class="flex-grow">
-          <div v-if="accounts.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20">
+          <div v-if="accounts.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
             <div 
               v-for="account in accounts" 
               :key="account.id"
-              class="p-3.5 hover:bg-slate-950/30 transition duration-150"
+              class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
             >
               <!-- Editing Mode -->
               <div v-if="editingAccountId === account.id" class="space-y-3">
@@ -332,11 +332,11 @@
                     v-model="editAccountName"
                     type="text"
                     required
-                    class="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-xs focus:outline-none transition"
+                    class="w-full px-3 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
                   />
                   <select 
                     v-model="editAccountType"
-                    class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-200 text-xs focus:outline-none transition cursor-pointer"
+                    class="w-full px-2.5 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
                   >
                     <option value="Checking">Checking</option>
                     <option value="Savings">Savings</option>
@@ -349,14 +349,14 @@
                   <button 
                     type="button"
                     @click="cancelEditAccount"
-                    class="px-2.5 py-1 text-[10px] font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+                    class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button 
                     type="button"
                     @click="saveAccountEdit(account)"
-                    class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                    class="px-2.5 py-1 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
                   >
                     Save
                   </button>
@@ -366,16 +366,16 @@
               <!-- Normal Mode -->
               <div v-else class="flex items-center justify-between">
                 <div>
-                  <p class="text-xs font-semibold text-slate-200">{{ account.name }}</p>
-                  <p class="text-[10px] text-slate-400 mt-0.5">
-                    <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">{{ account.type }}</span>
-                    <span class="ml-2 font-medium text-slate-300">Balance: ₹{{ formatAmount(account.balance) }}</span>
+                  <p class="text-xs font-semibold text-[#dae2fd]">{{ account.name }}</p>
+                  <p class="text-[10px] text-[#9e9cae] mt-0.5">
+                    <span class="px-1.5 py-0.5 rounded bg-[#14141d] border border-[#29293a] text-[#9e9cae]">{{ account.type }}</span>
+                    <span class="ml-2 font-medium text-[#ccc3d8]">Balance: ₹{{ formatAmount(account.balance) }}</span>
                   </p>
                 </div>
                 <div class="flex gap-1.5">
                   <button 
                     @click="startEditAccount(account)"
-                    class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-2 rounded-lg transition cursor-pointer"
                     title="Edit Account"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -384,7 +384,7 @@
                   </button>
                   <button 
                     @click="confirmDeleteAccount(account)"
-                    class="text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
                     title="Delete Account"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -395,7 +395,7 @@
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+          <div v-else class="text-center py-12 border border-dashed border-[#29293a] rounded-xl text-xs text-[#6b6a7d]">
             No accounts configured.
           </div>
         </div>
@@ -465,11 +465,11 @@
 
         <!-- Category List -->
         <div class="flex-grow">
-          <div v-if="categories.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20">
+          <div v-if="categories.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
             <div 
               v-for="category in categories" 
               :key="category.id"
-              class="p-3.5 hover:bg-slate-950/30 transition duration-150"
+              class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
             >
               <!-- Editing Mode -->
               <div v-if="editingCategoryId === category.id" class="space-y-3">
@@ -478,15 +478,15 @@
                     v-model="editCategoryIcon"
                     type="text"
                     placeholder="Icon"
-                    class="w-12 px-2 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-center text-xs focus:outline-none transition"
+                    class="w-12 px-2 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-center text-xs focus:outline-none transition"
                   />
                   <input 
                     v-model="editCategoryName"
                     type="text"
                     required
-                    class="flex-grow px-3 py-1.5 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 text-xs focus:outline-none transition"
+                    class="flex-grow px-3 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
                   />
-                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center shrink-0">
+                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-[#29293a] bg-[#14141d] flex items-center justify-center shrink-0">
                     <input 
                       v-model="editCategoryColor"
                       type="color"
@@ -500,14 +500,14 @@
                   <button 
                     type="button"
                     @click="cancelEditCategory"
-                    class="px-2.5 py-1 text-[10px] font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+                    class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button 
                     type="button"
                     @click="saveCategoryEdit(category)"
-                    class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                    class="px-2.5 py-1 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
                   >
                     Save
                   </button>
@@ -519,13 +519,13 @@
                 <div class="flex items-center gap-2.5">
                   <span class="text-base">{{ category.icon || '🏷️' }}</span>
                   <span class="w-3 h-3 rounded-full border border-white/10 shrink-0" :style="{ backgroundColor: category.color }"></span>
-                  <p class="text-xs font-semibold text-slate-200">{{ category.name }}</p>
+                  <p class="text-xs font-semibold text-[#dae2fd]">{{ category.name }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <button 
                     @click="$emit('update-category', category.id, { name: category.name, color: category.color, icon: category.icon || '🏷️', is_quick_select: category.is_quick_select ? 0 : 1 })"
                     class="px-2 py-1 text-[10px] font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
-                    :class="category.is_quick_select ? 'bg-amber-950/80 text-amber-400 border border-amber-800/40' : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'"
+                    :class="category.is_quick_select ? 'bg-amber-950/80 text-amber-400 border border-amber-800/40' : 'bg-[#14141d] text-[#9e9cae] border border-[#29293a] hover:text-[#dae2fd]'"
                     :title="category.is_quick_select ? 'Pinned to Quick Select in transaction form' : 'Pin to Quick Select in transaction form'"
                   >
                     <span>{{ category.is_quick_select ? '⭐ Quick Select' : '☆ Pin' }}</span>
@@ -533,7 +533,7 @@
 
                   <button 
                     @click="startEditCategory(category)"
-                    class="text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/20 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-2 rounded-lg transition cursor-pointer"
                     title="Edit Category"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -542,7 +542,7 @@
                   </button>
                   <button 
                     @click="confirmDeleteCategory(category)"
-                    class="text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
                     title="Delete Category"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -553,7 +553,7 @@
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-12 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
+          <div v-else class="text-center py-12 border border-dashed border-[#29293a] rounded-xl text-xs text-[#6b6a7d]">
             No categories configured.
           </div>
         </div>
@@ -564,13 +564,13 @@
 
 
     <!-- 5. Data Management & Database Backups Card -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
+    <div class="bg-[#14141d] border border-[#29293a] rounded-2xl p-6 shadow-xl space-y-5">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#29293a] pb-4">
         <div>
-          <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+          <h3 class="text-base font-bold text-[#f1f0f5] flex items-center gap-2">
             <span>💾</span> Data Backup & Export Controls
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Export active database file, create local snapshots, or restore backups.</p>
+          <p class="text-xs text-[#9e9cae] mt-0.5">Export active database file, create local snapshots, or restore backups.</p>
         </div>
         <div class="flex gap-2 shrink-0">
           <a 
@@ -583,7 +583,7 @@
           <button 
             @click="handleCreateSnapshot"
             :disabled="creatingBackup"
-            class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+            class="px-3.5 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
           >
             <span>{{ creatingBackup ? 'Creating...' : '📸 Create Local Snapshot' }}</span>
           </button>
@@ -593,21 +593,21 @@
       <!-- Local Snapshots List -->
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Local Snapshots (<code class="text-indigo-400 font-mono">backups/</code>)</p>
-          <button @click="loadBackupsList" class="text-xs text-indigo-400 hover:underline cursor-pointer">Refresh List</button>
+          <p class="text-xs font-semibold text-[#9e9cae] uppercase tracking-wider">Local Snapshots (<code class="text-[#D4BFFF] font-mono">backups/</code>)</p>
+          <button @click="loadBackupsList" class="text-xs text-[#D4BFFF] hover:underline cursor-pointer">Refresh List</button>
         </div>
 
-        <div v-if="backupsList.length > 0" class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20 max-h-48 overflow-y-auto">
+        <div v-if="backupsList.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20 max-h-48 overflow-y-auto">
           <div 
             v-for="b in backupsList" 
             :key="b.filename"
-            class="p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-slate-950/30 transition gap-2"
+            class="p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-[#0f0f15]/30 transition gap-2"
           >
             <div class="flex items-center gap-2.5 min-w-0">
               <span class="text-base shrink-0">📦</span>
               <div class="truncate">
-                <p class="text-xs font-semibold text-slate-200 font-mono truncate">{{ b.filename }}</p>
-                <p class="text-[10px] text-slate-500">{{ formatSize(b.size_bytes) }}</p>
+                <p class="text-xs font-semibold text-[#dae2fd] font-mono truncate">{{ b.filename }}</p>
+                <p class="text-[10px] text-[#6b6a7d]">{{ formatSize(b.size_bytes) }}</p>
               </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
@@ -620,7 +620,7 @@
               </button>
               <button 
                 @click="handleShareBackup(b.filename)"
-                class="px-2.5 py-1 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
+                class="px-2.5 py-1 bg-[#1a1030]/80 hover:bg-indigo-900 text-[#D4BFFF] border border-[#D4BFFF]/25 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
                 title="Share or Save to Google Drive / iCloud / Files app"
               >
                 <span>📤 Share</span>
@@ -634,55 +634,55 @@
             </div>
           </div>
         </div>
-        <div v-else class="text-center py-6 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">
-          No snapshot backups saved in <code class="text-slate-400 font-mono">backups/</code> folder yet. Click "Create Local Snapshot" above to save a backup.
+        <div v-else class="text-center py-6 border border-dashed border-[#29293a] rounded-xl text-xs text-[#6b6a7d]">
+          No snapshot backups saved in <code class="text-[#9e9cae] font-mono">backups/</code> folder yet. Click "Create Local Snapshot" above to save a backup.
         </div>
       </div>
     </div>
 
     <!-- 5. Frequently Asked Questions (FAQ) Card -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-      <div class="border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+    <div class="bg-[#14141d] border border-[#29293a] rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="border-b border-[#29293a] pb-3">
+        <h3 class="text-base font-bold text-[#f1f0f5] flex items-center gap-2">
           <span>❓</span> Frequently Asked Questions & App Guide
         </h3>
-        <p class="text-xs text-slate-400 mt-0.5">Quick guide on how Cash Buddy works and how to organize your finances.</p>
+        <p class="text-xs text-[#9e9cae] mt-0.5">Quick guide on how Cash Buddy works and how to organize your finances.</p>
       </div>
 
       <div class="space-y-3">
         <!-- Q1: Buckets -->
-        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
-          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+        <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
             <span>🪣 What are Savings Buckets & why create them?</span>
-            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
           </summary>
-          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+          <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
             <p><strong>Buckets represent the PURPOSE of your money (why it exists).</strong></p>
-            <p class="text-slate-400">Instead of just seeing a lump sum in your bank account, Savings Buckets allow you to allocate funds for specific goals or expenses—such as an <em>Emergency Fund</em>, <em>Japan Trip</em>, <em>Rent</em>, or <em>Monthly Budget</em>.</p>
+            <p class="text-[#9e9cae]">Instead of just seeing a lump sum in your bank account, Savings Buckets allow you to allocate funds for specific goals or expenses—such as an <em>Emergency Fund</em>, <em>Japan Trip</em>, <em>Rent</em>, or <em>Monthly Budget</em>.</p>
           </div>
         </details>
 
         <!-- Q2: Accounts -->
-        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
-          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+        <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
             <span>🏦 What are Accounts & what do they mean?</span>
-            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
           </summary>
-          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+          <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
             <p><strong>Accounts represent the PHYSICAL STORAGE LOCATION of your money (where it lives).</strong></p>
-            <p class="text-slate-400">Examples include your <em>Checking Account</em>, <em>Savings Account</em>, <em>Physical Cash</em>, or <em>Digital Wallet</em>.</p>
+            <p class="text-[#9e9cae]">Examples include your <em>Checking Account</em>, <em>Savings Account</em>, <em>Physical Cash</em>, or <em>Digital Wallet</em>.</p>
           </div>
         </details>
 
         <!-- Q3: Adding Transactions -->
-        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
-          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+        <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
             <span>➕ How do I add a transaction and link Buckets & Accounts?</span>
-            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
           </summary>
-          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
+          <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
             <p>Tap the <strong>+ Add</strong> button anywhere in the app. You'll choose:</p>
-            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+            <ul class="list-disc pl-4 space-y-1 text-[#9e9cae]">
               <li><strong>Account</strong>: The bank account or cash wallet that paid or received the money.</li>
               <li><strong>Savings Bucket</strong>: The purpose allocation that was spent from or added to.</li>
               <li><strong>Category</strong>: The category (Food, Utilities, Shopping) for spending charts.</li>
@@ -691,65 +691,65 @@
         </details>
 
         <!-- Q4: Filtering -->
-        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
-          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+        <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
             <span>🔍 How does filtering work across the app?</span>
-            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
           </summary>
-          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
-            <p class="text-slate-400">In the <strong>History</strong> tab, you can filter by Date Range (This Month, Last Month, Custom), Transaction Type (Income/Expense), Account, Bucket, or Categories. The spending breakdown pie charts automatically update to reflect your active filter selection!</p>
+          <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
+            <p class="text-[#9e9cae]">In the <strong>History</strong> tab, you can filter by Date Range (This Month, Last Month, Custom), Transaction Type (Income/Expense), Account, Bucket, or Categories. The spending breakdown pie charts automatically update to reflect your active filter selection!</p>
           </div>
         </details>
 
         <!-- Q5: Export & Backup -->
-        <details class="group bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden transition">
-          <summary class="p-3.5 text-xs font-bold text-slate-200 cursor-pointer flex items-center justify-between hover:bg-slate-950/80">
+        <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
+          <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
             <span>💾 How do I backup or export my database?</span>
-            <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
           </summary>
-          <div class="px-3.5 pb-3.5 text-xs text-slate-300 space-y-2 border-t border-slate-800/40 pt-2.5">
-            <p class="text-slate-400">Scroll up to <strong>Data Backup & Export Controls</strong> in Settings. Tap <strong>Export Active Database</strong> to download your standard <code class="text-indigo-400 font-mono">.db</code> SQLite file directly to your phone's Files app, or tap <strong>Create Local Snapshot</strong> to save a local restore point anytime.</p>
+          <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
+            <p class="text-[#9e9cae]">Scroll up to <strong>Data Backup & Export Controls</strong> in Settings. Tap <strong>Export Active Database</strong> to download your standard <code class="text-[#D4BFFF] font-mono">.db</code> SQLite file directly to your phone's Files app, or tap <strong>Create Local Snapshot</strong> to save a local restore point anytime.</p>
           </div>
         </details>
       </div>
     </div>
 
     <!-- 6. ABOUT CASH BUDDY (AT THE VERY BOTTOM) -->
-    <div class="bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-900 border border-indigo-900/40 rounded-2xl p-6 shadow-2xl space-y-5">
-      <div class="flex items-center gap-3 border-b border-slate-800/80 pb-4">
+    <div class="bg-gradient-to-br from-[#1a1030]/50 via-[#14141d] to-[#14141d] border border-[#D4BFFF]/15 rounded-2xl p-6 shadow-2xl space-y-5">
+      <div class="flex items-center gap-3 border-b border-[#29293a]/80 pb-4">
         <img src="/cashbuddy-logo.svg?v=3" alt="Cash Buddy Logo" class="w-11 h-11 object-contain" />
         <div>
-          <h3 class="text-base font-bold text-slate-100">About Cash Buddy</h3>
-          <p class="text-xs text-indigo-400 font-medium">Your Personal Expense Tracker</p>
+          <h3 class="text-base font-bold text-[#f1f0f5]">About Cash Buddy</h3>
+          <p class="text-xs text-[#D4BFFF] font-medium">Your Personal Expense Tracker</p>
         </div>
       </div>
 
       <!-- Ideation & Creator Note -->
-      <div class="space-y-3.5 text-xs text-slate-300 leading-relaxed">
-        <div class="p-3.5 bg-indigo-950/50 border border-indigo-900/60 rounded-xl text-indigo-300 font-medium flex items-center gap-2">
+      <div class="space-y-3.5 text-xs text-[#ccc3d8] leading-relaxed">
+        <div class="p-3.5 bg-[#1a1030]/50 border border-[#D4BFFF]/20 rounded-xl text-[#D4BFFF] font-medium flex items-center gap-2">
           <span>✨</span>
           <span>This whole app was built and ideated by <strong>Sajid</strong>.</span>
         </div>
 
-        <p class="text-slate-300">
+        <p class="text-[#ccc3d8]">
           I have been tracking my finances via a notepad all this time. It was just for my own needs so I would know where my money is going, but I thought I needed an app that would make adding transactions easier.
         </p>
-        <p class="text-slate-300">
+        <p class="text-[#ccc3d8]">
           The first thing that made me think of this was how I spent so much time at the end of months manually tallying and summing everything; it took way too long and quite frankly I would have made many mistakes.
         </p>
-        <p class="text-slate-300">
+        <p class="text-[#ccc3d8]">
           This app has been on my mind for the past 4-ish years, and I’ve been making versions of it for a very long time. But this is the first time that I’ve brought it to a phone. I am still actively working on making it better.
         </p>
 
         <!-- On-Device Local Data Storage Guarantee -->
-        <div class="p-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2 text-slate-400">
-          <p class="font-bold text-slate-200 uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+        <div class="p-4 bg-[#0f0f15]/60 border border-[#29293a] rounded-xl space-y-2 text-[#9e9cae]">
+          <p class="font-bold text-[#dae2fd] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
             <span>🔒</span> 100% Local On-Phone Storage Guarantee
           </p>
-          <p class="text-slate-300 text-[11px] leading-normal">
+          <p class="text-[#ccc3d8] text-[11px] leading-normal">
             Cash Buddy stores all your financial data <strong>completely locally on your own phone</strong>. Every transaction, savings bucket, and custom database vault is saved directly inside your device's local internal storage memory (WebAssembly SQLite + OPFS).
           </p>
-          <p class="text-slate-400 text-[11px] leading-normal">
+          <p class="text-[#9e9cae] text-[11px] leading-normal">
             No user accounts, no external servers, no cloud sync, and zero tracking—your financial data never leaves your device.
           </p>
         </div>
@@ -757,25 +757,25 @@
     </div>
 
     <!-- Bucket Transfer Modal -->
-    <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-          <h3 class="text-base font-bold text-slate-100">Transfer Allocation Between Buckets</h3>
-          <button @click="showTransferModal = false" class="text-slate-400 hover:text-slate-200 text-lg">✕</button>
+    <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">
+        <div class="flex justify-between items-center border-b border-[#29293a] pb-3">
+          <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Allocation Between Buckets</h3>
+          <button @click="showTransferModal = false" class="text-[#9e9cae] hover:text-[#dae2fd] text-lg">✕</button>
         </div>
 
-        <div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-xl text-xs text-slate-300">
+        <div class="p-3 bg-[#1a1030]/30 border border-[#D4BFFF]/15 rounded-xl text-xs text-[#ccc3d8]">
           <p>This moves allocated funds from one bucket to another. Your physical <strong>bank account balances remain 100% unchanged</strong>.</p>
         </div>
 
         <form @submit.prevent="submitBucketTransfer" class="space-y-4">
           <!-- From Bucket -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">From Bucket *</label>
+            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">From Bucket *</label>
             <select 
               v-model="transferForm.from_bucket_id"
               required
-              class="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition cursor-pointer"
+              class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
             >
               <option value="" disabled>Select Source Bucket</option>
               <option v-for="b in activeBuckets" :key="b.id" :value="b.id">
@@ -786,11 +786,11 @@
 
           <!-- To Bucket -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">To Bucket *</label>
+            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">To Bucket *</label>
             <select 
               v-model="transferForm.to_bucket_id"
               required
-              class="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition cursor-pointer"
+              class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
             >
               <option value="" disabled>Select Destination Bucket</option>
               <option v-for="b in activeBuckets" :key="b.id" :value="b.id">
@@ -801,7 +801,7 @@
 
           <!-- Amount -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Amount to Move (₹) *</label>
+            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move (₹) *</label>
             <input 
               v-model="transferForm.amount"
               type="text"
@@ -810,18 +810,18 @@
               autocomplete="off"
               placeholder="0.00"
               required
-              class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition"
+              class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
             />
           </div>
 
           <!-- Description -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Reason / Description (Optional)</label>
+            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Reason / Description (Optional)</label>
             <input 
               v-model="transferForm.description"
               type="text"
               placeholder="e.g. Reallocating trip funds to laptop"
-              class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-slate-100 text-xs focus:outline-none transition"
+              class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
             />
           </div>
 
@@ -829,14 +829,14 @@
             <button 
               type="button" 
               @click="showTransferModal = false" 
-              class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
+              class="px-4 py-2 text-xs font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               :disabled="submittingTransfer"
-              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+              class="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
             >
               {{ submittingTransfer ? 'Transferring...' : 'Transfer Funds' }}
             </button>
@@ -1234,3 +1234,4 @@ const formatSize = (bytes) => {
   return `${(kb / 1024).toFixed(1)} MB`;
 };
 </script>
+
