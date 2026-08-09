@@ -152,11 +152,11 @@
           </div>
         </div>
 
-        <!-- Interactive Legend Cards Grid -->
+        <!-- Interactive Borderless Legend List -->
         <TransitionGroup 
           name="flip-list" 
           tag="div" 
-          class="sm:col-span-6 grid grid-cols-2 gap-2.5 max-h-64 overflow-y-auto p-1.5 pr-2"
+          class="sm:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 max-h-56 overflow-y-auto p-1"
         >
           <div 
             v-for="item in activeDashboardLegendItems"
@@ -164,28 +164,25 @@
             @mouseenter="hoveredCategoryIndex = item.originalIndex"
             @mouseleave="hoveredCategoryIndex = null"
             @click="toggleSelectCategory(item.originalIndex)"
-            class="p-2.5 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-1.5 hover:border-slate-400"
-            :style="{
-              borderColor: activeDashboardIndex === item.originalIndex ? item.color : '#31394d',
-              backgroundColor: activeDashboardIndex === item.originalIndex ? '#131b2e' : '#0b1326',
-              boxShadow: activeDashboardIndex === item.originalIndex 
-                ? `0 0 16px ${item.color}60, inset 0 0 12px ${item.color}15` 
-                : 'none'
-            }"
+            class="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#171f33]"
+            :class="activeDashboardIndex === item.originalIndex ? 'bg-[#171f33] ring-1 ring-[#7c3aed]/50' : ''"
           >
+            <!-- Left: Color dot + Category Name -->
             <div class="flex items-center gap-2 min-w-0">
               <span 
-                class="w-3 h-3 rounded-full shrink-0 transition-transform duration-200"
+                class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
                 :style="{ 
                   backgroundColor: item.color,
                   boxShadow: activeDashboardIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
                 }"
               ></span>
-              <p class="text-xs font-bold text-[#dae2fd] truncate leading-tight min-w-0">{{ item.name }}</p>
+              <span class="text-xs font-bold text-[#dae2fd] truncate leading-none">{{ item.name }}</span>
             </div>
-            <div class="flex items-center justify-between gap-1">
-              <span class="text-[10px] text-[#ccc3d8] font-semibold">{{ item.percentage }}%</span>
-              <span class="text-xs font-bold tabular-nums truncate" :style="{ color: activeDashboardIndex === item.originalIndex ? item.color : '#dae2fd' }">
+
+            <!-- Right: Percentage + Amount -->
+            <div class="flex items-center gap-2 shrink-0 tabular-nums">
+              <span class="text-[10px] font-semibold text-[#ccc3d8] bg-[#0b1326] px-1.5 py-0.2 rounded border border-[#31394d]">{{ item.percentage }}%</span>
+              <span class="text-xs font-bold" :style="{ color: activeDashboardIndex === item.originalIndex ? item.color : '#dae2fd' }">
                 ₹{{ formatAmount(item.amount) }}
               </span>
             </div>

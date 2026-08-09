@@ -1,163 +1,157 @@
 <template>
-  <div class="space-y-4 overflow-hidden">
-    <!-- 1. Top Header & Inline Month Navigation Row -->
-    <div class="bg-[#131b2e] border border-[#31394d] rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-      <div>
-        <h2 class="text-xl font-bold text-[#dae2fd] tracking-tight">History & Analytics</h2>
-        <p class="text-xs text-[#ccc3d8]">Browse, filter, and analyze complete transaction history.</p>
-      </div>
-
-      <!-- Header Controls: Inline Month Navigation & Custom Range Toggle -->
-      <div class="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
-        <!-- Month Navigation Bar (Default) -->
-        <div v-if="timeMode === 'monthly'" class="flex items-center gap-1 bg-[#0b1326] border border-[#31394d] rounded-lg p-1 shadow-inner">
+  <div 
+    class="space-y-3 overflow-hidden touch-pan-y"
+    @touchstart="onTouchStart"
+    @touchmove="onTouchMove"
+    @touchend="onTouchEnd"
+    @mousedown="onTouchStart"
+    @mousemove="onTouchMove"
+    @mouseup="onTouchEnd"
+    @mouseleave="onTouchEnd"
+  >
+    <!-- Single Ultra-Compact Control & Navigation Strip -->
+    <div class="bg-[#131b2e] border border-[#31394d] rounded-xl p-2 shadow-sm flex flex-wrap items-center justify-between gap-2">
+      <!-- Left: Month Navigator & Range Toggle -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <!-- Month Navigator -->
+        <div v-if="timeMode === 'monthly'" class="flex items-center gap-0.5 bg-[#0b1326] border border-[#31394d] rounded-lg p-0.5 shadow-inner">
           <button 
             @click="prevMonth"
-            class="w-7 h-7 rounded-md bg-[#131b2e] hover:bg-[#1f2b48] text-[#dae2fd] flex items-center justify-center text-xs font-bold transition cursor-pointer active:scale-95"
+            class="w-6 h-6 rounded bg-[#131b2e] hover:bg-[#1f2b48] text-[#dae2fd] flex items-center justify-center text-[10px] font-bold transition cursor-pointer active:scale-95"
             title="Previous Month"
           >
             ◀
           </button>
-          <span class="px-2.5 text-xs font-bold text-[#dae2fd] min-w-[115px] text-center select-none tracking-tight">
+          <span class="px-2 text-xs font-bold text-[#dae2fd] min-w-[105px] text-center select-none tracking-tight">
             {{ formattedMonthYear }}
           </span>
           <button 
             @click="nextMonth"
-            class="w-7 h-7 rounded-md bg-[#131b2e] hover:bg-[#1f2b48] text-[#dae2fd] flex items-center justify-center text-xs font-bold transition cursor-pointer active:scale-95"
+            class="w-6 h-6 rounded bg-[#131b2e] hover:bg-[#1f2b48] text-[#dae2fd] flex items-center justify-center text-[10px] font-bold transition cursor-pointer active:scale-95"
             title="Next Month"
           >
             ▶
           </button>
         </div>
 
-        <!-- Custom Range Option Toggle -->
+        <!-- Custom Range Toggle -->
         <button 
           @click="toggleTimeMode"
-          class="h-8 px-3 bg-[#0b1326] hover:bg-[#1f2b48] border border-[#31394d] hover:border-[#7c3aed] rounded-lg text-xs font-bold text-[#d2bbff] transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+          class="h-7 px-2.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-sm border"
+          :class="timeMode === 'range' 
+            ? 'bg-[#7c3aed] text-white border-[#7c3aed]' 
+            : 'bg-[#0b1326] text-[#d2bbff] border-[#31394d] hover:border-[#7c3aed]'"
+          :title="timeMode === 'monthly' ? 'Switch to Custom Range' : 'Switch back to Monthly View'"
         >
-          <span>{{ timeMode === 'monthly' ? '📆 Custom Range' : '📅 Monthly View' }}</span>
+          <span>{{ timeMode === 'range' ? '📅 Monthly View' : '📆 Custom Range' }}</span>
+        </button>
+
+        <!-- Choose Filters Button -->
+        <button 
+          @click="showFilterDrawer = !showFilterDrawer"
+          class="h-7 px-2.5 bg-[#0b1326] hover:bg-[#1a243b] border border-[#31394d] hover:border-[#7c3aed] rounded-lg text-xs font-bold text-[#d2bbff] flex items-center gap-1 transition cursor-pointer"
+        >
+          <span>🔍 Filters</span>
+          <span v-if="activeFilterCount > 0" class="px-1.5 py-0.2 rounded-full text-[9px] bg-[#7c3aed] text-white font-bold">
+            {{ activeFilterCount }}
+          </span>
+          <span class="text-[9px] text-[#ccc3d8] transition" :class="{ 'rotate-180': showFilterDrawer }">▼</span>
+        </button>
+
+        <!-- Sort Control Dropdown -->
+        <div class="flex items-center gap-0.5 bg-[#0b1326] border border-[#31394d] focus-within:border-[#7c3aed] rounded-lg px-2 h-7 transition">
+          <span class="text-xs text-[#d2bbff] font-bold">⇅</span>
+          <select 
+            v-model="sortBy"
+            class="bg-transparent text-[#dae2fd] text-xs font-bold focus:outline-none cursor-pointer pr-0.5"
+          >
+            <option value="date_desc" class="bg-[#0b1326] text-[#dae2fd]">Newest First</option>
+            <option value="date_asc" class="bg-[#0b1326] text-[#dae2fd]">Oldest First</option>
+            <option value="amount_desc" class="bg-[#0b1326] text-[#dae2fd]">Most Expensive</option>
+            <option value="amount_asc" class="bg-[#0b1326] text-[#dae2fd]">Least Expensive</option>
+          </select>
+        </div>
+
+        <button 
+          v-if="hasActiveFilters"
+          @click="clearFilters"
+          class="h-7 px-2 bg-[#ffb4ab]/10 hover:bg-[#ffb4ab]/20 border border-[#ffb4ab]/30 rounded-lg text-xs font-bold text-[#ffb4ab] transition cursor-pointer flex items-center gap-0.5"
+          title="Clear all active filters"
+        >
+          <span>Clear</span>
+          <span class="text-xs">✕</span>
+        </button>
+      </div>
+
+      <!-- Right: Chart View Mode Segmented Toggle -->
+      <div class="inline-flex p-0.5 bg-[#0b1326] border border-[#31394d] rounded-lg text-[10px] font-bold">
+        <button 
+          @click="chartViewMode = 'both'"
+          class="px-2 py-0.5 rounded transition cursor-pointer"
+          :class="chartViewMode === 'both' ? 'bg-[#7c3aed] text-white' : 'text-[#ccc3d8] hover:text-white'"
+        >
+          Both
+        </button>
+        <button 
+          @click="chartViewMode = 'expense'"
+          class="px-2 py-0.5 rounded transition cursor-pointer"
+          :class="chartViewMode === 'expense' ? 'bg-[#ffb4ab]/30 text-[#ffb4ab] border border-[#ffb4ab]/40' : 'text-[#ccc3d8] hover:text-white'"
+        >
+          Expenses
+        </button>
+        <button 
+          @click="chartViewMode = 'income'"
+          class="px-2 py-0.5 rounded transition cursor-pointer"
+          :class="chartViewMode === 'income' ? 'bg-[#4edea3]/30 text-[#4edea3] border border-[#4edea3]/40' : 'text-[#ccc3d8] hover:text-white'"
+        >
+          Income
         </button>
       </div>
     </div>
 
-    <!-- Range Selector Bar (Visible when timeMode === 'range') -->
-    <div v-if="timeMode === 'range'" class="bg-[#131b2e] border border-[#31394d] rounded-xl p-3 shadow-sm space-y-3">
-      <div class="flex flex-col sm:flex-row items-center gap-3">
-        <div class="flex-1 space-y-1 w-full">
-          <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Select Time Range</label>
-          <select 
-            v-model="rangeTimeChoice"
-            class="h-8 px-2.5 bg-[#0b1326] border border-[#31394d] rounded-lg text-[#dae2fd] text-xs font-semibold focus:outline-none focus:border-[#7c3aed] transition cursor-pointer w-full"
-          >
-            <option value="this_month">This Month</option>
-            <option value="last_month">Last Month</option>
-            <option value="last_3_months">Last 3 Months</option>
-            <option value="last_6_months">Last 6 Months</option>
-            <option value="this_year">This Year</option>
-            <option value="custom">Custom Date Range</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Custom Date Inputs (Visible when rangeTimeChoice === 'custom') -->
-      <div v-if="rangeTimeChoice === 'custom'" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#31394d]">
-        <div class="space-y-1">
-          <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Start Date</label>
-          <input 
-            v-model="startDateInput"
-            type="date"
-            @click="$event.target.showPicker?.()"
-            class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
-          />
-        </div>
-        <div class="space-y-1">
-          <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">End Date</label>
-          <input 
-            v-model="endDateInput"
-            type="date"
-            @click="$event.target.showPicker?.()"
-            class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. Dual Expenses & Income Donut Charts Container with Full Slide Transition -->
-    <Transition :name="slideDirection === 'next' ? 'slide-next' : 'slide-prev'" mode="out-in">
-      <div 
-        :key="timeMode === 'monthly' ? formattedMonthYear : rangeTimeChoice"
-        class="space-y-4 touch-pan-y"
-        @touchstart="onTouchStart"
-        @touchmove="onTouchMove"
-        @touchend="onTouchEnd"
-        @mousedown="onTouchStart"
-        @mousemove="onTouchMove"
-        @mouseup="onTouchEnd"
-        @mouseleave="onTouchEnd"
-      >
-        <!-- Chart Display Control & Filter Trigger Bar -->
-        <div class="bg-[#131b2e] border border-[#31394d] rounded-xl p-2.5 shadow-sm flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <button 
-              @click="showFilterDrawer = !showFilterDrawer"
-              class="h-8 px-3 bg-[#0b1326] hover:bg-[#1a243b] border border-[#31394d] hover:border-[#7c3aed] rounded-lg text-xs font-bold text-[#d2bbff] flex items-center gap-1.5 transition cursor-pointer"
+    <!-- Range Selector Drawer (Visible when timeMode === 'range') -->
+    <Transition name="fade-slide">
+      <div v-if="timeMode === 'range'" class="bg-[#131b2e] border border-[#31394d] rounded-xl p-3 shadow-sm space-y-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+          <div class="flex-1 space-y-1 w-full">
+            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Select Time Range</label>
+            <select 
+              v-model="rangeTimeChoice"
+              class="h-8 px-2.5 bg-[#0b1326] border border-[#31394d] rounded-lg text-[#dae2fd] text-xs font-semibold focus:outline-none focus:border-[#7c3aed] transition cursor-pointer w-full"
             >
-              <span>🔍 Choose Filters</span>
-              <span v-if="activeFilterCount > 0" class="px-1.5 py-0.5 rounded-full text-[10px] bg-[#7c3aed] text-white font-bold">
-                {{ activeFilterCount }}
-              </span>
-              <span class="text-[10px] text-[#ccc3d8] transition" :class="{ 'rotate-180': showFilterDrawer }">▼</span>
-            </button>
-
-            <!-- Sort Control Dropdown -->
-            <div class="flex items-center gap-1 bg-[#0b1326] border border-[#31394d] focus-within:border-[#7c3aed] rounded-lg px-2.5 h-8 transition">
-              <span class="text-xs text-[#d2bbff] font-bold">⇅</span>
-              <select 
-                v-model="sortBy"
-                class="bg-transparent text-[#dae2fd] text-xs font-bold focus:outline-none cursor-pointer pr-1"
-              >
-                <option value="date_desc" class="bg-[#0b1326] text-[#dae2fd]">Newest First</option>
-                <option value="date_asc" class="bg-[#0b1326] text-[#dae2fd]">Oldest First</option>
-                <option value="amount_desc" class="bg-[#0b1326] text-[#dae2fd]">Most Expensive</option>
-                <option value="amount_asc" class="bg-[#0b1326] text-[#dae2fd]">Least Expensive</option>
-              </select>
-            </div>
-
-            <button 
-              v-if="hasActiveFilters"
-              @click="clearFilters"
-              class="h-8 px-2.5 bg-[#ffb4ab]/10 hover:bg-[#ffb4ab]/20 border border-[#ffb4ab]/30 rounded-lg text-xs font-bold text-[#ffb4ab] transition cursor-pointer flex items-center gap-1"
-            >
-              <span>Clear Filters</span>
-              <span class="text-xs">✕</span>
-            </button>
-          </div>
-
-          <!-- Chart Display Mode Segmented Toggle -->
-          <div class="inline-flex p-0.5 bg-[#0b1326] border border-[#31394d] rounded-lg text-[11px] font-bold">
-            <button 
-              @click="chartViewMode = 'both'"
-              class="px-2.5 py-0.5 rounded-md transition cursor-pointer"
-              :class="chartViewMode === 'both' ? 'bg-[#7c3aed] text-white' : 'text-[#ccc3d8] hover:text-white'"
-            >
-              Both Charts
-            </button>
-            <button 
-              @click="chartViewMode = 'expense'"
-              class="px-2.5 py-0.5 rounded-md transition cursor-pointer"
-              :class="chartViewMode === 'expense' ? 'bg-[#ffb4ab]/30 text-[#ffb4ab] border border-[#ffb4ab]/40' : 'text-[#ccc3d8] hover:text-white'"
-            >
-              Expenses Only
-            </button>
-            <button 
-              @click="chartViewMode = 'income'"
-              class="px-2.5 py-0.5 rounded-md transition cursor-pointer"
-              :class="chartViewMode === 'income' ? 'bg-[#4edea3]/30 text-[#4edea3] border border-[#4edea3]/40' : 'text-[#ccc3d8] hover:text-white'"
-            >
-              Income Only
-            </button>
+              <option value="this_month">This Month</option>
+              <option value="last_month">Last Month</option>
+              <option value="last_3_months">Last 3 Months</option>
+              <option value="last_6_months">Last 6 Months</option>
+              <option value="this_year">This Year</option>
+              <option value="custom">Custom Date Range...</option>
+            </select>
           </div>
         </div>
+
+        <!-- Custom Date Inputs (Visible when rangeTimeChoice === 'custom') -->
+        <div v-if="rangeTimeChoice === 'custom'" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#31394d]">
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Start Date</label>
+            <input 
+              v-model="startDateInput"
+              type="date"
+              @click="$event.target.showPicker?.()"
+              class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">End Date</label>
+            <input 
+              v-model="endDateInput"
+              type="date"
+              @click="$event.target.showPicker?.()"
+              class="w-full h-8 px-2.5 bg-[#0b1326] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer [color-scheme:dark]"
+            />
+          </div>
+        </div>
+      </div>
+    </Transition>
 
         <!-- Collapsible Multi-Select Filter Drawer Panel (Opened directly under control bar) -->
         <Transition name="fade-slide">
@@ -265,6 +259,19 @@
           </div>
         </Transition>
 
+    <!-- Dual Expenses & Income Donut Charts Container with Full Slide Transition -->
+    <Transition :name="slideDirection === 'next' ? 'slide-next' : 'slide-prev'" mode="out-in">
+      <div 
+        :key="timeMode === 'monthly' ? formattedMonthYear : rangeTimeChoice"
+        class="space-y-4 touch-pan-y"
+        @touchstart="onTouchStart"
+        @touchmove="onTouchMove"
+        @touchend="onTouchEnd"
+        @mousedown="onTouchStart"
+        @mousemove="onTouchMove"
+        @mouseup="onTouchEnd"
+        @mouseleave="onTouchEnd"
+      >
         <!-- Expenses Breakdown Donut Chart -->
         <section 
           v-if="chartViewMode === 'both' || chartViewMode === 'expense'"
@@ -321,11 +328,11 @@
               </div>
             </div>
 
-            <!-- Interactive Legend Cards Grid -->
+            <!-- Interactive Borderless Legend List -->
             <TransitionGroup 
               name="flip-list" 
               tag="div" 
-              class="md:col-span-6 grid grid-cols-2 gap-2.5 max-h-64 overflow-y-auto p-1.5 pr-2"
+              class="md:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 max-h-56 overflow-y-auto p-1"
             >
               <div 
                 v-for="item in activeExpenseLegendItems"
@@ -333,28 +340,25 @@
                 @mouseenter="hoveredExpenseIndex = item.originalIndex"
                 @mouseleave="hoveredExpenseIndex = null"
                 @click="toggleSelectExpenseCategory(item.originalIndex)"
-                class="p-2.5 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-1.5 hover:border-slate-400"
-                :style="{
-                  borderColor: activeExpenseIndex === item.originalIndex ? item.color : '#31394d',
-                  backgroundColor: activeExpenseIndex === item.originalIndex ? '#131b2e' : '#0b1326',
-                  boxShadow: activeExpenseIndex === item.originalIndex 
-                    ? `0 0 16px ${item.color}60, inset 0 0 12px ${item.color}15` 
-                    : 'none'
-                }"
+                class="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#171f33]"
+                :class="activeExpenseIndex === item.originalIndex ? 'bg-[#171f33] ring-1 ring-[#7c3aed]/50' : ''"
               >
+                <!-- Left: Color dot + Category Name -->
                 <div class="flex items-center gap-2 min-w-0">
                   <span 
-                    class="w-3 h-3 rounded-full shrink-0 transition-transform duration-200"
+                    class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
                     :style="{ 
                       backgroundColor: item.color,
                       boxShadow: activeExpenseIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
                     }"
                   ></span>
-                  <p class="text-xs font-bold text-[#dae2fd] truncate leading-tight min-w-0">{{ item.name }}</p>
+                  <span class="text-xs font-bold text-[#dae2fd] truncate leading-none">{{ item.name }}</span>
                 </div>
-                <div class="flex items-center justify-between gap-1">
-                  <span class="text-[10px] text-[#ccc3d8] font-semibold">{{ item.percentage }}%</span>
-                  <span class="text-xs font-bold tabular-nums truncate" :style="{ color: activeExpenseIndex === item.originalIndex ? item.color : '#dae2fd' }">
+
+                <!-- Right: Percentage + Amount -->
+                <div class="flex items-center gap-2 shrink-0 tabular-nums">
+                  <span class="text-[10px] font-semibold text-[#ccc3d8] bg-[#0b1326] px-1.5 py-0.2 rounded border border-[#31394d]">{{ item.percentage }}%</span>
+                  <span class="text-xs font-bold" :style="{ color: activeExpenseIndex === item.originalIndex ? item.color : '#dae2fd' }">
                     ₹{{ formatAmount(item.amount) }}
                   </span>
                 </div>
@@ -419,11 +423,11 @@
               </div>
             </div>
 
-            <!-- Interactive Legend Cards Grid -->
+            <!-- Interactive Borderless Legend List -->
             <TransitionGroup 
               name="flip-list" 
               tag="div" 
-              class="md:col-span-6 grid grid-cols-2 gap-2.5 max-h-64 overflow-y-auto p-1.5 pr-2"
+              class="md:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 max-h-56 overflow-y-auto p-1"
             >
               <div 
                 v-for="item in activeIncomeLegendItems"
@@ -431,28 +435,25 @@
                 @mouseenter="hoveredIncomeIndex = item.originalIndex"
                 @mouseleave="hoveredIncomeIndex = null"
                 @click="toggleSelectIncomeCategory(item.originalIndex)"
-                class="p-2.5 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-1.5 hover:border-slate-400"
-                :style="{
-                  borderColor: activeIncomeIndex === item.originalIndex ? item.color : '#31394d',
-                  backgroundColor: activeIncomeIndex === item.originalIndex ? '#131b2e' : '#0b1326',
-                  boxShadow: activeIncomeIndex === item.originalIndex 
-                    ? `0 0 16px ${item.color}60, inset 0 0 12px ${item.color}15` 
-                    : 'none'
-                }"
+                class="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#171f33]"
+                :class="activeIncomeIndex === item.originalIndex ? 'bg-[#171f33] ring-1 ring-[#7c3aed]/50' : ''"
               >
+                <!-- Left: Color dot + Category Name -->
                 <div class="flex items-center gap-2 min-w-0">
                   <span 
-                    class="w-3 h-3 rounded-full shrink-0 transition-transform duration-200"
+                    class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
                     :style="{ 
                       backgroundColor: item.color,
                       boxShadow: activeIncomeIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
                     }"
                   ></span>
-                  <p class="text-xs font-bold text-[#dae2fd] truncate leading-tight min-w-0">{{ item.name }}</p>
+                  <span class="text-xs font-bold text-[#dae2fd] truncate leading-none">{{ item.name }}</span>
                 </div>
-                <div class="flex items-center justify-between gap-1">
-                  <span class="text-[10px] text-[#ccc3d8] font-semibold">{{ item.percentage }}%</span>
-                  <span class="text-xs font-bold tabular-nums truncate" :style="{ color: activeIncomeIndex === item.originalIndex ? item.color : '#dae2fd' }">
+
+                <!-- Right: Percentage + Amount -->
+                <div class="flex items-center gap-2 shrink-0 tabular-nums">
+                  <span class="text-[10px] font-semibold text-[#ccc3d8] bg-[#0b1326] px-1.5 py-0.2 rounded border border-[#31394d]">{{ item.percentage }}%</span>
+                  <span class="text-xs font-bold" :style="{ color: activeIncomeIndex === item.originalIndex ? item.color : '#dae2fd' }">
                     ₹{{ formatAmount(item.amount) }}
                   </span>
                 </div>
@@ -465,62 +466,62 @@
 
 
 
-    <!-- 4. Mobile Cards List (Visible on < sm screens) -->
-    <div id="history-records-section" v-if="displayedTransactions.length > 0" class="sm:hidden space-y-2">
+    <!-- 4. Minimal & High-Density Grouped Transaction Records List -->
+    <div id="history-records-section" v-if="displayedTransactions.length > 0" class="space-y-3">
       <div 
-        v-for="tx in displayedTransactions" 
-        :key="tx.id" 
-        @click="viewTransactionDetails(tx)"
-        class="bg-[#131b2e] border border-[#31394d] hover:border-[#7c3aed]/60 rounded-xl p-3 shadow-sm space-y-2 min-h-[48px] flex flex-col justify-between cursor-pointer transition-all active:scale-[0.99]"
+        v-for="group in groupedTransactionsByDate" 
+        :key="group.dateStr" 
+        class="space-y-1.5"
       >
-        <div class="flex justify-between items-start gap-2">
-          <div class="flex items-start gap-2 min-w-0">
-            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#0b1326] border border-[#31394d] text-sm shrink-0 mt-0.5">
-              {{ getBucketIcon(tx.bucket_id) }}
-            </span>
-            <div class="min-w-0 flex-1">
-              <p class="text-xs font-bold text-[#dae2fd] break-words leading-snug">{{ tx.description || 'No description' }}</p>
-              <p class="text-[10px] text-[#ccc3d8] font-mono mt-0.5">{{ formatDate(tx.date) }}</p>
-            </div>
-          </div>
-          <div class="text-right shrink-0">
-            <span 
-              class="text-xs font-bold block tabular-nums"
-              :class="transactionAmountClass(tx)"
-            >
-              {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
-            </span>
-            <span 
-              class="inline-block px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider mt-0.5"
-              :class="transactionBadgeClass(tx)"
-            >
-              {{ transactionLabel(tx) }}
-            </span>
+        <!-- Group Date Header (Larger font, no calendar emoji, minimal borderless header) -->
+        <div class="flex items-center justify-between px-1 py-1.5 border-b border-[#31394d]/50 text-xs sm:text-sm font-bold sticky top-14 z-10 bg-[#0b1326]/95 backdrop-blur-md">
+          <span class="text-[#dae2fd] font-bold tracking-tight">{{ formatDateHeader(group.dateStr) }}</span>
+          <div class="flex items-center gap-2 tabular-nums text-xs font-bold">
+            <span v-if="group.totalExpense > 0" class="text-[#ffb4ab]">Spent: ₹{{ formatAmount(group.totalExpense) }}</span>
+            <span v-if="group.totalIncome > 0" class="text-[#4edea3]">Income: ₹{{ formatAmount(group.totalIncome) }}</span>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#31394d]/40 text-xs">
-          <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-            <!-- Category -->
-            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#0b1326] text-[#dae2fd] text-[10px] font-semibold border border-[#31394d]">
-              <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
-              <span>{{ getCategoryName(tx.category_id) }}</span>
-            </span>
+        <!-- Group Records Unified Container with Hairline Dividers -->
+        <div class="bg-[#131b2e] border border-[#31394d] rounded-xl overflow-hidden divide-y divide-[#31394d]/30 shadow-sm">
+          <div 
+            v-for="tx in group.transactions" 
+            :key="tx.id" 
+            @click="viewTransactionDetails(tx)"
+            class="px-3 py-2.5 hover:bg-[#171f33] transition cursor-pointer flex items-center justify-between gap-2.5 min-h-[44px] active:bg-[#171f33]"
+          >
+            <!-- Left: Bucket Icon & Description Details -->
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#0b1326] border border-[#31394d] text-sm shrink-0">
+                {{ getBucketIcon(tx.bucket_id) }}
+              </span>
 
-            <!-- Account -->
-            <span class="px-1.5 py-0.5 rounded-md bg-[#0b1326] text-[#ccc3d8] text-[10px] font-medium border border-[#31394d]">
-              {{ getAccountName(tx.account_id) }}
-            </span>
-          </div>
+              <!-- Center: Description & Metadata -->
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-[#dae2fd] truncate leading-tight">{{ tx.description || 'No description' }}</p>
+                <div class="flex items-center gap-1.5 text-[10px] text-[#ccc3d8] truncate mt-0.5">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
+                    <span class="truncate font-medium">{{ getCategoryName(tx.category_id) }}</span>
+                  </span>
+                  <span>•</span>
+                  <span class="truncate text-[#94a3b8] font-medium">{{ getAccountName(tx.account_id) }}</span>
+                </div>
+              </div>
+            </div>
 
-          <!-- Actions -->
-          <div class="flex gap-2 items-center shrink-0 ml-auto">
-            <button @click.stop="$emit('edit-transaction', tx)" class="p-1 text-[#d2bbff] hover:text-white text-xs cursor-pointer" title="Edit">
-              ✏️
-            </button>
-            <button @click.stop="confirmDelete(tx)" class="p-1 text-[#ffb4ab] hover:text-rose-300 text-xs cursor-pointer" title="Delete">
-              🗑️
-            </button>
+            <!-- Right: Amount (Clean & bold, without redundant badge pills) -->
+            <div class="flex items-center gap-2 shrink-0 text-right">
+              <span class="text-xs sm:text-sm font-bold block tabular-nums" :class="transactionAmountClass(tx)">
+                {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
+              </span>
+
+              <!-- Quick Edit/Delete Actions for Desktop -->
+              <div class="hidden sm:flex gap-1 items-center ml-1">
+                <button @click.stop="$emit('edit-transaction', tx)" class="p-1 text-[#d2bbff] hover:text-white text-xs cursor-pointer" title="Edit">✏️</button>
+                <button @click.stop="confirmDelete(tx)" class="p-1 text-[#ffb4ab] hover:text-rose-300 text-xs cursor-pointer" title="Delete">🗑️</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1142,6 +1143,38 @@ const displayedTransactions = computed(() => {
   });
 });
 
+const groupedTransactionsByDate = computed(() => {
+  const groups = {};
+  displayedTransactions.value.forEach(t => {
+    const rawDate = t.date ? String(t.date).split('T')[0] : 'Unknown Date';
+    if (!groups[rawDate]) {
+      groups[rawDate] = { dateStr: rawDate, transactions: [], totalExpense: 0, totalIncome: 0 };
+    }
+    groups[rawDate].transactions.push(t);
+    const amt = Number(t.amount) || 0;
+    if (t.transaction_type === 'expense') groups[rawDate].totalExpense += amt;
+    if (t.transaction_type === 'income') groups[rawDate].totalIncome += amt;
+  });
+
+  return Object.values(groups);
+});
+
+const formatDateHeader = (dateStr) => {
+  if (!dateStr || dateStr === 'Unknown Date') return 'Unknown Date';
+  const todayObj = new Date();
+  const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+  
+  const yestObj = new Date();
+  yestObj.setDate(yestObj.getDate() - 1);
+  const yestStr = `${yestObj.getFullYear()}-${String(yestObj.getMonth() + 1).padStart(2, '0')}-${String(yestObj.getDate()).padStart(2, '0')}`;
+
+  if (dateStr === todayStr) return 'Today';
+  if (dateStr === yestStr) return 'Yesterday';
+
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+};
+
 // Category Expense & Income Aggregation for Donut Charts (ALWAYS stays 100% full & intact!)
 const filteredCategoryExpenses = computed(() => {
   const map = {};
@@ -1197,7 +1230,7 @@ const scrollToHistoryRecords = () => {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, 100);
+  }, 50);
 };
 
 const toggleSelectExpenseCategory = (idx) => {
@@ -1209,10 +1242,10 @@ const toggleSelectExpenseCategory = (idx) => {
     selectedExpenseIndex.value = idx;
     hoveredExpenseIndex.value = idx;
     const item = expensePiePaths.value[idx];
-    if (item && item.id) {
+    if (item) {
       selectedChartCategoryRecordId.value = item.id;
-      scrollToHistoryRecords();
     }
+    scrollToHistoryRecords();
   }
 };
 
@@ -1241,10 +1274,10 @@ const toggleSelectIncomeCategory = (idx) => {
     selectedIncomeIndex.value = idx;
     hoveredIncomeIndex.value = idx;
     const item = incomePiePaths.value[idx];
-    if (item && item.id) {
+    if (item) {
       selectedChartCategoryRecordId.value = item.id;
-      scrollToHistoryRecords();
     }
+    scrollToHistoryRecords();
   }
 };
 
