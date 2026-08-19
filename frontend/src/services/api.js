@@ -339,7 +339,16 @@ export const api = {
   // ----------------------------------------------------
   async getCategories() {
     await ensureDB();
-    return execQuery('SELECT * FROM categories ORDER BY name ASC');
+    return execQuery('SELECT * FROM categories ORDER BY sort_order ASC, name ASC');
+  },
+
+  async updateCategorySortOrder(categoryIds) {
+    await ensureDB();
+    const now = new Date().toISOString();
+    categoryIds.forEach((id, idx) => {
+      execRun('UPDATE categories SET sort_order = ?, updated_at = ? WHERE id = ?', [idx, now, id]);
+    });
+    return this.getCategories();
   },
 
   async createCategory(payload) {
@@ -434,21 +443,189 @@ export const api = {
     const { from_bucket_id, to_bucket_id, amount } = payload;
     const transferAmt = Number(amount);
     if (!transferAmt || transferAmt <= 0) throw new Error("Transfer amount must be positive.");
-    if (from_bucket_id === to_bucket_id) throw new Error('Source and destination buckets must be different.');
+    if (to_bucket_id && from_bucket_id === to_bucket_id) throw new Error('Source and destination buckets must be different.');
 
     const fromRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [from_bucket_id]);
-    const toRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [to_bucket_id]);
-    if (!fromRows.length || !toRows.length) throw new Error("Source or destination bucket not found.");
-
+    if (!fromRows.length) throw new Error("Source bucket not found.");
     const fromAlloc = Number(fromRows[0].allocated_balance) || 0;
-    const toAlloc = Number(toRows[0].allocated_balance) || 0;
     if (transferAmt > fromAlloc) throw new Error('Transfer amount exceeds the source bucket balance.');
 
     const now = new Date().toISOString();
     return runInTransaction(async () => {
       execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [fromAlloc - transferAmt, now, from_bucket_id], false);
-      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [toAlloc + transferAmt, now, to_bucket_id], false);
+      if (to_bucket_id) {
+        // Transfer to another bucket
+        const toRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [to_bucket_id]);
+        if (!toRows.length) throw new Error("Destination bucket not found.");
+        const toAlloc = Number(toRows[0].allocated_balance) || 0;
+        execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [toAlloc + transferAmt, now, to_bucket_id], false);
+      }
+      // if to_bucket_id is null → money returns to unassigned pool (no bucket row to update)
       return { status: "transferred" };
+    });
+  },
+
+  // ----------------------------------------------------
+  // ACCOUNT-TO-ACCOUNT TRANSFER
+  // ----------------------------------------------------
+  async transferBetweenAccounts(payload) {
+    await ensureDB();
+    const { from_account_id, to_account_id, bucket_id, amount, description } = payload;
+    const transferAmt = Number(amount);
+    if (!transferAmt || transferAmt <= 0) throw new Error("Transfer amount must be positive.");
+    if (from_account_id === to_account_id) throw new Error('Source and destination accounts must be different.');
+
+    const fromAcc = execQuery('SELECT * FROM accounts WHERE id = ?', [from_account_id])[0];
+    const toAcc = execQuery('SELECT * FROM accounts WHERE id = ?', [to_account_id])[0];
+    if (!fromAcc || !toAcc) throw new Error("One or both accounts not found.");
+    if (Number(fromAcc.balance) < transferAmt) throw new Error(`Insufficient balance in source account (₹${Number(fromAcc.balance).toFixed(2)} available).`);
+
+    const now = new Date().toISOString();
+    const today = now.slice(0, 10);
+    const desc = description?.trim() || `Transfer: ${fromAcc.name} → ${toAcc.name}`;
+
+    return runInTransaction(async () => {
+      // Deduct from source account
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Number(fromAcc.balance) - transferAmt, now, from_account_id], false);
+      // Add to destination account
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Number(toAcc.balance) + transferAmt, now, to_account_id], false);
+
+      // Bucket impact — the money stays allocated to the same bucket, just moves accounts
+      // We record two adjustment transactions for full ledger traceability
+      const outId = generateUUID();
+      const inId = generateUUID();
+      execRun(
+        `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
+         VALUES (?, ?, 'adjustment', 'subtract', ?, ?, ?, ?, NULL, ?, ?)`,
+        [outId, transferAmt, desc, today, from_account_id, bucket_id || null, now, now], false
+      );
+      execRun(
+        `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
+         VALUES (?, ?, 'adjustment', 'add', ?, ?, ?, ?, NULL, ?, ?)`,
+        [inId, transferAmt, desc, today, to_account_id, bucket_id || null, now, now], false
+      );
+
+      // If a bucket was specified, the balance within the bucket doesn't change
+      // (same money, just moved between accounts — net bucket impact is 0)
+      // But we do need to cancel out the bucket allocation adjustment since both
+      // adjustments would double-count. Keep allocation flat.
+      if (bucket_id) {
+        const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [bucket_id])[0];
+        if (bucket) {
+          // The two transactions cancel each other on bucket allocation (−amount + amount = 0)
+          // So no UPDATE needed on savings_buckets. The transactions are just ledger records.
+        }
+      }
+
+      return { status: 'transferred', from: fromAcc.name, to: toAcc.name, amount: transferAmt };
+    });
+  },
+
+  // ----------------------------------------------------
+  // ALLOCATION PRESETS
+  // ----------------------------------------------------
+  async getPresets() {
+    await ensureDB();
+    const presets = execQuery('SELECT * FROM allocation_presets ORDER BY created_at ASC');
+    return presets.map(p => ({
+      ...p,
+      rules: execQuery('SELECT * FROM allocation_preset_rules WHERE preset_id = ? ORDER BY rowid ASC', [p.id])
+    }));
+  },
+
+  async createPreset(payload) {
+    await ensureDB();
+    if (!String(payload.name || '').trim()) throw new Error('Preset name is required.');
+    if (!Array.isArray(payload.rules) || payload.rules.length === 0) throw new Error('At least one rule is required.');
+    const id = generateUUID();
+    const now = new Date().toISOString();
+    return runInTransaction(async () => {
+      execRun('INSERT INTO allocation_presets (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)', [id, payload.name.trim(), now, now], false);
+      for (const rule of payload.rules) {
+        if (!['percentage', 'fixed'].includes(rule.mode)) throw new Error('Rule mode must be percentage or fixed.');
+        const val = Number(rule.value);
+        if (!val || val <= 0) throw new Error('Each rule value must be a positive number.');
+        execRun(
+          'INSERT INTO allocation_preset_rules (id, preset_id, bucket_id, mode, value, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+          [generateUUID(), id, rule.bucket_id || null, rule.mode, val, now], false
+        );
+      }
+      const preset = execQuery('SELECT * FROM allocation_presets WHERE id = ?', [id])[0];
+      return { ...preset, rules: execQuery('SELECT * FROM allocation_preset_rules WHERE preset_id = ?', [id]) };
+    });
+  },
+
+  async updatePreset(id, payload) {
+    await ensureDB();
+    const now = new Date().toISOString();
+    return runInTransaction(async () => {
+      if (payload.name) execRun('UPDATE allocation_presets SET name = ?, updated_at = ? WHERE id = ?', [payload.name.trim(), now, id], false);
+      if (Array.isArray(payload.rules)) {
+        execRun('DELETE FROM allocation_preset_rules WHERE preset_id = ?', [id], false);
+        for (const rule of payload.rules) {
+          const val = Number(rule.value);
+          if (!val || val <= 0) throw new Error('Each rule value must be a positive number.');
+          execRun(
+            'INSERT INTO allocation_preset_rules (id, preset_id, bucket_id, mode, value, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            [generateUUID(), id, rule.bucket_id || null, rule.mode, val, now], false
+          );
+        }
+      }
+      const preset = execQuery('SELECT * FROM allocation_presets WHERE id = ?', [id])[0];
+      return { ...preset, rules: execQuery('SELECT * FROM allocation_preset_rules WHERE preset_id = ?', [id]) };
+    });
+  },
+
+  async deletePreset(id) {
+    await ensureDB();
+    execRun('DELETE FROM allocation_presets WHERE id = ?', [id]);
+    return { status: 'deleted' };
+  },
+
+  async applyPreset(id, payload) {
+    await ensureDB();
+    const { total_amount, account_id, description } = payload;
+    const total = Number(total_amount);
+    if (!total || total <= 0) throw new Error('Total amount must be positive.');
+    const account = execQuery('SELECT * FROM accounts WHERE id = ?', [account_id])[0];
+    if (!account) throw new Error('Account not found.');
+    const rules = execQuery('SELECT * FROM allocation_preset_rules WHERE preset_id = ?', [id]);
+    if (!rules.length) throw new Error('This preset has no rules configured.');
+
+    const now = new Date().toISOString();
+    const today = now.slice(0, 10);
+    const presetName = execQuery('SELECT name FROM allocation_presets WHERE id = ?', [id])[0]?.name || 'Allocation';
+    const desc = description?.trim() || `Salary allocation: ${presetName}`;
+
+    return runInTransaction(async () => {
+      // Create a single income transaction to record the deposit
+      const txId = generateUUID();
+      execRun(
+        `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
+         VALUES (?, ?, 'income', NULL, ?, ?, ?, NULL, NULL, ?, ?)`,
+        [txId, total, desc, today, account_id, now, now], false
+      );
+      // Update account balance
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Number(account.balance) + total, now, account_id], false);
+
+      // Distribute to buckets per rules
+      const distributions = [];
+      for (const rule of rules) {
+        const share = rule.mode === 'percentage' ? (total * rule.value / 100) : rule.value;
+        const rounded = Math.round(share * 100) / 100;
+        if (rounded <= 0) continue;
+        if (rule.bucket_id) {
+          const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [rule.bucket_id])[0];
+          if (bucket) {
+            execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?',
+              [Number(bucket.allocated_balance) + rounded, now, rule.bucket_id], false);
+            distributions.push({ bucket_id: rule.bucket_id, amount: rounded });
+          }
+        }
+        // if bucket_id is null → goes to unassigned (no bucket row to update)
+      }
+
+      return { status: 'applied', total, distributions };
     });
   },
 

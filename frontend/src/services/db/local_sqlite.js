@@ -209,6 +209,7 @@ function runSchemaAndSeeds() {
     ['savings_buckets', 'sort_order', 'ALTER TABLE savings_buckets ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0']
     ,['transactions', 'adjustment_direction', 'ALTER TABLE transactions ADD COLUMN adjustment_direction TEXT NULL']
     ,['debts', 'bucket_id', 'ALTER TABLE debts ADD COLUMN bucket_id TEXT NULL']
+    ,['categories', 'sort_order', 'ALTER TABLE categories ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0']
   ];
   for (const [table, column, sql] of migrations) {
     const columns = execQuery(`PRAGMA table_info(${table})`).map(row => row.name);
@@ -220,6 +221,15 @@ function runSchemaAndSeeds() {
   db.run('CREATE INDEX IF NOT EXISTS ix_transactions_category ON transactions(category_id)');
   db.run('CREATE INDEX IF NOT EXISTS ix_transactions_bucket ON transactions(bucket_id)');
   db.run('CREATE INDEX IF NOT EXISTS ix_transactions_date_created ON transactions(date DESC, created_at DESC)');
+  // Allocation preset tables (idempotent — safe to run on existing vaults)
+  db.run(`CREATE TABLE IF NOT EXISTS allocation_presets (
+    id TEXT PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS allocation_preset_rules (
+    id TEXT PRIMARY KEY, preset_id TEXT NOT NULL, bucket_id TEXT NULL, mode TEXT NOT NULL, value REAL NOT NULL, created_at TEXT NOT NULL,
+    FOREIGN KEY (preset_id) REFERENCES allocation_presets(id) ON DELETE CASCADE,
+    FOREIGN KEY (bucket_id) REFERENCES savings_buckets(id) ON DELETE CASCADE
+  )`);
   const now = new Date().toISOString();
   if (execQuery('SELECT COUNT(*) count FROM categories')[0]?.count === 0) {
     for (const cat of DEFAULT_CATEGORIES) db.run('INSERT INTO categories (id,name,color,icon,is_quick_select,created_at,updated_at) VALUES (?,?,?,?,?,?,?)', [generateUUID(), cat.name, cat.color, cat.icon || '🏷️', cat.is_quick_select || 0, now, now]);

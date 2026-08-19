@@ -220,23 +220,20 @@
                 <span class="text-xs font-bold truncate max-w-full leading-tight">{{ cat.name }}</span>
               </button>
 
-              <!-- Category Dropdown / More Trigger -->
-              <div class="relative">
-                <select 
-                  v-model="form.category_id" 
-                  required
-                  class="w-full h-full min-h-[72px] p-2 bg-[#131b2e] border border-[#31394d] hover:border-slate-500 focus:border-[#7c3aed] rounded-xl text-transparent text-xs font-bold focus:outline-none transition cursor-pointer appearance-none text-center"
-                >
-                  <option value="" disabled class="bg-[#0b1326] text-slate-500">••• More</option>
-                  <option v-for="cat in categories" :key="cat.id" :value="cat.id" class="bg-[#0b1326] text-[#dae2fd]">
-                    {{ cat.icon || '🏷️' }} {{ cat.name }}
-                  </option>
-                </select>
-                <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-1">
-                  <span class="w-8 h-8 rounded-lg bg-[#0b1326] border border-[#31394d] flex items-center justify-center text-xs text-[#ccc3d8]">•••</span>
-                  <span class="text-xs font-bold text-[#ccc3d8]">More</span>
-                </div>
-              </div>
+              <!-- All Categories Grid Modal Trigger -->
+              <button
+                type="button"
+                @click="showCategoryModal = true"
+                class="p-2.5 rounded-xl border text-xs font-semibold transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[72px] w-full"
+                :class="selectedCategoryIsNonQuick ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] text-[#D4BFFF] ring-1 ring-[#D4BFFF]/40' : 'bg-[#131b2e] border-[#31394d] text-[#ccc3d8] hover:border-[#D4BFFF]/40'"
+              >
+                <span class="w-8 h-8 rounded-lg bg-[#0b1326] border border-[#31394d] flex items-center justify-center text-base">
+                  {{ selectedCategoryIsNonQuick ? (categories.find(c => c.id === form.category_id)?.icon || '🏷️') : '•••' }}
+                </span>
+                <span class="text-xs font-bold truncate max-w-full leading-tight">
+                  {{ selectedCategoryIsNonQuick ? categories.find(c => c.id === form.category_id)?.name : 'More' }}
+                </span>
+              </button>
             </div>
           </div>
 
@@ -286,6 +283,49 @@
         </div>
       </form>
     </div>
+
+    <!-- Category Grid Modal -->
+    <div
+      v-if="showCategoryModal"
+      class="fixed inset-0 z-[60] flex items-end justify-center bg-[#0f0f15]/85 backdrop-blur-sm"
+      @click.self="showCategoryModal = false"
+    >
+      <div class="w-full max-w-md bg-[#14141d] border-t border-[#29293a] rounded-t-2xl shadow-2xl flex flex-col max-h-[80vh]">
+        <!-- Handle bar -->
+        <div class="flex justify-center pt-2.5 pb-1 shrink-0">
+          <div class="w-10 h-1 rounded-full bg-[#29293a]"></div>
+        </div>
+        <!-- Header -->
+        <div class="px-5 pb-3 pt-1 flex justify-between items-center shrink-0">
+          <h3 class="text-sm font-bold text-[#f1f0f5]">Select Category</h3>
+          <button @click="showCategoryModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-base cursor-pointer p-1">✕</button>
+        </div>
+        <!-- Grid -->
+        <div class="overflow-y-auto flex-1 px-4 pb-6">
+          <div class="grid grid-cols-3 gap-2.5">
+            <button
+              v-for="cat in categories"
+              :key="cat.id"
+              type="button"
+              @click="form.category_id = cat.id; showCategoryModal = false"
+              class="p-3 rounded-2xl border flex flex-col items-center justify-center gap-2 text-center cursor-pointer transition min-h-[80px]"
+              :class="form.category_id === cat.id
+                ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
+                : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/30'"
+            >
+              <span
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-xl transition"
+                :class="form.category_id === cat.id ? 'bg-[#D4BFFF]/20' : 'bg-[#191924]'"
+              >{{ cat.icon || '🏷️' }}</span>
+              <span
+                class="text-[11px] font-bold leading-tight truncate w-full"
+                :class="form.category_id === cat.id ? 'text-[#D4BFFF]' : 'text-[#ccc3d8]'"
+              >{{ cat.name }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -333,6 +373,13 @@ const quickSelectCategories = computed(() => props.categories.filter(c => c.is_q
 const displayedQuickCategories = computed(() => {
   const pinned = quickSelectCategories.value;
   return pinned.length > 0 ? pinned : props.categories.slice(0, 5);
+});
+
+// Category grid modal
+const showCategoryModal = ref(false);
+const selectedCategoryIsNonQuick = computed(() => {
+  if (!form.value.category_id) return false;
+  return !displayedQuickCategories.value.some(c => c.id === form.value.category_id);
 });
 
 const form = ref({

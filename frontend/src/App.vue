@@ -321,6 +321,20 @@ const handleTransferBucket = async (payload) => {
   }
 };
 
+const handleTransferAccounts = async (payload) => {
+  try {
+    await api.transferBetweenAccounts(payload);
+    await refreshAll();
+    showSuccess('Account transfer complete');
+  } catch (err) {
+    alert(err.message || 'Failed to transfer between accounts.');
+  }
+};
+
+const handleDataRefresh = async () => {
+  await refreshAll();
+};
+
 const handleAllocateUnassigned = async ({ bucketId, amount }) => {
   try {
     await api.allocateUnassigned(bucketId, amount);
@@ -337,6 +351,15 @@ const handleReorderBuckets = async (bucketIds) => {
     await refreshAll();
   } catch (err) {
     alert(err.message || 'Failed to reorder buckets.');
+  }
+};
+
+const handleReorderCategories = async (categoryIds) => {
+  try {
+    await api.updateCategorySortOrder(categoryIds);
+    await refreshAll();
+  } catch (err) {
+    alert(err.message || 'Failed to reorder categories.');
   }
 };
 
@@ -524,8 +547,11 @@ onMounted(() => {
           @update-bucket="handleUpdateBucket"
           @delete-bucket="handleDeleteBucket"
           @transfer-bucket="handleTransferBucket"
+          @transfer-accounts="handleTransferAccounts"
           @reorder-buckets="handleReorderBuckets"
+          @reorder-categories="handleReorderCategories"
           @allocate-unassigned="handleAllocateUnassigned"
+          @data-refresh="handleDataRefresh"
         />
       </div>
     </main>

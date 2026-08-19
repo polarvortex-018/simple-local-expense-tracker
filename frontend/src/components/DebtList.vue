@@ -147,16 +147,16 @@
     </div>
 
     <!-- Create Debt Modal -->
-    <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-slate-950/80 backdrop-blur-sm">
-      <div class="relative w-full max-w-md bg-[#0b1326] border border-[#31394d] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm">
+      <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         <!-- Header -->
-        <div class="px-5 py-3.5 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326] shrink-0">
+        <div class="px-5 py-3.5 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
           <div>
-            <h3 class="text-base font-bold text-[#d2bbff] tracking-tight">Record New Debt</h3>
-            <p class="text-[11px] text-[#ccc3d8]">Track money lent or borrowed</p>
+            <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">Record New Debt</h3>
+            <p class="text-[11px] text-[#9e9cae]">Track money lent or borrowed</p>
           </div>
-          <button @click="showAddModal = false" class="text-[#ccc3d8] hover:text-[#dae2fd] text-base font-bold cursor-pointer p-1">✕</button>
+          <button @click="showAddModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer p-1">✕</button>
         </div>
 
         <form @submit.prevent="submitAddDebt" class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
@@ -234,18 +234,9 @@
           </div>
 
           <!-- Savings Bucket Selection -->
-          <div class="space-y-1">
+          <div class="space-y-1.5">
             <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">SAVINGS BUCKET *</label>
-            <select
-              v-model="newDebt.bucket_id"
-              required
-              class="w-full px-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs font-semibold focus:outline-none transition cursor-pointer"
-            >
-              <option value="" disabled class="bg-[#0b1326] text-slate-500">Select Bucket</option>
-              <option v-for="bucket in activeBuckets" :key="bucket.id" :value="bucket.id" class="bg-[#0b1326] text-[#dae2fd]">
-                {{ bucket.icon || '🪣' }} {{ bucket.name }} (₹{{ formatAmount(bucket.allocated_balance) }})
-              </option>
-            </select>
+            <BucketGrid :buckets="activeBuckets" v-model="newDebt.bucket_id" />
           </div>
 
           <!-- Notes / Description -->
@@ -276,13 +267,13 @@
     </div>
 
     <!-- Settle Debt Modal -->
-    <div v-if="showSettleModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-slate-950/80 backdrop-blur-sm">
-      <div class="relative w-full max-w-md bg-[#0b1326] border border-[#31394d] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div v-if="showSettleModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm">
+      <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         <!-- Header -->
-        <div class="px-5 py-3.5 border-b border-[#31394d] flex justify-between items-center bg-[#0b1326] shrink-0">
-          <h3 class="text-base font-bold text-[#d2bbff] tracking-tight">Settle Debt</h3>
-          <button @click="showSettleModal = false" class="text-[#ccc3d8] hover:text-[#dae2fd] text-base font-bold cursor-pointer p-1">✕</button>
+        <div class="px-5 py-3.5 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
+          <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">Settle Debt</h3>
+          <button @click="showSettleModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer p-1">✕</button>
         </div>
 
         <div class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
@@ -401,6 +392,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import BucketGrid from './BucketGrid.vue';
 
 const props = defineProps({
   debts: {

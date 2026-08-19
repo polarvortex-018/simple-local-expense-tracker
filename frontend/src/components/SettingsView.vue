@@ -1,17 +1,31 @@
-﻿<template>
+<template>
   <div class="space-y-4">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
       <div>
         <h2 class="text-xl font-black text-[#f1f0f5] tracking-tight">Settings</h2>
         <p class="text-xs text-[#9e9cae]">Manage storage accounts, categories, and savings buckets.</p>
       </div>
-      <button 
-        @click="showTransferModal = true"
-        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
-      >
-        <span class="text-sm">⇄</span> Transfer Between Buckets
-      </button>
+      <div class="flex flex-wrap gap-2 shrink-0">
+        <button
+          @click="showTransferModal = true"
+          class="flex items-center gap-1.5 px-4 py-2 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 text-[#D4BFFF] font-bold text-xs rounded-full transition cursor-pointer"
+        >
+          <span>⇄</span> Bucket Transfer
+        </button>
+        <button
+          @click="showAccountTransferModal = true"
+          class="flex items-center gap-1.5 px-4 py-2 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 text-[#D4BFFF] font-bold text-xs rounded-full transition cursor-pointer"
+        >
+          <span>⇆</span> Account Transfer
+        </button>
+        <button
+          @click="showPresetsModal = true"
+          class="flex items-center gap-1.5 px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-full transition shadow-sm cursor-pointer"
+        >
+          <span>✦</span> Salary Allocation
+        </button>
+      </div>
     </div>
 
     <!-- Click Interceptor Overlay for active Emoji Pickers -->
@@ -467,7 +481,7 @@
         <div class="flex-grow">
           <div v-if="categories.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
             <div 
-              v-for="category in categories" 
+              v-for="(category, idx) in categories" 
               :key="category.id"
               class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
             >
@@ -517,6 +531,27 @@
               <!-- Normal Mode -->
               <div v-else class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
+                  <!-- Up/Down Priority Buttons -->
+                  <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
+                    <button 
+                      type="button"
+                      @click="moveCategoryPriority(idx, -1)"
+                      :disabled="idx === 0"
+                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                      title="Move Priority Up"
+                    >
+                      ▲
+                    </button>
+                    <button 
+                      type="button"
+                      @click="moveCategoryPriority(idx, 1)"
+                      :disabled="idx === categories.length - 1"
+                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                      title="Move Priority Down"
+                    >
+                      ▼
+                    </button>
+                  </div>
                   <span class="text-base">{{ category.icon || '🏷️' }}</span>
                   <span class="w-3 h-3 rounded-full border border-white/10 shrink-0" :style="{ backgroundColor: category.color }"></span>
                   <p class="text-xs font-semibold text-[#dae2fd]">{{ category.name }}</p>
@@ -757,86 +792,73 @@
     </div>
 
     <!-- Bucket Transfer Modal -->
-    <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
-      <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">
-        <div class="flex justify-between items-center border-b border-[#29293a] pb-3">
-          <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Allocation Between Buckets</h3>
-          <button @click="showTransferModal = false" class="text-[#9e9cae] hover:text-[#dae2fd] text-lg">✕</button>
+    <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
+          <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Allocation</h3>
+          <button @click="showTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
         </div>
 
-        <div class="p-3 bg-[#1a1030]/30 border border-[#D4BFFF]/15 rounded-xl text-xs text-[#ccc3d8]">
-          <p>This moves allocated funds from one bucket to another. Your physical <strong>bank account balances remain 100% unchanged</strong>.</p>
-        </div>
+        <form @submit.prevent="submitBucketTransfer" class="flex flex-col flex-1 min-h-0">
+          <!-- Scrollable Body -->
+          <div class="overflow-y-auto p-5 space-y-4 flex-1">
+            <div class="p-3 bg-[#1a1030]/30 border border-[#D4BFFF]/15 rounded-xl text-xs text-[#ccc3d8]">
+              <p>This moves allocated funds from one bucket to another. Your physical <strong>bank account balances remain 100% unchanged</strong>.</p>
+            </div>
 
-        <form @submit.prevent="submitBucketTransfer" class="space-y-4">
-          <!-- From Bucket -->
-          <div>
-            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">From Bucket *</label>
-            <select 
-              v-model="transferForm.from_bucket_id"
-              required
-              class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
-            >
-              <option value="" disabled>Select Source Bucket</option>
-              <option v-for="b in activeBuckets" :key="b.id" :value="b.id">
-                {{ b.icon || '🪣' }} {{ b.name }} (Allocated: ₹{{ formatAmount(b.allocated_balance) }})
-              </option>
-            </select>
+            <!-- From Bucket -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#ccc3d8]">From Bucket *</label>
+              <BucketGrid :buckets="activeBuckets" v-model="transferForm.from_bucket_id" />
+            </div>
+
+            <!-- To Bucket -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#ccc3d8]">To Bucket *</label>
+              <BucketGrid :buckets="activeBuckets" v-model="transferForm.to_bucket_id" :show-unassigned="true" />
+            </div>
+
+            <!-- Amount -->
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move (₹) *</label>
+              <input 
+                v-model="transferForm.amount"
+                type="text"
+                inputmode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
+                autocomplete="off"
+                placeholder="0.00"
+                required
+                class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
+              />
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Reason / Description (Optional)</label>
+              <input 
+                v-model="transferForm.description"
+                type="text"
+                placeholder="e.g. Reallocating trip funds to laptop"
+                class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
+              />
+            </div>
           </div>
 
-          <!-- To Bucket -->
-          <div>
-            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">To Bucket *</label>
-            <select 
-              v-model="transferForm.to_bucket_id"
-              required
-              class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
-            >
-              <option value="" disabled>Select Destination Bucket</option>
-              <option v-for="b in activeBuckets" :key="b.id" :value="b.id">
-                {{ b.icon || '🪣' }} {{ b.name }} (Allocated: ₹{{ formatAmount(b.allocated_balance) }})
-              </option>
-            </select>
-          </div>
-
-          <!-- Amount -->
-          <div>
-            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move (₹) *</label>
-            <input 
-              v-model="transferForm.amount"
-              type="text"
-              inputmode="decimal"
-              pattern="[0-9]*[.,]?[0-9]*"
-              autocomplete="off"
-              placeholder="0.00"
-              required
-              class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
-            />
-          </div>
-
-          <!-- Description -->
-          <div>
-            <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Reason / Description (Optional)</label>
-            <input 
-              v-model="transferForm.description"
-              type="text"
-              placeholder="e.g. Reallocating trip funds to laptop"
-              class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
-            />
-          </div>
-
-          <div class="flex justify-end gap-3 pt-2">
+          <!-- Sticky Footer -->
+          <div class="flex justify-end gap-3 px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
             <button 
               type="button" 
               @click="showTransferModal = false" 
-              class="px-4 py-2 text-xs font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
+              class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               :disabled="submittingTransfer"
-              class="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+              class="px-4 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
             >
               {{ submittingTransfer ? 'Transferring...' : 'Transfer Funds' }}
             </button>
@@ -844,11 +866,255 @@
         </form>
       </div>
     </div>
+
+    <!-- Account Transfer Modal -->
+    <div v-if="showAccountTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
+          <div>
+            <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Between Accounts</h3>
+            <p class="text-[11px] text-[#9e9cae] mt-0.5">Move money between physical accounts</p>
+          </div>
+          <button @click="showAccountTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+        </div>
+
+        <form @submit.prevent="submitAccountTransfer" class="flex flex-col flex-1 min-h-0">
+          <!-- Scrollable Body -->
+          <div class="overflow-y-auto p-5 space-y-4 flex-1">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">From Account *</label>
+                <select v-model="accountTransferForm.from_account_id" required class="w-full px-3 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer font-bold">
+                  <option value="" disabled>Select</option>
+                  <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.name }} (₹{{ formatAmount(a.balance) }})</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">To Account *</label>
+                <select v-model="accountTransferForm.to_account_id" required class="w-full px-3 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer font-bold">
+                  <option value="" disabled>Select</option>
+                  <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.name }}</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount (₹) *</label>
+              <input v-model="accountTransferForm.amount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+            </div>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#ccc3d8]">Savings Bucket (Optional)</label>
+              <BucketGrid :buckets="activeBuckets" v-model="accountTransferForm.bucket_id" :show-unassigned="true" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
+              <input v-model="accountTransferForm.description" type="text" placeholder="e.g. Moving savings to checking" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+            </div>
+          </div>
+
+          <!-- Sticky Footer -->
+          <div class="flex justify-end gap-3 px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
+            <button type="button" @click="showAccountTransferModal = false" class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer">Cancel</button>
+            <button type="submit" :disabled="submittingAccountTransfer" class="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50">
+              {{ submittingAccountTransfer ? 'Transferring...' : 'Transfer Funds' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Salary Allocation Presets Modal -->
+    <div v-if="showPresetsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4">
+          <div>
+            <h3 class="text-base font-bold text-[#f1f0f5]">Salary Allocation Presets</h3>
+            <p class="text-[11px] text-[#9e9cae] mt-0.5">Auto-split any amount across your buckets</p>
+          </div>
+          <button @click="showPresetsModal = false; editingPreset = null" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+        </div>
+
+        <div class="overflow-y-auto flex-1 p-5 space-y-4">
+          <!-- Apply / List view -->
+          <div v-if="!editingPreset">
+            <!-- Existing presets -->
+            <div v-if="localPresets.length > 0" class="space-y-2 mb-4">
+              <div
+                v-for="preset in localPresets"
+                :key="preset.id"
+                class="bg-[#0f0f15] border border-[#29293a] rounded-xl p-3 space-y-2"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-[#f1f0f5]">{{ preset.name }}</span>
+                  <div class="flex gap-2">
+                    <button @click="startApplyPreset(preset)" class="px-3 py-1 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-[10px] rounded-lg cursor-pointer transition">Apply</button>
+                    <button @click="editingPreset = JSON.parse(JSON.stringify(preset))" class="px-3 py-1 bg-[#29293a] hover:bg-[#363648] text-[#ccc3d8] font-bold text-[10px] rounded-lg cursor-pointer transition">Edit</button>
+                    <button @click="deletePreset(preset.id)" class="px-2 py-1 text-[#9e9cae] hover:text-[#FFD1B3] cursor-pointer transition text-xs">✕</button>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <span v-for="rule in preset.rules" :key="rule.id" class="text-[10px] px-2 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#9e9cae]">
+                    {{ getBucketName(rule.bucket_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <p v-else class="text-xs text-[#9e9cae] text-center py-4">No presets yet. Create your first one below.</p>
+            <button @click="editingPreset = { id: null, name: '', rules: [] }" class="w-full py-2.5 border border-dashed border-[#29293a] hover:border-[#D4BFFF]/40 text-[#9e9cae] hover:text-[#D4BFFF] text-xs font-bold rounded-xl transition cursor-pointer">+ New Preset</button>
+          </div>
+
+          <!-- Apply preset form -->
+          <div v-else-if="applyingPreset" class="space-y-4">
+            <div class="p-3 bg-[#1a1030]/50 border border-[#D4BFFF]/15 rounded-xl">
+              <p class="text-xs font-bold text-[#D4BFFF]">Applying: {{ applyingPreset.name }}</p>
+              <div class="flex flex-wrap gap-1.5 mt-1.5">
+                <span v-for="rule in applyingPreset.rules" :key="rule.id" class="text-[10px] px-2 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#9e9cae]">
+                  {{ getBucketName(rule.bucket_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
+                </span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Total Amount Received (₹) *</label>
+              <input v-model="applyForm.total_amount" type="text" inputmode="decimal" placeholder="e.g. 50000" class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Deposit to Account *</label>
+              <select v-model="applyForm.account_id" class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer">
+                <option value="" disabled>Select Account</option>
+                <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.name }} (₹{{ formatAmount(a.balance) }})</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
+              <input v-model="applyForm.description" type="text" placeholder="e.g. August salary" class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+            </div>
+            <div class="flex justify-end gap-3 pt-1">
+              <button type="button" @click="applyingPreset = null" class="px-4 py-2 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer">Back</button>
+              <button @click="submitApplyPreset" :disabled="submittingPreset" class="px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-xl transition cursor-pointer disabled:opacity-50">
+                {{ submittingPreset ? 'Applying...' : 'Apply & Allocate' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Create / Edit preset form -->
+          <div v-else class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Preset Name *</label>
+              <input v-model="editingPreset.name" type="text" placeholder="e.g. Monthly Salary Split" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition font-bold" />
+            </div>
+
+            <!-- Allocation Summary Dashboard -->
+            <div class="bg-[#1a1a24] border border-[#29293a] rounded-xl p-3 flex justify-around text-center">
+              <div>
+                <p class="text-[9px] uppercase tracking-wider text-[#9e9cae] font-bold">Total Percentage</p>
+                <p class="text-sm font-black mt-0.5" :class="editingPresetTotalPercentage > 100 ? 'text-[#FFD1B3]' : 'text-[#D4BFFF]'">
+                  {{ editingPresetTotalPercentage }}%
+                </p>
+              </div>
+              <div class="w-px bg-[#29293a]"></div>
+              <div>
+                <p class="text-[9px] uppercase tracking-wider text-[#9e9cae] font-bold">Total Fixed Amount</p>
+                <p class="text-sm font-black mt-0.5 text-[#B3F5E1]">
+                  ₹{{ formatAmount(editingPresetTotalFixed) }}
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <label class="text-xs font-bold text-[#ccc3d8] uppercase tracking-wider">Allocation Rules</label>
+                <button
+                  type="button"
+                  @click="editingPreset.rules.push({ bucket_id: activeBuckets[0]?.id || '', mode: 'percentage', value: '' })"
+                  class="px-3 py-1.5 bg-[#D4BFFF]/10 hover:bg-[#D4BFFF]/20 text-[#D4BFFF] text-[10px] font-bold rounded-lg transition cursor-pointer"
+                >
+                  + Add Rule
+                </button>
+              </div>
+
+              <!-- Rule Cards -->
+              <div v-for="(rule, idx) in editingPreset.rules" :key="idx" class="bg-[#0f0f15] border border-[#29293a] rounded-xl p-3.5 space-y-3 relative">
+                <!-- Delete Button -->
+                <button
+                  type="button"
+                  @click="editingPreset.rules.splice(idx, 1)"
+                  class="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-[#14141d] hover:bg-[#FFD1B3]/10 text-[#9e9cae] hover:text-[#FFD1B3] transition cursor-pointer"
+                >
+                  ✕
+                </button>
+
+                <!-- Bucket Selection Option -->
+                <div class="space-y-1.5">
+                  <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Bucket Destination</label>
+                  <BucketGrid :buckets="activeBuckets" v-model="rule.bucket_id" :show-unassigned="true" />
+                </div>
+
+                <!-- Split Controls (Mode Switcher + Value Field) -->
+                <div class="grid grid-cols-2 gap-3 items-end">
+                  <!-- Mode Switcher Segmented Buttons -->
+                  <div class="space-y-1">
+                    <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Rule Type</label>
+                    <div class="grid grid-cols-2 p-1 bg-[#14141d] border border-[#29293a] rounded-xl">
+                      <button
+                        type="button"
+                        @click="rule.mode = 'percentage'"
+                        class="py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer"
+                        :class="rule.mode === 'percentage' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                      >
+                        % Percent
+                      </button>
+                      <button
+                        type="button"
+                        @click="rule.mode = 'fixed'"
+                        class="py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer"
+                        :class="rule.mode === 'fixed' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                      >
+                        ₹ Fixed
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Value Input Field -->
+                  <div class="space-y-1">
+                    <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">
+                      {{ rule.mode === 'percentage' ? 'Percentage (%)' : 'Amount (₹)' }}
+                    </label>
+                    <div class="relative flex items-center">
+                      <span v-if="rule.mode === 'fixed'" class="absolute left-3 text-xs font-bold text-[#9e9cae]">₹</span>
+                      <input
+                        v-model="rule.value"
+                        type="text"
+                        inputmode="decimal"
+                        :placeholder="rule.mode === 'percentage' ? '25' : '1000.00'"
+                        required
+                        class="w-full px-3 py-2 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-xs font-bold focus:outline-none transition text-right"
+                        :class="rule.mode === 'fixed' ? 'pl-6 pr-3' : 'px-3'"
+                      />
+                      <span v-if="rule.mode === 'percentage'" class="absolute right-3 text-xs font-bold text-[#9e9cae] pointer-events-none">%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p v-if="!editingPreset.rules.length" class="text-xs text-[#9e9cae] text-center py-4 border border-dashed border-[#29293a] rounded-xl">No rules yet. Click "+ Add Rule" to begin.</p>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-1">
+              <button type="button" @click="editingPreset = null" class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer">Cancel</button>
+              <button @click="savePreset" :disabled="submittingPreset" class="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50">
+                {{ submittingPreset ? 'Saving...' : editingPreset.id ? 'Save Changes' : 'Create Preset' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import BucketGrid from './BucketGrid.vue';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -896,8 +1162,11 @@ const emit = defineEmits([
   'update-bucket',
   'delete-bucket',
   'transfer-bucket',
+  'transfer-accounts',
   'reorder-buckets',
-  'allocate-unassigned'
+  'reorder-categories',
+  'allocate-unassigned',
+  'data-refresh'
 ]);
 
 // Preset Emoji Grid Palette
@@ -930,6 +1199,15 @@ const closeAllEmojiPickers = () => {
 // Filters & Modals
 const showArchivedBuckets = ref(false);
 const showTransferModal = ref(false);
+const showAccountTransferModal = ref(false);
+const showPresetsModal = ref(false);
+const editingPreset = ref(null);
+const applyingPreset = ref(null);
+const localPresets = ref([]);
+const submittingPreset = ref(false);
+const applyForm = ref({ total_amount: '', account_id: '', description: '' });
+const accountTransferForm = ref({ from_account_id: '', to_account_id: '', bucket_id: '', amount: '', description: '' });
+const submittingAccountTransfer = ref(false);
 
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
 const totalAllocated = computed(() => props.buckets.reduce(
@@ -967,6 +1245,11 @@ const submittingBucket = ref(false);
 
 const transferForm = ref({ from_bucket_id: '', to_bucket_id: '', amount: '', description: '' });
 const submittingTransfer = ref(false);
+
+const getBucketName = (id) => {
+  if (!id) return 'Unassigned';
+  return props.buckets.find(b => b.id === id)?.name || 'Unknown';
+};
 
 // Editing States
 const editingAccountId = ref(null);
@@ -1044,8 +1327,9 @@ const submitBucket = async () => {
 };
 
 const submitBucketTransfer = async () => {
-  if (!transferForm.value.from_bucket_id || !transferForm.value.to_bucket_id || !transferForm.value.amount) return;
-  if (transferForm.value.from_bucket_id === transferForm.value.to_bucket_id) {
+  if (!transferForm.value.from_bucket_id || transferForm.value.to_bucket_id === '' || !transferForm.value.amount) return;
+  const toId = transferForm.value.to_bucket_id;
+  if (toId && transferForm.value.from_bucket_id === toId) {
     alert("Source and destination buckets must be different.");
     return;
   }
@@ -1053,7 +1337,7 @@ const submitBucketTransfer = async () => {
   try {
     emit('transfer-bucket', {
       from_bucket_id: transferForm.value.from_bucket_id,
-      to_bucket_id: transferForm.value.to_bucket_id,
+      to_bucket_id: toId,
       amount: Number(transferForm.value.amount),
       description: transferForm.value.description.trim() || null
     });
@@ -1064,6 +1348,98 @@ const submitBucketTransfer = async () => {
   }
 };
 
+const submitAccountTransfer = async () => {
+  if (!accountTransferForm.value.from_account_id || !accountTransferForm.value.to_account_id || !accountTransferForm.value.amount) return;
+  submittingAccountTransfer.value = true;
+  try {
+    emit('transfer-accounts', {
+      from_account_id: accountTransferForm.value.from_account_id,
+      to_account_id: accountTransferForm.value.to_account_id,
+      bucket_id: accountTransferForm.value.bucket_id || null,
+      amount: Number(accountTransferForm.value.amount),
+      description: accountTransferForm.value.description.trim() || null
+    });
+    showAccountTransferModal.value = false;
+    accountTransferForm.value = { from_account_id: '', to_account_id: '', bucket_id: '', amount: '', description: '' };
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    submittingAccountTransfer.value = false;
+  }
+};
+
+const loadPresets = async () => {
+  try { localPresets.value = await api.getPresets(); } catch (e) { console.error(e); }
+};
+
+const startApplyPreset = (preset) => {
+  applyingPreset.value = preset;
+  applyForm.value = { total_amount: '', account_id: props.accounts[0]?.id || '', description: '' };
+};
+
+const submitApplyPreset = async () => {
+  if (!applyForm.value.total_amount || !applyForm.value.account_id || !applyingPreset.value) return;
+  submittingPreset.value = true;
+  try {
+    await api.applyPreset(applyingPreset.value.id, {
+      total_amount: Number(applyForm.value.total_amount),
+      account_id: applyForm.value.account_id,
+      description: applyForm.value.description
+    });
+    emit('data-refresh');
+    applyingPreset.value = null;
+    showPresetsModal.value = false;
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    submittingPreset.value = false;
+  }
+};
+
+const savePreset = async () => {
+  if (!editingPreset.value?.name?.trim() || !editingPreset.value.rules.length) {
+    alert('Please add a name and at least one rule.');
+    return;
+  }
+  submittingPreset.value = true;
+  try {
+    const rules = editingPreset.value.rules.map(r => ({ bucket_id: r.bucket_id || null, mode: r.mode, value: Number(r.value) }));
+    if (editingPreset.value.id) {
+      await api.updatePreset(editingPreset.value.id, { name: editingPreset.value.name, rules });
+    } else {
+      await api.createPreset({ name: editingPreset.value.name, rules });
+    }
+    await loadPresets();
+    editingPreset.value = null;
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    submittingPreset.value = false;
+  }
+};
+
+const deletePreset = async (id) => {
+  if (!confirm('Delete this preset?')) return;
+  try {
+    await api.deletePreset(id);
+    await loadPresets();
+  } catch (err) { alert(err.message); }
+};
+
+const editingPresetTotalPercentage = computed(() => {
+  if (!editingPreset.value || !editingPreset.value.rules) return 0;
+  return editingPreset.value.rules
+    .filter(r => r.mode === 'percentage')
+    .reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+});
+
+const editingPresetTotalFixed = computed(() => {
+  if (!editingPreset.value || !editingPreset.value.rules) return 0;
+  return editingPreset.value.rules
+    .filter(r => r.mode === 'fixed')
+    .reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+});
+
 const moveBucketPriority = (idx, direction) => {
   const newIdx = idx + direction;
   if (newIdx < 0 || newIdx >= displayedBuckets.value.length) return;
@@ -1072,6 +1448,16 @@ const moveBucketPriority = (idx, direction) => {
   list.splice(newIdx, 0, moved);
   const ids = list.map(b => b.id);
   emit('reorder-buckets', ids);
+};
+
+const moveCategoryPriority = (idx, direction) => {
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= props.categories.length) return;
+  const list = [...props.categories];
+  const [moved] = list.splice(idx, 1);
+  list.splice(newIdx, 0, moved);
+  const ids = list.map(c => c.id);
+  emit('reorder-categories', ids);
 };
 
 const startEditAccount = (account) => {
@@ -1178,6 +1564,10 @@ const loadBackupsList = async () => {
 
 onMounted(() => {
   loadBackupsList();
+});
+
+watch(showPresetsModal, (val) => {
+  if (val) loadPresets();
 });
 
 const handleCreateSnapshot = async () => {
