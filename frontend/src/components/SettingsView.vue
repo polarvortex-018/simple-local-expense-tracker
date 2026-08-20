@@ -6,24 +6,58 @@
         <h2 class="text-xl font-black text-[#f1f0f5] tracking-tight">Settings</h2>
         <p class="text-xs text-[#9e9cae]">Manage storage accounts, categories, and savings buckets.</p>
       </div>
-      <div class="flex flex-wrap gap-2 shrink-0">
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm space-y-3">
+      <div>
+        <h3 class="text-[10px] font-extrabold text-[#D4BFFF] uppercase tracking-wider">Quick Actions</h3>
+        <p class="text-[11px] text-[#9e9cae]">Rapid balance operations and allocation presets</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Bucket Transfer Button -->
         <button
           @click="showTransferModal = true"
-          class="flex items-center gap-1.5 px-4 py-2 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 text-[#D4BFFF] font-bold text-xs rounded-full transition cursor-pointer"
+          class="flex items-center justify-between p-3.5 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group"
         >
-          <span>⇄</span> Bucket Transfer
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center text-sm shrink-0 font-bold">⇄</span>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-[#f1f0f5]">Bucket Transfer</p>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 truncate">Move allocation between savings buckets</p>
+            </div>
+          </div>
+          <span class="text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">➔</span>
         </button>
+
+        <!-- Account Transfer Button -->
         <button
           @click="showAccountTransferModal = true"
-          class="flex items-center gap-1.5 px-4 py-2 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 text-[#D4BFFF] font-bold text-xs rounded-full transition cursor-pointer"
+          class="flex items-center justify-between p-3.5 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group"
         >
-          <span>⇆</span> Account Transfer
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center text-sm shrink-0 font-bold">⇆</span>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-[#f1f0f5]">Account Transfer</p>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 truncate">Transfer funds between physical accounts</p>
+            </div>
+          </div>
+          <span class="text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">➔</span>
         </button>
+
+        <!-- Salary Allocation Preset Button -->
         <button
           @click="showPresetsModal = true"
-          class="flex items-center gap-1.5 px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-full transition shadow-sm cursor-pointer"
+          class="flex items-center justify-between p-3.5 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group"
         >
-          <span>✦</span> Salary Allocation
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center text-sm shrink-0 font-bold">✦</span>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-[#f1f0f5]">Salary Allocation</p>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 truncate">Auto-split deposits into savings buckets</p>
+            </div>
+          </div>
+          <span class="text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition font-bold">➔</span>
         </button>
       </div>
     </div>
