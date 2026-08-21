@@ -148,7 +148,7 @@
 
     <!-- Create Debt Modal -->
     <Transition name="modal">
-      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showAddModal = false">
+      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showAddModal = false">
         <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
           
           <!-- Header -->
@@ -157,7 +157,7 @@
               <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">Record New Debt</h3>
               <p class="text-[11px] text-[#9e9cae]">Track money lent or borrowed</p>
             </div>
-            <button @click="showAddModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer p-1">✕</button>
+            <button @click="showAddModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer">✕</button>
           </div>
 
           <form @submit.prevent="submitAddDebt" class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
@@ -270,13 +270,13 @@
 
     <!-- Settle Debt Modal -->
     <Transition name="modal">
-      <div v-if="showSettleModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showSettleModal = false">
+      <div v-if="showSettleModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showSettleModal = false">
         <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
           
           <!-- Header -->
           <div class="px-5 py-3.5 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
             <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">Settle Debt</h3>
-            <button @click="showSettleModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer p-1">✕</button>
+            <button @click="showSettleModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer">✕</button>
           </div>
 
           <div class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">

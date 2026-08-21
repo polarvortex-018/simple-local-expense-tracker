@@ -431,7 +431,7 @@ onMounted(() => {
     >
       <div
         v-if="successMessage"
-        class="pointer-events-none fixed top-[max(1rem,env(safe-area-inset-top))] left-1/2 z-[80] -translate-x-1/2 rounded-full border border-emerald-500/40 bg-emerald-950/95 px-4 py-2.5 text-xs font-bold text-emerald-200 shadow-2xl backdrop-blur-lg"
+        class="pointer-events-none fixed top-[max(2.5rem,calc(env(safe-area-inset-top)+1rem))] left-1/2 z-[80] -translate-x-1/2 rounded-full border border-emerald-500/40 bg-emerald-950/95 px-4 py-2.5 text-xs font-bold text-emerald-200 shadow-2xl backdrop-blur-lg"
         role="status"
         aria-live="polite"
       >
@@ -513,7 +513,7 @@ onMounted(() => {
     </header>
 
     <!-- Main Content Container with Bottom Padding for Mobile Nav Bar -->
-    <main class="flex-grow max-w-6xl w-full mx-auto px-3 md:px-6 py-4 pb-24 sm:pb-8">
+    <main class="flex-grow max-w-6xl w-full mx-auto px-3 md:px-6 py-4 pb-28 sm:pb-8">
       <!-- Error Banner -->
       <div v-if="error" class="mb-4 p-3 bg-rose-950/40 border border-rose-900/50 rounded-lg flex justify-between items-center">
         <div class="flex gap-2.5 items-center">
@@ -587,7 +587,7 @@ onMounted(() => {
     </main>
 
     <!-- BottomNavBar (Material 3 Dark Pastel Theme) -->
-    <nav class="bg-[#14141d] border-t border-[#29293a] fixed bottom-0 w-full z-40 flex justify-around items-center h-16 px-4 md:hidden safe-area-pb">
+    <nav class="bg-[#14141d] border-t border-[#29293a] fixed bottom-0 w-full z-40 flex justify-around items-center min-h-[64px] px-4 md:hidden safe-area-pb">
       <button 
         @click="currentTab = 'dashboard'"
         class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"

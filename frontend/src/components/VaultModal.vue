@@ -1,6 +1,6 @@
 <template>
   <Transition name="modal">
-    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm" @click.self="$emit('close')">
+    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm" @click.self="$emit('close')">
       <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-xl p-5 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb flex flex-col">
       
       <!-- Header -->
@@ -11,7 +11,7 @@
           </h3>
           <p class="text-xs text-[#9e9cae] mt-0.5">Switch between isolated database vaults stored locally.</p>
         </div>
-        <button @click="$emit('close')" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg font-bold cursor-pointer p-1">✕</button>
+        <button @click="$emit('close')" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-lg font-bold cursor-pointer">✕</button>
       </div>
 
       <!-- Create Vault Form -->

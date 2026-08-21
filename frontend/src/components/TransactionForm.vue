@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm">
+  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm">
     <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
       
       <!-- Header -->

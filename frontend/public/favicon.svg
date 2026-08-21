@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <!-- Standalone Money Bag Logo (Transparent Background, No Container Box or Outer Circle) -->
-  <g transform="translate(10, 5) scale(0.96)">
-    <!-- Top Knot (Soft Light Lavender #d8b4fe) -->
-    <path d="M256,45 C195,45 165,82 165,125 C165,162 198,188 256,188 C314,188 347,162 347,125 C347,82 317,45 256,45 Z" fill="#d8b4fe" />
-    <path d="M192,112 C214,92 298,92 320,112 C298,128 214,128 192,112 Z" fill="#f5f0eb" />
-    
-    <!-- Tie String & Tassels (Warm Beige #f5f0eb) -->
-    <path d="M202,182 C224,195 288,195 310,182" stroke="#f5f0eb" stroke-width="15" stroke-linecap="round" fill="none" />
-    <circle cx="332" cy="238" r="15" fill="#f5f0eb" />
-    <path d="M298,188 Q328,212 332,238" stroke="#f5f0eb" stroke-width="10" fill="none" />
-    <circle cx="360" cy="272" r="15" fill="#f5f0eb" />
-    <path d="M304,188 Q348,230 360,272" stroke="#f5f0eb" stroke-width="10" fill="none" />
+  <!-- Standalone Beige and Lavender Money Bag Logo -->
+  <g transform="translate(15, 10) scale(0.94)">
+    <!-- Cinched Top Opening & Rim (#d8b4fe) -->
+    <path d="M256,40 C190,40 160,78 160,122 C160,160 195,185 256,185 C317,185 352,160 352,122 C352,78 322,40 256,40 Z" fill="#d8b4fe" />
+    <path d="M188,110 C210,88 302,88 324,110 C302,128 210,128 188,110 Z" fill="#f5f0eb" />
 
-    <!-- Main Bag Body (Vibrant Lavender #c084fc) -->
-    <path d="M256,192 C140,192 65,275 65,390 C65,462 140,495 256,495 C372,495 447,462 447,390 C447,275 372,192 256,192 Z" fill="#c084fc" />
-    
-    <!-- Inner Oval Badge (Warm Cream Beige #f5f0eb) -->
-    <ellipse cx="228" cy="360" rx="68" ry="78" fill="#f5f0eb" />
-    
-    <!-- Currency Symbol (Rich Deep Purple Lavender #6b21a8) -->
-    <text x="228" y="392" font-family="system-ui, -apple-system, sans-serif" font-size="100" font-weight="900" fill="#6b21a8" text-anchor="middle">₹</text>
+    <!-- Tie Cord & Hanging Tassels (#f5f0eb) -->
+    <path d="M200,180 C222,194 290,194 312,180" stroke="#f5f0eb" stroke-width="16" stroke-linecap="round" fill="none" />
+    <circle cx="335" cy="235" r="16" fill="#f5f0eb" />
+    <path d="M298,185 Q330,210 335,235" stroke="#f5f0eb" stroke-width="11" fill="none" />
+    <circle cx="365" cy="270" r="16" fill="#f5f0eb" />
+    <path d="M304,185 Q350,225 365,270" stroke="#f5f0eb" stroke-width="11" fill="none" />
+
+    <!-- Money Bag Body (#c084fc) -->
+    <path d="M256,190 C138,190 60,275 60,392 C60,466 138,498 256,498 C374,498 452,466 452,392 C452,275 374,190 256,190 Z" fill="#c084fc" />
+
+    <!-- Inner Oval Badge (#f5f0eb) -->
+    <ellipse cx="225" cy="360" rx="72" ry="82" fill="#f5f0eb" />
+
+    <!-- Currency Symbol (₹ in #5b21b6) -->
+    <text x="225" y="394" font-family="system-ui, -apple-system, sans-serif" font-size="105" font-weight="900" fill="#5b21b6" text-anchor="middle">₹</text>
   </g>
 </svg>

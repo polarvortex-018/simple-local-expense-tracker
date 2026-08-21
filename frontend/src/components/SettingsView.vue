@@ -847,7 +847,7 @@
           <!-- Header -->
           <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
             <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Allocation</h3>
-            <button @click="showTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+            <button @click="showTransferModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
           </div>
 
           <form @submit.prevent="submitBucketTransfer" class="flex flex-col flex-1 min-h-0">
@@ -928,7 +928,7 @@
               <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Between Accounts</h3>
               <p class="text-[11px] text-[#9e9cae] mt-0.5">Move money between physical accounts</p>
             </div>
-            <button @click="showAccountTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+            <button @click="showAccountTransferModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
           </div>
 
           <form @submit.prevent="submitAccountTransfer" class="flex flex-col flex-1 min-h-0">
@@ -976,7 +976,7 @@
               <h3 class="text-base font-bold text-[#f1f0f5]">Salary Allocation Presets</h3>
               <p class="text-[11px] text-[#9e9cae] mt-0.5">Auto-split any amount across your buckets</p>
             </div>
-            <button @click="showPresetsModal = false; editingPreset = null" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+            <button @click="showPresetsModal = false; editingPreset = null" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
           </div>
 
         <div class="overflow-y-auto flex-1 p-5 space-y-4">

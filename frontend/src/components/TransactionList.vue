@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="space-y-3 overflow-hidden touch-pan-y"
+    class="space-y-3 touch-pan-y"
     @touchstart="onTouchStart"
     @touchmove="onTouchMove"
     @touchend="onTouchEnd"
