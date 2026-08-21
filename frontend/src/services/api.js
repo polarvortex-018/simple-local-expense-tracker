@@ -19,6 +19,43 @@ import {
   checkDatabaseIntegrity
 } from './db/local_sqlite.js';
 
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+
+function uint8ToBase64(uint8) {
+  let binary = '';
+  const len = uint8.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(uint8[i]);
+  }
+  return btoa(binary);
+}
+
+async function handleNativeExportOrShare(filename, uint8Array, title, text) {
+  const base64Data = uint8ToBase64(uint8Array);
+  const written = await Filesystem.writeFile({
+    path: filename,
+    data: base64Data,
+    directory: Directory.Cache
+  });
+
+  const canShare = await Share.canShare().catch(() => ({ value: false }));
+  if (canShare.value) {
+    await Share.share({
+      title,
+      text,
+      url: written.uri
+    });
+  } else {
+    await Filesystem.writeFile({
+      path: filename,
+      data: base64Data,
+      directory: Directory.Documents
+    });
+  }
+}
+
 let isEngineInitialized = false;
 
 async function ensureDB() {
@@ -873,6 +910,12 @@ export const api = {
     if (passphrase === null) throw new Error('Backup sharing cancelled.');
     const binary = await exportBackupBytes(filename, passphrase || 'default_cashbuddy_pass');
     if (!binary) throw new Error("Backup file not found");
+
+    if (Capacitor.isNativePlatform()) {
+      await handleNativeExportOrShare(filename, binary, `Cash Buddy Backup (${filename})`, `Here is my Cash Buddy database backup file: ${filename}`);
+      return;
+    }
+
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
     const file = new File([blob], filename, { type: 'application/x-sqlite3' });
 
@@ -904,6 +947,12 @@ export const api = {
     await ensureDB();
     const binary = await exportDatabaseBlobByName(filename);
     if (!binary) throw new Error("Vault not found.");
+
+    if (Capacitor.isNativePlatform()) {
+      await handleNativeExportOrShare(filename, binary, `Cash Buddy Vault (${filename})`, `Here is my Cash Buddy vault file: ${filename}`);
+      return;
+    }
+
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
     const file = new File([blob], filename, { type: 'application/x-sqlite3' });
 

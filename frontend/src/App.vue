@@ -392,11 +392,32 @@ const handleDeleteDebt = async (id) => {
   }
 };
 
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { StatusBar, Style } from '@capacitor/status-bar';
+
 onMounted(() => {
   window.addEventListener('cashbuddy-storage-error', event => {
     error.value = `Your latest change could not be saved securely: ${event.detail}`;
   });
   refreshAll();
+
+  if (Capacitor.isNativePlatform()) {
+    StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+    StatusBar.setBackgroundColor({ color: '#0f0f15' }).catch(() => {});
+
+    CapApp.addListener('backButton', () => {
+      if (showForm.value) {
+        showForm.value = false;
+      } else if (showVaultModal.value) {
+        showVaultModal.value = false;
+      } else if (currentTab.value !== 'dashboard') {
+        currentTab.value = 'dashboard';
+      } else {
+        CapApp.exitApp();
+      }
+    });
+  }
 });
 </script>
 
