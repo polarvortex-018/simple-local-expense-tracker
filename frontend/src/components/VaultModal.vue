@@ -1,33 +1,33 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-slate-950/80 backdrop-blur-sm">
-    <div class="bg-[#131b2e] border border-[#31394d] rounded-2xl w-full max-w-xl p-5 shadow-xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb">
+  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm">
+    <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-xl p-5 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb flex flex-col">
       
       <!-- Header -->
-      <div class="flex justify-between items-center border-b border-[#31394d] pb-3">
+      <div class="flex justify-between items-center border-b border-[#29293a] pb-3 shrink-0">
         <div>
-          <h3 class="text-base font-bold text-slate-100 flex items-center gap-2 tracking-tight">
+          <h3 class="text-base font-bold text-[#f1f0f5] flex items-center gap-2 tracking-tight">
             <span>🏦</span> Financial Vaults Management
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Switch between isolated database vaults stored locally.</p>
+          <p class="text-xs text-[#9e9cae] mt-0.5">Switch between isolated database vaults stored locally.</p>
         </div>
-        <button @click="$emit('close')" class="text-slate-400 hover:text-slate-200 text-lg font-bold cursor-pointer">✕</button>
+        <button @click="$emit('close')" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg font-bold cursor-pointer p-1">✕</button>
       </div>
 
       <!-- Create Vault Form -->
-      <form @submit.prevent="handleCreate" class="p-3.5 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-2.5">
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Create New Vault</p>
-        <div class="flex gap-2">
+      <form @submit.prevent="handleCreate" class="p-3.5 bg-[#0f0f15]/50 border border-[#29293a] rounded-xl space-y-2.5 shrink-0">
+        <p class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">Create New Vault</p>
+        <div class="flex flex-col sm:flex-row gap-2">
           <input 
             v-model="newVaultName"
             type="text"
             placeholder="Vault Name (e.g. Freelance, Family, Business)"
             required
-            class="flex-grow px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-slate-100 text-xs placeholder-slate-500 focus:outline-none transition"
+            class="flex-grow px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition min-h-[36px]"
           />
           <button 
             type="submit"
             :disabled="creating"
-            class="px-4 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition cursor-pointer disabled:opacity-50 shrink-0 shadow-sm"
+            class="px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full transition cursor-pointer disabled:opacity-50 shrink-0 shadow-sm min-h-[36px]"
           >
             {{ creating ? 'Creating...' : '+ Create Vault' }}
           </button>
@@ -35,38 +35,73 @@
       </form>
 
       <!-- Vaults List -->
-      <div class="space-y-3">
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Available Vaults</p>
+      <div class="space-y-3 flex-1 overflow-y-auto min-h-0">
+        <p class="text-xs font-semibold text-[#9e9cae] uppercase tracking-wider">Available Vaults</p>
         
-        <div class="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/20 max-h-60 overflow-y-auto">
+        <div class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20 max-h-64 overflow-y-auto">
           <div 
             v-for="v in vaults" 
             :key="v.filename"
-            class="p-3.5 flex items-center justify-between hover:bg-slate-950/40 transition gap-3"
-            :class="{ 'bg-indigo-950/20 border-l-4 border-l-indigo-500': v.is_active }"
+            class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-[#191924]/40 transition gap-3.5 border-b border-[#29293a]/80"
+            :class="{ 'bg-[#D4BFFF]/10 border-l-4 border-l-[#D4BFFF]': v.is_active }"
           >
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg shrink-0">
+            <div class="flex items-center gap-3 min-w-0 flex-grow">
+              <div class="w-9 h-9 rounded-xl bg-[#0f0f15] border border-[#29293a] flex items-center justify-center text-lg shrink-0">
                 {{ v.is_active ? '📂' : '📁' }}
               </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                  <p class="text-sm font-bold text-slate-200 truncate max-w-[180px] sm:max-w-[240px]" :title="v.name">{{ v.name }}</p>
-                  <span v-if="v.is_active" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40 shrink-0">
-                    Active Vault
+              <div class="min-w-0 flex-grow">
+                <!-- Inline rename input form -->
+                <div v-if="editingVaultFilename === v.filename" class="flex items-center gap-2 max-w-full">
+                  <input 
+                    v-model="editingVaultName" 
+                    type="text" 
+                    class="flex-grow px-2 py-1 bg-[#0f0f15] border border-[#D4BFFF] rounded text-[#f1f0f5] text-xs focus:outline-none min-h-[28px] max-w-[180px] sm:max-w-xs"
+                    required
+                    @keyup.enter="saveRename(v.filename)"
+                    @keyup.esc="editingVaultFilename = null"
+                  />
+                  <button 
+                    type="button" 
+                    @click="saveRename(v.filename)" 
+                    class="px-2 py-1 bg-[#B3F5E1] hover:bg-[#92edd0] text-[#0f0f15] font-bold text-[10px] rounded transition cursor-pointer min-h-[28px]"
+                  >
+                    Save
+                  </button>
+                  <button 
+                    type="button" 
+                    @click="editingVaultFilename = null" 
+                    class="px-2.5 py-1 bg-[#191924] hover:bg-[#232332] text-[#f1f0f5] border border-[#29293a] text-[10px] rounded transition cursor-pointer min-h-[28px]"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <!-- Normal view mode -->
+                <div v-else class="flex items-center gap-2 flex-wrap">
+                  <p class="text-sm font-bold text-[#f1f0f5] truncate" :title="v.name">{{ v.name }}</p>
+                  <button 
+                    @click="startRename(v)" 
+                    class="text-[#9e9cae] hover:text-[#D4BFFF] p-1 transition rounded hover:bg-[#191924] text-[10px]"
+                    title="Rename Vault"
+                  >
+                    ✏️ Rename
+                  </button>
+                  <span v-if="v.is_active" class="px-2 py-0.5 rounded text-[9px] font-bold bg-[#B3F5E1]/20 text-[#B3F5E1] border border-[#B3F5E1]/30 shrink-0">
+                    Active
                   </span>
                 </div>
-                <p class="text-[10px] text-slate-400 mt-0.5 truncate">
-                  <span class="font-mono text-slate-500 truncate inline-block max-w-[160px] sm:max-w-[220px] align-bottom" :title="v.filename">{{ v.filename }}</span> • {{ formatSize(v.size_bytes) }}
+                
+                <!-- Storage Path Display -->
+                <p class="text-[9px] text-[#6b6a7d] font-mono mt-0.5 truncate" :title="`IndexedDB/vaults/${v.filename}`">
+                  path: <span class="text-[#9e9cae]">IndexedDB/vaults/{{ v.filename }}</span>
                 </p>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0 ml-2">
+            <div class="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap justify-end">
               <button 
                 @click="handleSaveVaultToFolder(v.filename)"
-                class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-lg transition cursor-pointer flex items-center gap-1"
-                title="Save database file directly to a custom folder on your computer/phone"
+                class="px-2.5 py-1.5 bg-[#191924] hover:bg-[#232332] text-[#f1f0f5] border border-[#29293a] hover:border-[#D4BFFF]/40 font-semibold text-xs rounded-lg transition cursor-pointer flex items-center gap-1 min-h-[32px]"
+                title="Save database file directly to your downloads"
               >
                 <span>💾 Save To...</span>
               </button>
@@ -74,58 +109,66 @@
               <button 
                 v-if="!v.is_active"
                 @click="$emit('switch-vault', v.filename)"
-                class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white font-semibold text-xs rounded-lg transition cursor-pointer"
+                class="px-3 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-lg transition cursor-pointer min-h-[32px]"
               >
                 Switch
               </button>
+              <span v-else class="px-3 py-1.5 bg-[#191924]/60 text-[#6b6a7d] border border-[#29293a] font-bold text-xs rounded-lg select-none min-h-[32px] flex items-center">
+                Active
+              </span>
 
               <button 
                 v-if="!v.is_active"
                 @click="$emit('delete-vault', v.filename)"
-                class="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-950/30 rounded-lg transition cursor-pointer"
+                class="p-1.5 text-[#9e9cae] hover:text-[#FFD1B3] hover:bg-[#FFD1B3]/10 border border-transparent hover:border-[#FFD1B3]/30 rounded-lg transition cursor-pointer w-8 h-8 flex items-center justify-center shrink-0"
                 title="Delete Vault"
               >
                 🗑️
               </button>
+              <span v-else class="w-8 h-8 flex items-center justify-center text-[#29293a] shrink-0 select-none cursor-not-allowed" title="Active vault cannot be deleted">
+                🗑️
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Import External Vault File -->
-      <div class="p-4 bg-slate-950/40 border border-slate-800/60 rounded-xl space-y-2">
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Import Existing Vault (.db)</p>
-        <div class="flex items-center gap-3">
+      <div class="p-4 bg-[#0f0f15]/30 border border-[#29293a] rounded-xl space-y-3 shrink-0">
+        <p class="text-xs font-semibold text-[#9e9cae] uppercase tracking-wider">Import Existing Vault (.db)</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <input 
             type="file" 
             ref="fileInput" 
-              accept=".db,.sqlite,.cbbak"
+            accept=".db,.sqlite,.cbbak"
             class="hidden" 
             @change="handleFileSelected"
           />
           <button 
             type="button" 
             @click="$refs.fileInput.click()" 
-            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-xl transition cursor-pointer"
+            class="px-3.5 py-2 bg-[#191924] hover:bg-[#232332] text-[#f1f0f5] border border-[#29293a] font-semibold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[36px]"
           >
-            Choose .db File
+            📂 Choose File
           </button>
-          <span class="text-xs text-slate-400 truncate">{{ selectedFileName || 'No file chosen' }}</span>
+          <span class="text-xs text-[#9e9cae] truncate flex-grow text-center sm:text-left min-h-[20px] flex items-center justify-center sm:justify-start">
+            {{ selectedFileName || 'No file chosen' }}
+          </span>
           <button 
             v-if="selectedFile" 
             type="button" 
             @click="handleImport" 
-            class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer ml-auto shrink-0"
+            class="px-3.5 py-2 bg-[#B3F5E1] hover:bg-[#92edd0] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer shrink-0 min-h-[36px] flex items-center justify-center shadow-sm"
           >
             Import Vault
           </button>
         </div>
       </div>
 
-      <div class="flex justify-end pt-2">
+      <div class="flex justify-end pt-2 shrink-0">
         <button 
           @click="$emit('close')" 
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition cursor-pointer"
+          class="px-4 py-2 bg-[#191924] hover:bg-[#232332] text-[#f1f0f5] border border-[#29293a] font-semibold text-xs rounded-xl transition cursor-pointer"
         >
           Close
         </button>
@@ -146,7 +189,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['close', 'switch-vault', 'create-vault', 'import-vault', 'delete-vault']);
+const emit = defineEmits(['close', 'switch-vault', 'create-vault', 'import-vault', 'delete-vault', 'rename-vault']);
 
 const newVaultName = ref('');
 const creating = ref(false);
@@ -154,6 +197,21 @@ const creating = ref(false);
 const selectedFile = ref(null);
 const selectedFileName = ref('');
 const fileInput = ref(null);
+
+const editingVaultFilename = ref(null);
+const editingVaultName = ref('');
+
+const startRename = (vault) => {
+  editingVaultFilename.value = vault.filename;
+  editingVaultName.value = vault.name;
+};
+
+const saveRename = (filename) => {
+  const newName = editingVaultName.value.trim();
+  if (!newName) return;
+  emit('rename-vault', { filename, name: newName });
+  editingVaultFilename.value = null;
+};
 
 const handleCreate = async () => {
   if (!newVaultName.value.trim()) return;
@@ -186,7 +244,7 @@ import { api } from '../services/api';
 
 const handleSaveVaultToFolder = async (filename) => {
   try {
-    await api.shareBackupFile(filename);
+    await api.shareVaultFile(filename);
   } catch (err) {
     alert(err.message || 'Failed to save vault file.');
   }

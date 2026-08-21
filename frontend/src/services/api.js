@@ -8,6 +8,7 @@ import {
   createNewVault,
   switchActiveVault,
   deleteVault as removeVault,
+  renameVault,
   exportActiveDatabaseBlob,
   exportDatabaseBlobByName,
   importDatabaseBlob,
@@ -526,7 +527,7 @@ export const api = {
   // ----------------------------------------------------
   async getPresets() {
     await ensureDB();
-    const presets = execQuery('SELECT * FROM allocation_presets ORDER BY created_at ASC');
+    const presets = execQuery('SELECT * FROM allocation_presets ORDER BY updated_at DESC');
     return presets.map(p => ({
       ...p,
       rules: execQuery('SELECT * FROM allocation_preset_rules WHERE preset_id = ? ORDER BY rowid ASC', [p.id])
@@ -540,14 +541,13 @@ export const api = {
     const id = generateUUID();
     const now = new Date().toISOString();
     return runInTransaction(async () => {
-      execRun('INSERT INTO allocation_presets (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)', [id, payload.name.trim(), now, now], false);
+      execRun('INSERT INTO allocation_presets (id, name, mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?)', [id, payload.name.trim(), payload.mode || 'percentage', now, now], false);
       for (const rule of payload.rules) {
-        if (!['percentage', 'fixed'].includes(rule.mode)) throw new Error('Rule mode must be percentage or fixed.');
         const val = Number(rule.value);
         if (!val || val <= 0) throw new Error('Each rule value must be a positive number.');
         execRun(
-          'INSERT INTO allocation_preset_rules (id, preset_id, bucket_id, mode, value, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-          [generateUUID(), id, rule.bucket_id || null, rule.mode, val, now], false
+          'INSERT INTO allocation_preset_rules (id, preset_id, bucket_id, account_id, category_id, mode, value, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [generateUUID(), id, rule.bucket_id || null, rule.account_id || null, rule.category_id || null, payload.mode || 'percentage', val, now], false
         );
       }
       const preset = execQuery('SELECT * FROM allocation_presets WHERE id = ?', [id])[0];
@@ -559,15 +559,15 @@ export const api = {
     await ensureDB();
     const now = new Date().toISOString();
     return runInTransaction(async () => {
-      if (payload.name) execRun('UPDATE allocation_presets SET name = ?, updated_at = ? WHERE id = ?', [payload.name.trim(), now, id], false);
+      if (payload.name) execRun('UPDATE allocation_presets SET name = ?, mode = ?, updated_at = ? WHERE id = ?', [payload.name.trim(), payload.mode || 'percentage', now, id], false);
       if (Array.isArray(payload.rules)) {
         execRun('DELETE FROM allocation_preset_rules WHERE preset_id = ?', [id], false);
         for (const rule of payload.rules) {
           const val = Number(rule.value);
           if (!val || val <= 0) throw new Error('Each rule value must be a positive number.');
           execRun(
-            'INSERT INTO allocation_preset_rules (id, preset_id, bucket_id, mode, value, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-            [generateUUID(), id, rule.bucket_id || null, rule.mode, val, now], false
+            'INSERT INTO allocation_preset_rules (id, preset_id, bucket_id, account_id, category_id, mode, value, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [generateUUID(), id, rule.bucket_id || null, rule.account_id || null, rule.category_id || null, payload.mode || 'percentage', val, now], false
           );
         }
       }
@@ -584,45 +584,99 @@ export const api = {
 
   async applyPreset(id, payload) {
     await ensureDB();
-    const { total_amount, account_id, description } = payload;
-    const total = Number(total_amount);
-    if (!total || total <= 0) throw new Error('Total amount must be positive.');
-    const account = execQuery('SELECT * FROM accounts WHERE id = ?', [account_id])[0];
-    if (!account) throw new Error('Account not found.');
+    const { total_amount, source_account_id, source_bucket_id, description } = payload;
+    
+    const preset = execQuery('SELECT * FROM allocation_presets WHERE id = ?', [id])[0];
+    if (!preset) throw new Error('Preset not found.');
+    
+    const actualSourceAccountId = (!source_bucket_id || source_bucket_id === '') ? 'acc_unassigned_pool' : source_account_id;
+    const sourceAcc = execQuery('SELECT * FROM accounts WHERE id = ?', [actualSourceAccountId])[0];
+    if (!sourceAcc) throw new Error('Source account not found.');
+
+    const mode = preset.mode || 'percentage';
     const rules = execQuery('SELECT * FROM allocation_preset_rules WHERE preset_id = ?', [id]);
     if (!rules.length) throw new Error('This preset has no rules configured.');
 
+    let total = 0;
+    if (mode === 'percentage') {
+      total = Number(total_amount);
+      if (!total || total <= 0) throw new Error('Total amount must be positive.');
+    } else {
+      total = rules.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+    }
+
+    if (sourceAcc.balance < total) {
+      const srcName = sourceAcc.id === 'acc_unassigned_pool' ? 'Unassigned Cash Pool' : sourceAcc.name;
+      throw new Error(`Allocation amount (₹${total.toFixed(2)}) exceeds ${srcName} balance (₹${sourceAcc.balance.toFixed(2)}).`);
+    }
+
+    // Check source bucket balance if drawing from a specific bucket
+    let sourceBucket = null;
+    if (source_bucket_id) {
+      sourceBucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [source_bucket_id])[0];
+      if (!sourceBucket) throw new Error('Source bucket not found.');
+      if (sourceBucket.allocated_balance < total) {
+        throw new Error(`Allocation amount (₹${total.toFixed(2)}) exceeds source bucket balance (₹${sourceBucket.allocated_balance.toFixed(2)}).`);
+      }
+    }
+
     const now = new Date().toISOString();
     const today = now.slice(0, 10);
-    const presetName = execQuery('SELECT name FROM allocation_presets WHERE id = ?', [id])[0]?.name || 'Allocation';
-    const desc = description?.trim() || `Salary allocation: ${presetName}`;
+    const desc = description?.trim() || `Salary allocation: ${preset.name}`;
 
     return runInTransaction(async () => {
-      // Create a single income transaction to record the deposit
-      const txId = generateUUID();
-      execRun(
-        `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-         VALUES (?, ?, 'income', NULL, ?, ?, ?, NULL, NULL, ?, ?)`,
-        [txId, total, desc, today, account_id, now, now], false
-      );
-      // Update account balance
-      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Number(account.balance) + total, now, account_id], false);
-
-      // Distribute to buckets per rules
       const distributions = [];
+
+      // Deduct from source bucket if drawing from a specific bucket
+      if (source_bucket_id) {
+        execRun('UPDATE savings_buckets SET allocated_balance = allocated_balance - ?, updated_at = ? WHERE id = ?',
+          [total, now, source_bucket_id], false);
+      }
+
       for (const rule of rules) {
-        const share = rule.mode === 'percentage' ? (total * rule.value / 100) : rule.value;
+        if (!rule.account_id) throw new Error('Each rule must have an account destination.');
+        const share = mode === 'percentage' ? (total * rule.value / 100) : rule.value;
         const rounded = Math.round(share * 100) / 100;
         if (rounded <= 0) continue;
+
+        // 1. Allocate to target bucket (if any)
         if (rule.bucket_id) {
-          const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [rule.bucket_id])[0];
-          if (bucket) {
-            execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?',
-              [Number(bucket.allocated_balance) + rounded, now, rule.bucket_id], false);
-            distributions.push({ bucket_id: rule.bucket_id, amount: rounded });
-          }
+          execRun('UPDATE savings_buckets SET allocated_balance = allocated_balance + ?, updated_at = ? WHERE id = ?',
+            [rounded, now, rule.bucket_id], false);
+          distributions.push({ bucket_id: rule.bucket_id, amount: rounded });
         }
-        // if bucket_id is null → goes to unassigned (no bucket row to update)
+
+        // Skip if source and destination are identical
+        if (rule.account_id === actualSourceAccountId && (rule.bucket_id || null) === (source_bucket_id || null)) {
+          continue;
+        }
+
+        // 2. Physical transfer logic
+        if (rule.account_id !== actualSourceAccountId) {
+          // Deduct from source account
+          execRun('UPDATE accounts SET balance = balance - ?, updated_at = ? WHERE id = ?', [rounded, now, actualSourceAccountId], false);
+          // Add to target account
+          execRun('UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE id = ?', [rounded, now, rule.account_id], false);
+        }
+
+        // 3. Log matching debit/credit ledger adjustments
+        const outId = generateUUID();
+        const inId = generateUUID();
+        
+        // Deduct from source (allocated to source_bucket_id/unassigned)
+        execRun(
+          `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
+           VALUES (?, ?, 'adjustment', 'subtract', ?, ?, ?, ?, ?, ?, ?)`,
+          [outId, rounded, `${desc} (split out)`, today, actualSourceAccountId, source_bucket_id || null, rule.category_id || null, now, now],
+          false
+        );
+        // Add to target (allocated to target bucket/unassigned)
+        execRun(
+          `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
+           VALUES (?, ?, 'adjustment', 'add', ?, ?, ?, ?, ?, ?, ?)`,
+          [inId, rounded, `${desc} (split in)`, today, rule.account_id, rule.bucket_id || null, rule.category_id || null, now, now],
+          false
+        );
       }
 
       return { status: 'applied', total, distributions };
@@ -757,12 +811,10 @@ export const api = {
     return { active_vault: filename, vaults: listVaults() };
   },
 
-  async importVault(file) {
+  async importVault(file, passphrase = '') {
     await ensureDB();
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    const passphrase = /\.cbbak$/i.test(file.name) ? prompt('Enter the passphrase for this encrypted backup:') : '';
-    if (/\.cbbak$/i.test(file.name) && !passphrase) throw new Error('Import cancelled: a passphrase is required.');
     const filename = await importDatabaseBlob(file.name, uint8Array, passphrase);
     return { active_vault: filename, vaults: listVaults() };
   },
@@ -770,6 +822,12 @@ export const api = {
   async deleteVault(filename) {
     await ensureDB();
     await removeVault(filename);
+    return { vaults: listVaults() };
+  },
+
+  async renameVault(filename, newName) {
+    await ensureDB();
+    await renameVault(filename, newName);
     return { vaults: listVaults() };
   },
 
@@ -803,8 +861,8 @@ export const api = {
 
   async getBackupDownloadUrl(filename) {
     const passphrase = prompt('Create a passphrase (at least 8 characters) for this portable encrypted backup:');
-    if (!passphrase) throw new Error('Backup export cancelled.');
-    const binary = await exportBackupBytes(filename, passphrase);
+    if (passphrase === null) throw new Error('Backup export cancelled.');
+    const binary = await exportBackupBytes(filename, passphrase || 'default_cashbuddy_pass');
     if (!binary) return '#';
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
     return URL.createObjectURL(blob);
@@ -812,8 +870,8 @@ export const api = {
 
   async shareBackupFile(filename) {
     const passphrase = prompt('Create a passphrase (at least 8 characters) for this portable encrypted backup:');
-    if (!passphrase) throw new Error('Backup sharing cancelled.');
-    const binary = await exportBackupBytes(filename, passphrase);
+    if (passphrase === null) throw new Error('Backup sharing cancelled.');
+    const binary = await exportBackupBytes(filename, passphrase || 'default_cashbuddy_pass');
     if (!binary) throw new Error("Backup file not found");
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
     const file = new File([blob], filename, { type: 'application/x-sqlite3' });
@@ -824,6 +882,37 @@ export const api = {
         await navigator.share({
           title: `Cash Buddy Backup (${filename})`,
           text: `Here is my Cash Buddy database backup file: ${filename}`,
+          files: [file]
+        });
+        sharedSuccess = true;
+      } catch (err) {
+        if (err.name === 'AbortError') sharedSuccess = true;
+      }
+    }
+
+    if (!sharedSuccess) {
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  },
+
+  async shareVaultFile(filename) {
+    await ensureDB();
+    const binary = await exportDatabaseBlobByName(filename);
+    if (!binary) throw new Error("Vault not found.");
+    const blob = new Blob([binary], { type: 'application/x-sqlite3' });
+    const file = new File([blob], filename, { type: 'application/x-sqlite3' });
+
+    let sharedSuccess = false;
+    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: `Cash Buddy Vault (${filename})`,
+          text: `Here is my Cash Buddy vault file: ${filename}`,
           files: [file]
         });
         sharedSuccess = true;

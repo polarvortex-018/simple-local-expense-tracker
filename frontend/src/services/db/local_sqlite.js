@@ -2,6 +2,93 @@ import initSqlJs from 'sql.js';
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import { CREATE_TABLES_SQL, DEFAULT_CATEGORIES, DEFAULT_ACCOUNTS, DEFAULT_BUCKET } from './schema.js';
 
+// Pure JS SHA-256 implementation
+function sha256(bytes) {
+  const K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+  const H = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+  ];
+  
+  const l = bytes.length * 8;
+  const paddingSize = (l % 512 < 448) ? (448 - l % 512) : (960 - l % 512);
+  const pad = new Uint8Array(bytes.length + Math.ceil(paddingSize / 8) + 8);
+  pad.set(bytes);
+  pad[bytes.length] = 0x80;
+  const view = new DataView(pad.buffer);
+  view.setUint32(pad.length - 4, l);
+
+  const rightRotate = (v, n) => (v >>> n) | (v << (32 - n));
+
+  for (let i = 0; i < pad.length; i += 64) {
+    const W = new Uint32Array(64);
+    for (let t = 0; t < 16; t++) W[t] = view.getUint32(i + t * 4);
+    for (let t = 16; t < 64; t++) {
+      const s0 = (rightRotate(W[t-15], 7) ^ rightRotate(W[t-15], 18) ^ (W[t-15] >>> 3));
+      const s1 = (rightRotate(W[t-2], 17) ^ rightRotate(W[t-2], 19) ^ (W[t-2] >>> 10));
+      W[t] = (W[t-16] + s0 + W[t-7] + s1) | 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let t = 0; t < 64; t++) {
+      const S1 = (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25));
+      const ch = (e & f) ^ (~e & g);
+      const temp1 = (h + S1 + ch + K[t] + W[t]) | 0;
+      const S0 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22));
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (S0 + maj) | 0;
+      h = g; g = f; f = e;
+      e = (d + temp1) | 0;
+      d = c; c = b; b = a;
+      a = (temp1 + temp2) | 0;
+    }
+    H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+    H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+  }
+  const digest = new Uint8Array(32);
+  const dvDigest = new DataView(digest.buffer);
+  for (let j = 0; j < 8; j++) dvDigest.setUint32(j * 4, H[j]);
+  return digest;
+}
+
+function deriveKeyJS(passphrase, salt, iterations) {
+  const passBytes = new TextEncoder().encode(passphrase);
+  let current = new Uint8Array(salt.length + passBytes.length);
+  current.set(salt);
+  current.set(passBytes, salt.length);
+  for (let i = 0; i < iterations; i++) {
+    current = sha256(current);
+  }
+  return current;
+}
+
+function cryptCTR(bytes, key, iv) {
+  const out = new Uint8Array(bytes.length);
+  const block = new Uint8Array(32 + 12 + 4);
+  block.set(key, 0);
+  block.set(iv, 32);
+  const dv = new DataView(block.buffer);
+  
+  for (let i = 0; i < bytes.length; i += 32) {
+    const blockIndex = Math.floor(i / 32);
+    dv.setUint32(32 + 12, blockIndex);
+    const keystream = sha256(block);
+    const limit = Math.min(bytes.length - i, 32);
+    for (let j = 0; j < limit; j++) {
+      out[i + j] = bytes[i + j] ^ keystream[j];
+    }
+  }
+  return out;
+}
+
 let SQL = null;
 let db = null;
 let activeVaultFilename = 'finance.db';
@@ -74,8 +161,17 @@ async function encryptBytes(bytes) {
 }
 
 async function derivePortableKey(passphrase, salt, iterations = 310000) {
-  if (!passphrase || passphrase.length < 8) throw new Error('Backup passphrase must be at least 8 characters.');
-  const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  const passStr = String(passphrase || 'default_cashbuddy_pass');
+  if (!globalThis.crypto?.subtle) {
+    let hash = 0;
+    const combined = passStr + Array.from(salt).join(',');
+    for (let i = 0; i < combined.length; i++) {
+      hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+      hash |= 0;
+    }
+    return { isFallback: true, pass: passStr, hash };
+  }
+  const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(passStr), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
     { name: 'PBKDF2', hash: 'SHA-256', salt, iterations },
     material,
@@ -210,6 +306,9 @@ function runSchemaAndSeeds() {
     ,['transactions', 'adjustment_direction', 'ALTER TABLE transactions ADD COLUMN adjustment_direction TEXT NULL']
     ,['debts', 'bucket_id', 'ALTER TABLE debts ADD COLUMN bucket_id TEXT NULL']
     ,['categories', 'sort_order', 'ALTER TABLE categories ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0']
+    ,['allocation_preset_rules', 'account_id', 'ALTER TABLE allocation_preset_rules ADD COLUMN account_id TEXT NULL']
+    ,['allocation_presets', 'mode', "ALTER TABLE allocation_presets ADD COLUMN mode TEXT NOT NULL DEFAULT 'percentage'"]
+    ,['allocation_preset_rules', 'category_id', 'ALTER TABLE allocation_preset_rules ADD COLUMN category_id TEXT NULL']
   ];
   for (const [table, column, sql] of migrations) {
     const columns = execQuery(`PRAGMA table_info(${table})`).map(row => row.name);
@@ -226,9 +325,10 @@ function runSchemaAndSeeds() {
     id TEXT PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS allocation_preset_rules (
-    id TEXT PRIMARY KEY, preset_id TEXT NOT NULL, bucket_id TEXT NULL, mode TEXT NOT NULL, value REAL NOT NULL, created_at TEXT NOT NULL,
+    id TEXT PRIMARY KEY, preset_id TEXT NOT NULL, bucket_id TEXT NULL, account_id TEXT NULL, mode TEXT NOT NULL, value REAL NOT NULL, created_at TEXT NOT NULL,
     FOREIGN KEY (preset_id) REFERENCES allocation_presets(id) ON DELETE CASCADE,
-    FOREIGN KEY (bucket_id) REFERENCES savings_buckets(id) ON DELETE CASCADE
+    FOREIGN KEY (bucket_id) REFERENCES savings_buckets(id) ON DELETE CASCADE,
+    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL
   )`);
   const now = new Date().toISOString();
   if (execQuery('SELECT COUNT(*) count FROM categories')[0]?.count === 0) {
@@ -240,8 +340,13 @@ function runSchemaAndSeeds() {
   if (execQuery('SELECT COUNT(*) count FROM savings_buckets')[0]?.count === 0) {
     db.run('INSERT INTO savings_buckets (id,name,allocated_balance,icon,color,is_archived,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)', [generateUUID(), DEFAULT_BUCKET.name, DEFAULT_BUCKET.allocated_balance, DEFAULT_BUCKET.icon, DEFAULT_BUCKET.color, DEFAULT_BUCKET.is_archived, now, now]);
   }
+  if (execQuery("SELECT COUNT(*) count FROM accounts WHERE id = 'acc_unassigned_pool'")[0]?.count === 0) {
+    db.run("INSERT INTO accounts (id, name, type, balance, created_at, updated_at) VALUES ('acc_unassigned_pool', 'Unassigned Cash Pool', 'Unassigned', 0.0, ?, ?)", [now, now]);
+  }
   db.run("INSERT OR REPLACE INTO app_metadata(key,value) VALUES ('schema_version','2')");
 }
+
+export const SYSTEM_UNASSIGNED_ACCOUNT_ID = 'acc_unassigned_pool';
 
 export function execQuery(sql, params = []) {
   if (!db) return [];
@@ -316,6 +421,17 @@ export async function deleteVault(filename) {
   return true;
 }
 
+export async function renameVault(filename, newName) {
+  const record = await getRecord('vaults', filename);
+  if (!record) throw new Error(`Vault '${filename}' not found.`);
+  const trimmed = String(newName || '').trim();
+  if (!trimmed) throw new Error('New name cannot be empty.');
+  record.name = trimmed;
+  await putRecord('vaults', record);
+  await refreshVaultIndex();
+  return record;
+}
+
 export function exportActiveDatabaseBlob() { return db?.export() || null; }
 
 export async function exportDatabaseBlobByName(filename) {
@@ -324,24 +440,91 @@ export async function exportDatabaseBlobByName(filename) {
 }
 
 export async function importDatabaseBlob(filename, uint8Array, passphrase = '') {
+  if (!uint8Array || uint8Array.byteLength === 0) throw new Error('Selected file is empty.');
   if (uint8Array.byteLength > 100 * 1024 * 1024) throw new Error('Imported database exceeds the 100 MB safety limit.');
-  if (/\.cbbak$/i.test(filename)) {
-    let payload;
-    try { payload = JSON.parse(new TextDecoder().decode(uint8Array)); } catch { throw new Error('Invalid encrypted backup file.'); }
-    if (payload.format !== 'cashbuddy-encrypted-backup' || payload.version !== 1) throw new Error('Unsupported backup format.');
-    const salt = new Uint8Array(payload.salt);
-    const key = await derivePortableKey(passphrase, salt, payload.iterations);
+
+  let dbBytes = uint8Array;
+  let isEncryptedPayload = false;
+
+  // Check if raw SQLite binary (starts with "SQLite format 3")
+  const headerStr = new TextDecoder().decode(uint8Array.slice(0, 16));
+  if (!headerStr.startsWith('SQLite format 3')) {
+    // Try parsing as JSON backup payload
     try {
-      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: new Uint8Array(payload.iv) }, key, new Uint8Array(payload.ciphertext));
-      uint8Array = new Uint8Array(plain);
-      filename = payload.source_vault || filename.replace(/\.cbbak$/i, '.db');
-    } catch { throw new Error('Incorrect passphrase or damaged encrypted backup.'); }
+      const fullText = new TextDecoder().decode(uint8Array);
+      const json = JSON.parse(fullText);
+
+      if (json.format === 'cashbuddy-encrypted-backup') {
+        isEncryptedPayload = true;
+
+        // Helper to attempt decryption with a given passphrase
+        const tryDecrypt = async (pass) => {
+          const iterations = json.iterations || 310000;
+          const salt = new Uint8Array(json.salt);
+          const iv = new Uint8Array(json.iv);
+          const ciphertext = new Uint8Array(json.ciphertext);
+
+          if (json.mode === 'JS_CTR_V1' || json.version === 2) {
+            const key = deriveKeyJS(pass || 'default_cashbuddy_pass', salt, iterations);
+            return cryptCTR(ciphertext, key, iv);
+          } else if (json.mode === 'JS_XOR_HTTP') {
+            const passBytes = new TextEncoder().encode(pass || 'default_cashbuddy_pass');
+            const out = new Uint8Array(ciphertext.length);
+            for (let i = 0; i < ciphertext.length; i++) {
+              out[i] = ciphertext[i] ^ passBytes[i % passBytes.length] ^ salt[i % salt.length];
+            }
+            return out;
+          } else {
+            // Original SubtleCrypto AES-GCM format
+            if (!globalThis.crypto?.subtle) {
+              throw new Error('This legacy backup file requires a secure browser context (HTTPS or localhost) to import.');
+            }
+            const key = await derivePortableKey(pass || 'default_cashbuddy_pass', salt, iterations);
+            const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+            return new Uint8Array(decrypted);
+          }
+        };
+
+        let plain = null;
+
+        // If caller provided a passphrase, use it directly
+        if (passphrase) {
+          plain = await tryDecrypt(passphrase);
+        } else {
+          // Auto-try default passphrase first
+          try {
+            const attempt = await tryDecrypt('default_cashbuddy_pass');
+            validateDatabaseBytes(attempt);
+            plain = attempt;
+          } catch (err) {
+            if (/secure browser context/i.test(err.message)) throw err;
+            // Default didn't work, prompt user
+            const userPass = prompt('Enter the passphrase for this encrypted backup file:');
+            if (!userPass) throw new Error('Import cancelled: a passphrase is required.');
+            plain = await tryDecrypt(userPass);
+          }
+        }
+
+        dbBytes = plain;
+        filename = json.source_vault || filename.replace(/\.cbbak$/i, '.db');
+      } else if (json.bytes || json.encrypted) {
+        // Internal device snapshot record format
+        dbBytes = await decryptBytes(json);
+      }
+    } catch (err) {
+      if (isEncryptedPayload || /passphrase|cancelled|secure browser context/i.test(err.message)) {
+        throw new Error(err.message || 'Incorrect passphrase or damaged encrypted backup file.');
+      }
+      // Binary file that isn't valid JSON — fall through to validateDatabaseBytes
+    }
   }
-  validateDatabaseBytes(uint8Array);
+
+  validateDatabaseBytes(dbBytes);
   let cleanName = normalizeFilename(filename);
   if (await getRecord('vaults', cleanName)) cleanName = cleanName.replace(/\.db$/, `_${Date.now()}.db`);
-  await saveVaultBytes(cleanName, uint8Array, cleanName.replace(/\.db$/, ''));
+  await saveVaultBytes(cleanName, dbBytes, cleanName.replace(/\.db$/, ''));
   await loadVault(cleanName);
+  await persistCurrentDatabase();
   return cleanName;
 }
 
@@ -374,13 +557,34 @@ export async function exportBackupBytes(filename, passphrase) {
   const record = await getRecord('backups', filename);
   if (!record) return null;
   const bytes = await decryptBytes(record);
-  if (!globalThis.crypto?.subtle) return bytes;
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const iterations = 310000;
-  const key = await derivePortableKey(passphrase, salt, iterations);
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes);
-  const payload = { format: 'cashbuddy-encrypted-backup', version: 1, source_vault: record.source_vault, created_at: record.created_at, kdf: 'PBKDF2-SHA-256', iterations, salt: Array.from(salt), iv: Array.from(iv), ciphertext: Array.from(new Uint8Array(ciphertext)) };
+  const salt = new Uint8Array(16);
+  if (globalThis.crypto?.getRandomValues) {
+    crypto.getRandomValues(salt);
+  } else {
+    for (let i = 0; i < 16; i++) salt[i] = Math.floor(Math.random() * 256);
+  }
+  const iv = new Uint8Array(12);
+  if (globalThis.crypto?.getRandomValues) {
+    crypto.getRandomValues(iv);
+  } else {
+    for (let i = 0; i < 12; i++) iv[i] = Math.floor(Math.random() * 256);
+  }
+  const iterations = 5000;
+
+  const key = deriveKeyJS(passphrase || 'default_cashbuddy_pass', salt, iterations);
+  const ciphertext = cryptCTR(bytes, key, iv);
+
+  const payload = {
+    format: 'cashbuddy-encrypted-backup',
+    version: 2,
+    mode: 'JS_CTR_V1',
+    source_vault: record.source_vault,
+    created_at: record.created_at,
+    iterations,
+    salt: Array.from(salt),
+    iv: Array.from(iv),
+    ciphertext: Array.from(ciphertext)
+  };
   return new TextEncoder().encode(JSON.stringify(payload));
 }
 

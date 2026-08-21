@@ -9,6 +9,7 @@ export default defineConfig({
     vue(),
     tailwindcss(),
     VitePWA({
+      selfDestroying: true,
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'logo.svg', 'cashbuddy-logo.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
@@ -53,7 +54,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: ({ request }) => true,
-            handler: 'CacheFirst',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'cashbuddy-offline-runtime-v2',
               expiration: {

@@ -163,6 +163,16 @@ const handleDeleteVault = async (filename) => {
   }
 };
 
+const handleRenameVault = async ({ filename, name }) => {
+  try {
+    await api.renameVault(filename, name);
+    await loadVaults();
+    showSuccess('Vault renamed successfully');
+  } catch (err) {
+    alert(err.message || 'Failed to rename vault.');
+  }
+};
+
 // Filter & Pagination Handlers
 const handleUpdateFilters = (newFilters) => {
   filters.value = newFilters;
@@ -557,7 +567,7 @@ onMounted(() => {
     </main>
 
     <!-- BottomNavBar (Material 3 Dark Pastel Theme) -->
-    <nav class="bg-[#14141d] border-t border-[#29293a] fixed bottom-0 w-full z-50 flex justify-around items-center h-16 px-4 md:hidden safe-area-pb">
+    <nav class="bg-[#14141d] border-t border-[#29293a] fixed bottom-0 w-full z-40 flex justify-around items-center h-16 px-4 md:hidden safe-area-pb">
       <button 
         @click="currentTab = 'dashboard'"
         class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
@@ -626,6 +636,7 @@ onMounted(() => {
       @create-vault="handleCreateVault"
       @import-vault="handleImportVault"
       @delete-vault="handleDeleteVault"
+      @rename-vault="handleRenameVault"
     />
   </div>
 </template>

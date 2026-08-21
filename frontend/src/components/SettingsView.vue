@@ -367,9 +367,9 @@
 
         <!-- Account List -->
         <div class="flex-grow">
-          <div v-if="accounts.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
+          <div v-if="userAccounts.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
             <div 
-              v-for="account in accounts" 
+              v-for="account in userAccounts" 
               :key="account.id"
               class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
             >
@@ -503,7 +503,7 @@
               <button 
                 type="submit"
                 :disabled="submittingCategory"
-                class="px-5 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full shadow-sm transition cursor-pointer disabled:opacity-50"
+                class="px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-sm transition cursor-pointer disabled:opacity-50 min-h-[36px]"
               >
                 {{ submittingCategory ? 'Creating...' : '+ Create Category' }}
               </button>
@@ -517,24 +517,24 @@
             <div 
               v-for="(category, idx) in categories" 
               :key="category.id"
-              class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
+              class="py-1.5 px-3 hover:bg-[#0f0f15]/30 transition duration-150"
             >
               <!-- Editing Mode -->
               <div v-if="editingCategoryId === category.id" class="space-y-3">
-                <div class="flex gap-2 items-center">
+                <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap">
                   <input 
                     v-model="editCategoryIcon"
                     type="text"
                     placeholder="Icon"
-                    class="w-12 px-2 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-center text-xs focus:outline-none transition"
+                    class="w-12 px-2 py-2 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-center text-xs focus:outline-none transition min-h-[36px]"
                   />
                   <input 
                     v-model="editCategoryName"
                     type="text"
                     required
-                    class="flex-grow px-3 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
+                    class="flex-grow px-3 py-2 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition min-h-[36px]"
                   />
-                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-[#29293a] bg-[#14141d] flex items-center justify-center shrink-0">
+                  <div class="relative w-9 h-9 rounded-lg overflow-hidden border border-[#29293a] bg-[#14141d] flex items-center justify-center shrink-0">
                     <input 
                       v-model="editCategoryColor"
                       type="color"
@@ -548,14 +548,14 @@
                   <button 
                     type="button"
                     @click="cancelEditCategory"
-                    class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
+                    class="px-3 py-1.5 bg-[#191924] border border-[#29293a] text-xs text-[#9e9cae] hover:text-[#f1f0f5] rounded-lg transition cursor-pointer min-h-[28px]"
                   >
                     Cancel
                   </button>
                   <button 
                     type="button"
                     @click="saveCategoryEdit(category)"
-                    class="px-2.5 py-1 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                    class="px-3 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-lg transition cursor-pointer min-h-[28px]"
                   >
                     Save
                   </button>
@@ -563,15 +563,16 @@
               </div>
 
               <!-- Normal Mode -->
-              <div v-else class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                  <!-- Up/Down Priority Buttons -->
-                  <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
+              <div v-else class="flex flex-row items-center justify-between gap-2">
+                <!-- Left: Identity & Reorder -->
+                <div class="flex items-center gap-2 min-w-0 flex-grow">
+                  <!-- Reorder Controls -->
+                  <div class="flex flex-col gap-0.5 shrink-0 mr-1">
                     <button 
                       type="button"
                       @click="moveCategoryPriority(idx, -1)"
                       :disabled="idx === 0"
-                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                      class="text-[9px] p-0.5 text-[#6b6a7d] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
                       title="Move Priority Up"
                     >
                       ▲
@@ -580,44 +581,54 @@
                       type="button"
                       @click="moveCategoryPriority(idx, 1)"
                       :disabled="idx === categories.length - 1"
-                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                      class="text-[9px] p-0.5 text-[#6b6a7d] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
                       title="Move Priority Down"
                     >
                       ▼
                     </button>
                   </div>
-                  <span class="text-base">{{ category.icon || '🏷️' }}</span>
-                  <span class="w-3 h-3 rounded-full border border-white/10 shrink-0" :style="{ backgroundColor: category.color }"></span>
-                  <p class="text-xs font-semibold text-[#dae2fd]">{{ category.name }}</p>
+                  <!-- Emoji Icon -->
+                  <span class="text-base shrink-0">{{ category.icon || '🏷️' }}</span>
+                  <!-- Color Dot -->
+                  <span class="w-2.5 h-2.5 rounded-full border border-white/10 shrink-0" :style="{ backgroundColor: category.color }"></span>
+                  <!-- Category Name -->
+                  <p class="text-xs font-semibold text-[#dae2fd] truncate" :title="category.name">{{ category.name }}</p>
                 </div>
-                <div class="flex items-center gap-2">
+
+                <!-- Right: Actions & States (Reflows nicely on mobile) -->
+                <div class="flex items-center justify-end gap-1.5 shrink-0">
+                  <!-- Quick Select / Pin -->
                   <button 
                     @click="$emit('update-category', category.id, { name: category.name, color: category.color, icon: category.icon || '🏷️', is_quick_select: category.is_quick_select ? 0 : 1 })"
-                    class="px-2 py-1 text-[10px] font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
-                    :class="category.is_quick_select ? 'bg-amber-950/80 text-amber-400 border border-amber-800/40' : 'bg-[#14141d] text-[#9e9cae] border border-[#29293a] hover:text-[#dae2fd]'"
-                    :title="category.is_quick_select ? 'Pinned to Quick Select in transaction form' : 'Pin to Quick Select in transaction form'"
+                    class="px-2 py-0.5 text-[10px] font-semibold rounded-lg border transition cursor-pointer flex items-center gap-1 min-h-[24px]"
+                    :class="category.is_quick_select ? 'bg-[#D4BFFF]/10 text-[#D4BFFF] border-[#D4BFFF]/30' : 'bg-[#191924] text-[#9e9cae] border border-[#29293a] hover:border-[#D4BFFF]/30 hover:text-[#f1f0f5]'"
+                    :title="category.is_quick_select ? 'Quick Select active' : 'Pin to Quick Select'"
                   >
-                    <span>{{ category.is_quick_select ? '⭐ Quick Select' : '☆ Pin' }}</span>
+                    <span>{{ category.is_quick_select ? '★ Quick' : '☆ Pin' }}</span>
                   </button>
 
-                  <button 
-                    @click="startEditCategory(category)"
-                    class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-2 rounded-lg transition cursor-pointer"
-                    title="Edit Category"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button 
-                    @click="confirmDeleteCategory(category)"
-                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
-                    title="Delete Category"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                  <div class="flex items-center border-l border-[#29293a] pl-2 gap-1">
+                    <!-- Edit -->
+                    <button 
+                      @click="startEditCategory(category)"
+                      class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-1 rounded-lg transition cursor-pointer"
+                      title="Edit Category"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <!-- Delete -->
+                    <button 
+                      @click="confirmDeleteCategory(category)"
+                      class="text-[#9e9cae] hover:text-[#FFD1B3] hover:bg-[#FFD1B3]/10 p-1 rounded-lg transition cursor-pointer"
+                      title="Delete Category"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -641,18 +652,22 @@
           </h3>
           <p class="text-xs text-[#9e9cae] mt-0.5">Export active database file, create local snapshots, or restore backups.</p>
         </div>
-        <div class="flex gap-2 shrink-0">
+        <div class="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0">
           <a 
             :href="exportUrl"
             download
-            class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
+            class="px-4 py-2 bg-[#B3F5E1] hover:bg-[#92edd0] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm min-h-[36px]"
           >
-            <span>⬇️ Export Active Database</span>
+            <span>⬇️ Export Database</span>
           </a>
+          <label class="px-4 py-2 bg-[#191924] hover:bg-[#232332] text-[#f1f0f5] border border-[#29293a] hover:border-[#D4BFFF]/40 font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[36px]">
+            <span>📥 Import Backup File</span>
+            <input type="file" accept=".db,.sqlite,.cbbak,*/*" class="hidden" @change="handleImportBackupFile" />
+          </label>
           <button 
             @click="handleCreateSnapshot"
             :disabled="creatingBackup"
-            class="px-3.5 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+            class="px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm min-h-[36px]"
           >
             <span>{{ creatingBackup ? 'Creating...' : '📸 Create Local Snapshot' }}</span>
           </button>
@@ -666,37 +681,37 @@
           <button @click="loadBackupsList" class="text-xs text-[#D4BFFF] hover:underline cursor-pointer">Refresh List</button>
         </div>
 
-        <div v-if="backupsList.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20 max-h-48 overflow-y-auto">
+        <div v-if="backupsList.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20 max-h-60 overflow-y-auto">
           <div 
             v-for="b in backupsList" 
             :key="b.filename"
-            class="p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-[#0f0f15]/30 transition gap-2"
+            class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-[#191924]/40 transition gap-3.5 border-b border-[#29293a]/80"
           >
-            <div class="flex items-center gap-2.5 min-w-0">
+            <div class="flex items-center gap-2.5 min-w-0 flex-grow">
               <span class="text-base shrink-0">📦</span>
-              <div class="truncate">
-                <p class="text-xs font-semibold text-[#dae2fd] font-mono truncate">{{ b.filename }}</p>
-                <p class="text-[10px] text-[#6b6a7d]">{{ formatSize(b.size_bytes) }}</p>
+              <div class="min-w-0 flex-grow">
+                <p class="text-xs font-semibold text-[#dae2fd] font-mono break-all sm:truncate" :title="b.filename">{{ b.filename }}</p>
+                <p class="text-[10px] text-[#9e9cae] mt-0.5">{{ formatSize(b.size_bytes) }}</p>
               </div>
             </div>
-            <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+            <div class="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap justify-end w-full sm:w-auto">
               <button
                 @click="handleDownloadBackup(b.filename)"
-                class="px-2.5 py-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
+                class="px-2.5 py-1.5 bg-[#191924] hover:bg-[#232332] text-[#B3F5E1] border border-[#29293a] hover:border-[#B3F5E1]/40 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1 min-h-[28px]"
                 title="Download backup file to phone Downloads / Files folder"
               >
-                <span>⬇️ Save File</span>
+                <span>⬇️ Save</span>
               </button>
               <button 
                 @click="handleShareBackup(b.filename)"
-                class="px-2.5 py-1 bg-[#1a1030]/80 hover:bg-indigo-900 text-[#D4BFFF] border border-[#D4BFFF]/25 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1"
+                class="px-2.5 py-1.5 bg-[#191924] hover:bg-[#232332] text-[#D4BFFF] border border-[#29293a] hover:border-[#D4BFFF]/40 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1 min-h-[28px]"
                 title="Share or Save to Google Drive / iCloud / Files app"
               >
                 <span>📤 Share</span>
               </button>
               <button 
                 @click="handleRestoreBackup(b.filename)"
-                class="px-2.5 py-1 bg-amber-950/80 hover:bg-amber-900 text-amber-400 border border-amber-800/50 font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                class="px-3 py-1.5 bg-amber-950/60 hover:bg-amber-900 text-amber-400 border border-amber-800/40 font-bold text-[10px] rounded-lg transition cursor-pointer min-h-[28px]"
               >
                 Restore
               </button>
@@ -916,29 +931,19 @@
         <form @submit.prevent="submitAccountTransfer" class="flex flex-col flex-1 min-h-0">
           <!-- Scrollable Body -->
           <div class="overflow-y-auto p-5 space-y-4 flex-1">
-            <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-3">
               <div>
-                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">From Account *</label>
-                <select v-model="accountTransferForm.from_account_id" required class="w-full px-3 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer font-bold">
-                  <option value="" disabled>Select</option>
-                  <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.name }} (₹{{ formatAmount(a.balance) }})</option>
-                </select>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">From Account *</label>
+                <AccountGrid :accounts="accounts" v-model="accountTransferForm.from_account_id" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">To Account *</label>
-                <select v-model="accountTransferForm.to_account_id" required class="w-full px-3 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer font-bold">
-                  <option value="" disabled>Select</option>
-                  <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.name }}</option>
-                </select>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">To Account *</label>
+                <AccountGrid :accounts="accounts" v-model="accountTransferForm.to_account_id" />
               </div>
             </div>
             <div>
               <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount (₹) *</label>
               <input v-model="accountTransferForm.amount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
-            </div>
-            <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[#ccc3d8]">Savings Bucket (Optional)</label>
-              <BucketGrid :buckets="activeBuckets" v-model="accountTransferForm.bucket_id" :show-unassigned="true" />
             </div>
             <div>
               <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
@@ -970,72 +975,34 @@
         </div>
 
         <div class="overflow-y-auto flex-1 p-5 space-y-4">
-          <!-- Apply / List view -->
-          <div v-if="!editingPreset">
-            <!-- Existing presets -->
-            <div v-if="localPresets.length > 0" class="space-y-2 mb-4">
-              <div
-                v-for="preset in localPresets"
-                :key="preset.id"
-                class="bg-[#0f0f15] border border-[#29293a] rounded-xl p-3 space-y-2"
-              >
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-[#f1f0f5]">{{ preset.name }}</span>
-                  <div class="flex gap-2">
-                    <button @click="startApplyPreset(preset)" class="px-3 py-1 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-[10px] rounded-lg cursor-pointer transition">Apply</button>
-                    <button @click="editingPreset = JSON.parse(JSON.stringify(preset))" class="px-3 py-1 bg-[#29293a] hover:bg-[#363648] text-[#ccc3d8] font-bold text-[10px] rounded-lg cursor-pointer transition">Edit</button>
-                    <button @click="deletePreset(preset.id)" class="px-2 py-1 text-[#9e9cae] hover:text-[#FFD1B3] cursor-pointer transition text-xs">✕</button>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1.5">
-                  <span v-for="rule in preset.rules" :key="rule.id" class="text-[10px] px-2 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#9e9cae]">
-                    {{ getBucketName(rule.bucket_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <p v-else class="text-xs text-[#9e9cae] text-center py-4">No presets yet. Create your first one below.</p>
-            <button @click="editingPreset = { id: null, name: '', rules: [] }" class="w-full py-2.5 border border-dashed border-[#29293a] hover:border-[#D4BFFF]/40 text-[#9e9cae] hover:text-[#D4BFFF] text-xs font-bold rounded-xl transition cursor-pointer">+ New Preset</button>
-          </div>
-
-          <!-- Apply preset form -->
-          <div v-else-if="applyingPreset" class="space-y-4">
-            <div class="p-3 bg-[#1a1030]/50 border border-[#D4BFFF]/15 rounded-xl">
-              <p class="text-xs font-bold text-[#D4BFFF]">Applying: {{ applyingPreset.name }}</p>
-              <div class="flex flex-wrap gap-1.5 mt-1.5">
-                <span v-for="rule in applyingPreset.rules" :key="rule.id" class="text-[10px] px-2 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#9e9cae]">
-                  {{ getBucketName(rule.bucket_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
-                </span>
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Total Amount Received (₹) *</label>
-              <input v-model="applyForm.total_amount" type="text" inputmode="decimal" placeholder="e.g. 50000" class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Deposit to Account *</label>
-              <select v-model="applyForm.account_id" class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer">
-                <option value="" disabled>Select Account</option>
-                <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.name }} (₹{{ formatAmount(a.balance) }})</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
-              <input v-model="applyForm.description" type="text" placeholder="e.g. August salary" class="w-full px-3.5 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
-            </div>
-            <div class="flex justify-end gap-3 pt-1">
-              <button type="button" @click="applyingPreset = null" class="px-4 py-2 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer">Back</button>
-              <button @click="submitApplyPreset" :disabled="submittingPreset" class="px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-xl transition cursor-pointer disabled:opacity-50">
-                {{ submittingPreset ? 'Applying...' : 'Apply & Allocate' }}
-              </button>
-            </div>
-          </div>
-
           <!-- Create / Edit preset form -->
-          <div v-else class="space-y-4">
+          <div v-if="editingPreset" class="space-y-4">
             <div>
               <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Preset Name *</label>
               <input v-model="editingPreset.name" type="text" placeholder="e.g. Monthly Salary Split" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition font-bold" />
+            </div>
+
+            <!-- Global Mode Switcher -->
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">Preset Mode (Applies to all rules) *</label>
+              <div class="grid grid-cols-2 p-1 bg-[#0f0f15] border border-[#29293a] rounded-xl">
+                <button
+                  type="button"
+                  @click="editingPreset.mode = 'percentage'"
+                  class="py-1.5 text-xs font-bold rounded-lg transition cursor-pointer"
+                  :class="editingPreset.mode === 'percentage' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                >
+                  % Percentage
+                </button>
+                <button
+                  type="button"
+                  @click="editingPreset.mode = 'fixed'"
+                  class="py-1.5 text-xs font-bold rounded-lg transition cursor-pointer"
+                  :class="editingPreset.mode === 'fixed' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                >
+                  ₹ Fixed Amounts
+                </button>
+              </div>
             </div>
 
             <!-- Allocation Summary Dashboard -->
@@ -1060,75 +1027,98 @@
                 <label class="text-xs font-bold text-[#ccc3d8] uppercase tracking-wider">Allocation Rules</label>
                 <button
                   type="button"
-                  @click="editingPreset.rules.push({ bucket_id: activeBuckets[0]?.id || '', mode: 'percentage', value: '' })"
+                  @click="editingPreset.rules.unshift({ id: 'new-' + Date.now() + '-' + Math.random(), bucket_id: activeBuckets[0]?.id || '', account_id: accounts[0]?.id || '', category_id: categories[0]?.id || '', value: '' })"
                   class="px-3 py-1.5 bg-[#D4BFFF]/10 hover:bg-[#D4BFFF]/20 text-[#D4BFFF] text-[10px] font-bold rounded-lg transition cursor-pointer"
                 >
                   + Add Rule
                 </button>
               </div>
 
-              <!-- Rule Cards -->
-              <div v-for="(rule, idx) in editingPreset.rules" :key="idx" class="bg-[#0f0f15] border border-[#29293a] rounded-xl p-3.5 space-y-3 relative">
-                <!-- Delete Button -->
-                <button
-                  type="button"
-                  @click="editingPreset.rules.splice(idx, 1)"
-                  class="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-[#14141d] hover:bg-[#FFD1B3]/10 text-[#9e9cae] hover:text-[#FFD1B3] transition cursor-pointer"
+              <!-- Rule Cards with TransitionGroup -->
+              <div class="relative min-h-[50px]">
+                <TransitionGroup
+                  tag="div"
+                  class="space-y-3"
+                  enter-active-class="transition-all duration-300 ease-out"
+                  enter-from-class="transform opacity-0 translate-y-4 scale-95"
+                  enter-to-class="transform opacity-100 translate-y-0 scale-100"
+                  leave-active-class="transition-all duration-250 ease-in absolute w-full z-0"
+                  leave-from-class="transform opacity-100 translate-y-0 scale-100"
+                  leave-to-class="transform opacity-0 translate-y-4 scale-95"
+                  move-class="transition-all duration-300 ease-in-out"
                 >
-                  ✕
-                </button>
+                  <div
+                    v-for="(rule, idx) in editingPreset.rules"
+                    :key="rule.id || idx"
+                    class="bg-[#0f0f15] border border-[#29293a] rounded-xl p-3.5 space-y-3 relative transition-all duration-300"
+                  >
+                    <!-- Rule Header Index Label -->
+                    <div class="flex items-center gap-1.5 border-b border-[#29293a]/40 pb-2 mr-6">
+                      <span class="text-[10px] px-2 py-0.5 rounded-md bg-[#29293a]/50 text-[#D4BFFF] font-black uppercase tracking-wider">
+                        Rule #{{ editingPreset.rules.length - idx }}
+                      </span>
+                    </div>
 
-                <!-- Bucket Selection Option -->
-                <div class="space-y-1.5">
-                  <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Bucket Destination</label>
-                  <BucketGrid :buckets="activeBuckets" v-model="rule.bucket_id" :show-unassigned="true" />
-                </div>
+                    <!-- Delete Button -->
+                    <button
+                      type="button"
+                      @click="editingPreset.rules.splice(idx, 1)"
+                      class="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-[#14141d] hover:bg-[#FFD1B3]/10 text-[#9e9cae] hover:text-[#FFD1B3] transition cursor-pointer"
+                    >
+                      ✕
+                    </button>
 
-                <!-- Split Controls (Mode Switcher + Value Field) -->
-                <div class="grid grid-cols-2 gap-3 items-end">
-                  <!-- Mode Switcher Segmented Buttons -->
-                  <div class="space-y-1">
-                    <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Rule Type</label>
-                    <div class="grid grid-cols-2 p-1 bg-[#14141d] border border-[#29293a] rounded-xl">
-                      <button
-                        type="button"
-                        @click="rule.mode = 'percentage'"
-                        class="py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer"
-                        :class="rule.mode === 'percentage' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-                      >
-                        % Percent
-                      </button>
-                      <button
-                        type="button"
-                        @click="rule.mode = 'fixed'"
-                        class="py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer"
-                        :class="rule.mode === 'fixed' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-                      >
-                        ₹ Fixed
-                      </button>
+                    <!-- Bucket Selection Option -->
+                    <div class="space-y-1.5">
+                      <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Bucket Destination *</label>
+                      <BucketGrid :buckets="activeBuckets" v-model="rule.bucket_id" :show-unassigned="true" />
+                    </div>
+
+                    <!-- Account Selection Option -->
+                    <div class="space-y-1.5">
+                      <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Account Destination *</label>
+                      <AccountGrid :accounts="accounts" v-model="rule.account_id" />
+                    </div>
+
+                    <!-- Category Selection Option -->
+                    <div class="space-y-1.5">
+                      <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Income Category *</label>
+                      <div class="relative">
+                        <select
+                          v-model="rule.category_id"
+                          required
+                          class="w-full px-3 py-2.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-bold focus:outline-none transition cursor-pointer appearance-none"
+                        >
+                          <option value="" disabled>Select Category</option>
+                          <option v-for="c in categories" :key="c.id" :value="c.id">
+                            {{ c.icon || '🏷️' }} {{ c.name }}
+                          </option>
+                        </select>
+                        <span class="absolute right-3 top-3.5 pointer-events-none text-xs text-[#9e9cae]">▼</span>
+                      </div>
+                    </div>
+
+                    <!-- Split Controls (Only Value Input Field remains!) -->
+                    <div class="space-y-1">
+                      <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider block">
+                        {{ editingPreset.mode === 'percentage' ? 'Percentage (%)' : 'Amount (₹)' }}
+                      </label>
+                      <div class="relative flex items-center">
+                        <span v-if="editingPreset.mode === 'fixed'" class="absolute left-3 text-xs font-bold text-[#9e9cae]">₹</span>
+                        <input
+                          v-model="rule.value"
+                          type="text"
+                          inputmode="decimal"
+                          :placeholder="editingPreset.mode === 'percentage' ? '25' : '1000.00'"
+                          required
+                          class="w-full px-3 py-2 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-xs font-bold focus:outline-none transition text-right"
+                          :class="editingPreset.mode === 'fixed' ? 'pl-6 pr-3' : 'px-3'"
+                        />
+                        <span v-if="editingPreset.mode === 'percentage'" class="absolute right-3 text-xs font-bold text-[#9e9cae] pointer-events-none">%</span>
+                      </div>
                     </div>
                   </div>
-
-                  <!-- Value Input Field -->
-                  <div class="space-y-1">
-                    <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">
-                      {{ rule.mode === 'percentage' ? 'Percentage (%)' : 'Amount (₹)' }}
-                    </label>
-                    <div class="relative flex items-center">
-                      <span v-if="rule.mode === 'fixed'" class="absolute left-3 text-xs font-bold text-[#9e9cae]">₹</span>
-                      <input
-                        v-model="rule.value"
-                        type="text"
-                        inputmode="decimal"
-                        :placeholder="rule.mode === 'percentage' ? '25' : '1000.00'"
-                        required
-                        class="w-full px-3 py-2 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-xs font-bold focus:outline-none transition text-right"
-                        :class="rule.mode === 'fixed' ? 'pl-6 pr-3' : 'px-3'"
-                      />
-                      <span v-if="rule.mode === 'percentage'" class="absolute right-3 text-xs font-bold text-[#9e9cae] pointer-events-none">%</span>
-                    </div>
-                  </div>
-                </div>
+                </TransitionGroup>
               </div>
               <p v-if="!editingPreset.rules.length" class="text-xs text-[#9e9cae] text-center py-4 border border-dashed border-[#29293a] rounded-xl">No rules yet. Click "+ Add Rule" to begin.</p>
             </div>
@@ -1140,6 +1130,115 @@
               </button>
             </div>
           </div>
+
+          <!-- Apply preset form -->
+          <div v-else-if="applyingPreset" class="space-y-4">
+            <!-- Unallocated Pool Summary at the very top -->
+            <div class="bg-[#1a1a24] border border-[#29293a] rounded-xl p-3.5 flex justify-between items-center">
+              <div>
+                <p class="text-[9px] uppercase tracking-wider text-[#9e9cae] font-bold">Unassigned Cash Pool</p>
+                <p class="text-[10px] text-[#9e9cae] mt-0.5">Total cash in system not allocated to any bucket</p>
+              </div>
+              <p class="text-sm font-black text-[#B3F5E1]">
+                ₹{{ formatAmount(unassignedAmount) }}
+              </p>
+            </div>
+
+            <div class="p-3 bg-[#1a1030]/50 border border-[#D4BFFF]/15 rounded-xl">
+              <p class="text-xs font-bold text-[#D4BFFF]">Applying: {{ applyingPreset.name }} ({{ applyingPreset.mode === 'percentage' ? 'Percentage' : 'Fixed' }})</p>
+              <div class="flex flex-wrap gap-1.5 mt-1.5">
+                <span v-for="rule in applyingPreset.rules" :key="rule.id" class="text-[10px] px-2 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#9e9cae]">
+                  {{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ applyingPreset.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
+              <span>Source Funds:</span>
+              <span class="font-bold text-[#FFD1B3]">Unassigned Cash Pool</span>
+            </div>
+
+            <!-- Dynamic Input depending on Mode -->
+            <div v-if="applyingPreset.mode === 'percentage'">
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Split (₹) *</label>
+              <input v-model="applyForm.total_amount" type="text" inputmode="decimal" placeholder="e.g. 50000" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition font-bold" />
+            </div>
+            <div v-else class="p-3.5 bg-[#0f0f15] border border-[#29293a] rounded-xl flex justify-between items-center">
+              <div>
+                <p class="text-[9px] uppercase tracking-wider text-[#9e9cae] font-bold">Total Fixed Allocation</p>
+                <p class="text-[10px] text-[#9e9cae] mt-0.5">Sum of all preset rules to be added as income</p>
+              </div>
+              <p class="text-sm font-black text-[#B3F5E1]">
+                ₹{{ formatAmount(applyingPresetTotalFixed) }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
+              <input v-model="applyForm.description" type="text" placeholder="e.g. August salary split" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+            </div>
+            <div class="flex justify-end gap-3 pt-1">
+              <button type="button" @click="applyingPreset = null" class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer">Back</button>
+              <button @click="submitApplyPreset" :disabled="submittingPreset" class="px-5 py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-xl transition cursor-pointer disabled:opacity-50">
+                {{ submittingPreset ? 'Splitting...' : 'Apply & Split' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- List view -->
+          <div v-else>
+            <!-- Existing presets -->
+            <div v-if="localPresets.length > 0" class="space-y-2.5 mb-4">
+              <div
+                v-for="preset in localPresets"
+                :key="preset.id"
+                class="bg-[#0f0f15] border border-[#29293a] rounded-xl p-3.5 transition-all duration-200 cursor-pointer hover:bg-[#191924]/30"
+                @click="expandedPresetId = expandedPresetId === preset.id ? null : preset.id"
+              >
+                <!-- Header (Always Visible) -->
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black text-[#f1f0f5]">{{ preset.name }}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#9e9cae]">
+                      {{ preset.rules.length }} {{ preset.rules.length === 1 ? 'rule' : 'rules' }}
+                    </span>
+                    <span class="text-[10px] text-[#D4BFFF] font-bold">{{ expandedPresetId === preset.id ? '▲' : '▼' }}</span>
+                  </div>
+                </div>
+
+                <!-- Expanded Content -->
+                <div
+                  class="overflow-hidden transition-all duration-300 ease-in-out"
+                  :class="expandedPresetId === preset.id ? 'max-h-[500px] mt-3.5 pt-3.5 border-t border-[#29293a]/50 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'"
+                  @click.stop
+                >
+                  <div class="space-y-3">
+                    <!-- Rule List badges -->
+                    <div class="flex flex-wrap gap-1.5">
+                      <span v-for="rule in preset.rules" :key="rule.id" class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#dae2fd]">
+                        {{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
+                      </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-end gap-2.5 pt-1">
+                      <button @click="startApplyPreset(preset)" class="px-3.5 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-[10px] rounded-lg cursor-pointer transition shadow-sm">
+                        Apply Preset
+                      </button>
+                      <button @click="editingPreset = JSON.parse(JSON.stringify(preset))" class="px-3.5 py-1.5 bg-[#29293a] hover:bg-[#363648] text-[#ccc3d8] font-bold text-[10px] rounded-lg cursor-pointer transition">
+                        Edit
+                      </button>
+                      <button @click="deletePreset(preset.id)" class="px-2.5 py-1.5 text-[#9e9cae] hover:text-[#FFD1B3] cursor-pointer transition text-xs font-bold">
+                        ✕ Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p v-else class="text-xs text-[#9e9cae] text-center py-6 border border-dashed border-[#29293a] rounded-xl mb-4">No presets yet. Create your first one below.</p>
+            <button @click="editingPreset = { id: null, name: '', mode: 'percentage', rules: [] }" class="w-full py-2.5 border border-dashed border-[#29293a] hover:border-[#D4BFFF]/40 text-[#9e9cae] hover:text-[#D4BFFF] text-xs font-bold rounded-xl transition cursor-pointer">+ New Preset</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1149,6 +1248,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import BucketGrid from './BucketGrid.vue';
+import AccountGrid from './AccountGrid.vue';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -1238,11 +1338,23 @@ const showPresetsModal = ref(false);
 const editingPreset = ref(null);
 const applyingPreset = ref(null);
 const localPresets = ref([]);
+const expandedPresetId = ref(null);
 const submittingPreset = ref(false);
-const applyForm = ref({ total_amount: '', account_id: '', description: '' });
+const applyForm = ref({ total_amount: '', source_account_id: '', description: '' });
 const accountTransferForm = ref({ from_account_id: '', to_account_id: '', bucket_id: '', amount: '', description: '' });
 const submittingAccountTransfer = ref(false);
 
+const getAccountName = (id) => {
+  if (!id) return 'Unspecified';
+  return props.accounts.find(a => a.id === id)?.name || 'Unknown Account';
+};
+
+const getCategoryName = (id) => {
+  if (!id) return 'Uncategorized';
+  return props.categories.find(c => c.id === id)?.name || 'Unknown Category';
+};
+
+const userAccounts = computed(() => props.accounts.filter(a => a.type !== 'Unassigned' && a.id !== 'acc_unassigned_pool'));
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
 const totalAllocated = computed(() => props.buckets.reduce(
   (sum, bucket) => sum + Math.round((Number(bucket.allocated_balance) || 0) * 100), 0
@@ -1389,12 +1501,12 @@ const submitAccountTransfer = async () => {
     emit('transfer-accounts', {
       from_account_id: accountTransferForm.value.from_account_id,
       to_account_id: accountTransferForm.value.to_account_id,
-      bucket_id: accountTransferForm.value.bucket_id || null,
+      bucket_id: null,
       amount: Number(accountTransferForm.value.amount),
       description: accountTransferForm.value.description.trim() || null
     });
     showAccountTransferModal.value = false;
-    accountTransferForm.value = { from_account_id: '', to_account_id: '', bucket_id: '', amount: '', description: '' };
+    accountTransferForm.value = { from_account_id: '', to_account_id: '', amount: '', description: '' };
   } catch (err) {
     alert(err.message);
   } finally {
@@ -1403,21 +1515,37 @@ const submitAccountTransfer = async () => {
 };
 
 const loadPresets = async () => {
-  try { localPresets.value = await api.getPresets(); } catch (e) { console.error(e); }
+  try {
+    localPresets.value = await api.getPresets();
+    if (localPresets.value.length > 0) {
+      if (!expandedPresetId.value || !localPresets.value.some(p => p.id === expandedPresetId.value)) {
+        expandedPresetId.value = localPresets.value[0].id;
+      }
+    } else {
+      expandedPresetId.value = null;
+    }
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 const startApplyPreset = (preset) => {
   applyingPreset.value = preset;
-  applyForm.value = { total_amount: '', account_id: props.accounts[0]?.id || '', description: '' };
+  applyForm.value = { total_amount: '', source_account_id: 'acc_unassigned_pool', source_bucket_id: null, description: '' };
 };
 
 const submitApplyPreset = async () => {
-  if (!applyForm.value.total_amount || !applyForm.value.account_id || !applyingPreset.value) return;
+  if (!applyingPreset.value) return;
+  if (applyingPreset.value.mode === 'percentage' && !Number(applyForm.value.total_amount)) {
+    alert('Please enter a valid amount to split.');
+    return;
+  }
   submittingPreset.value = true;
   try {
     await api.applyPreset(applyingPreset.value.id, {
-      total_amount: Number(applyForm.value.total_amount),
-      account_id: applyForm.value.account_id,
+      total_amount: applyingPreset.value.mode === 'percentage' ? Number(applyForm.value.total_amount) : 0,
+      source_account_id: 'acc_unassigned_pool',
+      source_bucket_id: null,
       description: applyForm.value.description
     });
     emit('data-refresh');
@@ -1429,7 +1557,6 @@ const submitApplyPreset = async () => {
     submittingPreset.value = false;
   }
 };
-
 const savePreset = async () => {
   if (!editingPreset.value?.name?.trim() || !editingPreset.value.rules.length) {
     alert('Please add a name and at least one rule.');
@@ -1437,13 +1564,25 @@ const savePreset = async () => {
   }
   submittingPreset.value = true;
   try {
-    const rules = editingPreset.value.rules.map(r => ({ bucket_id: r.bucket_id || null, mode: r.mode, value: Number(r.value) }));
+    const rules = editingPreset.value.rules.map(r => ({
+      bucket_id: r.bucket_id || null,
+      account_id: r.account_id || null,
+      category_id: r.category_id || null,
+      mode: editingPreset.value.mode,
+      value: Number(r.value)
+    }));
+    let saved;
     if (editingPreset.value.id) {
-      await api.updatePreset(editingPreset.value.id, { name: editingPreset.value.name, rules });
+      saved = await api.updatePreset(editingPreset.value.id, { name: editingPreset.value.name, mode: editingPreset.value.mode, rules });
     } else {
-      await api.createPreset({ name: editingPreset.value.name, rules });
+      saved = await api.createPreset({ name: editingPreset.value.name, mode: editingPreset.value.mode, rules });
     }
     await loadPresets();
+    if (saved && saved.id) {
+      expandedPresetId.value = saved.id;
+    } else if (localPresets.value.length > 0) {
+      expandedPresetId.value = localPresets.value[0].id;
+    }
     editingPreset.value = null;
   } catch (err) {
     alert(err.message);
@@ -1461,17 +1600,18 @@ const deletePreset = async (id) => {
 };
 
 const editingPresetTotalPercentage = computed(() => {
-  if (!editingPreset.value || !editingPreset.value.rules) return 0;
-  return editingPreset.value.rules
-    .filter(r => r.mode === 'percentage')
-    .reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+  if (!editingPreset.value || !editingPreset.value.rules || editingPreset.value.mode !== 'percentage') return 0;
+  return editingPreset.value.rules.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
 });
 
 const editingPresetTotalFixed = computed(() => {
-  if (!editingPreset.value || !editingPreset.value.rules) return 0;
-  return editingPreset.value.rules
-    .filter(r => r.mode === 'fixed')
-    .reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+  if (!editingPreset.value || !editingPreset.value.rules || editingPreset.value.mode !== 'fixed') return 0;
+  return editingPreset.value.rules.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+});
+
+const applyingPresetTotalFixed = computed(() => {
+  if (!applyingPreset.value || !applyingPreset.value.rules) return 0;
+  return applyingPreset.value.rules.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
 });
 
 const moveBucketPriority = (idx, direction) => {
@@ -1614,6 +1754,20 @@ const handleCreateSnapshot = async () => {
     alert(`Failed to create backup: ${err.message}`);
   } finally {
     creatingBackup.value = false;
+  }
+};
+
+const handleImportBackupFile = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const res = await api.importVault(file);
+    alert(`Successfully imported backup file "${file.name}"! Vault loaded: ${res.active_vault}. Reloading application...`);
+    window.location.reload();
+  } catch (err) {
+    if (!/cancelled/i.test(err.message)) alert(`Failed to import backup file: ${err.message}`);
+  } finally {
+    event.target.value = '';
   }
 };
 

@@ -59,7 +59,7 @@
                   <span class="text-lg">🪣</span>
                   <span class="text-xs font-semibold">Unassigned (Account Only)</span>
                 </div>
-                <span class="text-xs font-bold tabular-nums text-[#FFD1B3]">₹0.00</span>
+                <span class="text-xs font-bold tabular-nums text-[#FFD1B3]">₹{{ formatAmount(unassignedAmount) }}</span>
               </div>
 
               <!-- Active Buckets Rows -->
@@ -83,11 +83,11 @@
           </div>
 
           <!-- 2. From Account Section -->
-          <div class="space-y-2">
+          <div v-if="form.bucket_id !== ''" class="space-y-2">
             <h4 class="text-sm font-bold text-[#f1f0f5] tracking-tight">From Account</h4>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div 
-                v-for="acc in accounts" 
+                v-for="acc in userAccounts" 
                 :key="acc.id"
                 @click="form.account_id = acc.id"
                 class="p-3 rounded-xl border text-xs cursor-pointer transition flex flex-col justify-between space-y-2 relative min-h-[64px]"
@@ -102,6 +102,10 @@
                 </span>
               </div>
             </div>
+          </div>
+          <div v-else class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
+            <span>Account Assignment:</span>
+            <span class="font-bold text-[#FFD1B3]">Unassigned General Pool</span>
           </div>
 
           <!-- Step 1 Sticky Footer Action CTA -->
@@ -200,14 +204,14 @@
             </div>
           </div>
 
-          <!-- Category Selection Grid (3x2 Grid) -->
+          <!-- Category Selection Grid -->
           <div class="space-y-2">
             <div class="flex justify-between items-center">
               <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">CATEGORY</label>
             </div>
 
-            <!-- Quick Category Grid (Displays categories pinned to Quick Select in Settings) -->
-            <div class="grid grid-cols-3 gap-2">
+            <!-- Quick Category Grid (Only shown if a specific bucket is selected) -->
+            <div v-if="form.bucket_id !== ''" class="grid grid-cols-3 gap-2">
               <button 
                 type="button"
                 v-for="cat in displayedQuickCategories" 
@@ -234,6 +238,12 @@
                   {{ selectedCategoryIsNonQuick ? categories.find(c => c.id === form.category_id)?.name : 'More' }}
                 </span>
               </button>
+            </div>
+
+            <!-- Unassigned Category Banner -->
+            <div v-else class="p-3 bg-[#131b2e] border border-[#31394d] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
+              <span>Category Assignment:</span>
+              <span class="font-bold text-[#FFD1B3]">Unassigned (No Category)</span>
             </div>
           </div>
 
@@ -369,6 +379,7 @@ const submitting = ref(false);
 const error = ref('');
 
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
+const userAccounts = computed(() => props.accounts.filter(a => a.type !== 'Unassigned' && a.id !== 'acc_unassigned_pool'));
 const quickSelectCategories = computed(() => props.categories.filter(c => c.is_quick_select == 1));
 const displayedQuickCategories = computed(() => {
   const pinned = quickSelectCategories.value;
@@ -381,6 +392,33 @@ const selectedCategoryIsNonQuick = computed(() => {
   if (!form.value.category_id) return false;
   return !displayedQuickCategories.value.some(c => c.id === form.value.category_id);
 });
+
+const netWorth = computed(() => {
+  return props.accounts.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
+});
+
+const totalAllocated = computed(() => {
+  return props.buckets.reduce((sum, bucket) => {
+    if (bucket.is_archived) return sum;
+    return sum + (Number(bucket.allocated_balance) || 0);
+  }, 0);
+});
+
+const unassignedAmount = computed(() => {
+  return Math.round((netWorth.value - totalAllocated.value) * 100) / 100;
+});
+
+import { watch, watchEffect } from 'vue';
+watchEffect(() => {
+  console.log("TransactionForm reactivity check - unassignedAmount:", unassignedAmount.value, "netWorth:", netWorth.value, "totalAllocated:", totalAllocated.value);
+});
+
+watch(() => form.value.bucket_id, (newVal) => {
+  if (newVal === '') {
+    form.value.category_id = '';
+    form.value.account_id = 'acc_unassigned_pool';
+  }
+}, { immediate: true });
 
 const form = ref({
   amount: '',
@@ -443,12 +481,19 @@ onMounted(() => {
     };
   } else {
     // Set default account, category, and bucket
-    if (props.accounts.length > 0) form.value.account_id = props.accounts[0].id;
-    if (props.categories.length > 0) form.value.category_id = props.categories[0].id;
-    if (props.defaultBucketId) {
+    if (props.defaultBucketId !== undefined) {
       form.value.bucket_id = props.defaultBucketId;
-    } else if (activeBuckets.value.length > 0) {
-      form.value.bucket_id = activeBuckets.value[0].id;
+    }
+    if (form.value.bucket_id === '') {
+      form.value.account_id = 'acc_unassigned_pool';
+      form.value.category_id = '';
+    } else {
+      if (props.accounts.length > 0 && !form.value.account_id) {
+        form.value.account_id = props.accounts.filter(a => a.id !== 'acc_unassigned_pool')[0]?.id || props.accounts[0].id;
+      }
+      if (props.categories.length > 0 && !form.value.category_id) {
+        form.value.category_id = props.categories[0].id;
+      }
     }
   }
 });
@@ -490,7 +535,7 @@ const handleSubmit = async () => {
     error.value = 'Description cannot be empty.';
     return;
   }
-  if (!form.value.category_id) {
+  if (form.value.bucket_id !== '' && !form.value.category_id) {
     error.value = 'Please select a category.';
     return;
   }

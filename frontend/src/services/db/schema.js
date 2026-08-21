@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS debts (
 CREATE TABLE IF NOT EXISTS allocation_presets (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
+    mode TEXT NOT NULL DEFAULT 'percentage',
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
@@ -78,11 +79,15 @@ CREATE TABLE IF NOT EXISTS allocation_preset_rules (
     id TEXT PRIMARY KEY,
     preset_id TEXT NOT NULL,
     bucket_id TEXT NULL,
+    account_id TEXT NULL,
+    category_id TEXT NULL,
     mode TEXT NOT NULL,
     value REAL NOT NULL,
     created_at TEXT NOT NULL,
     FOREIGN KEY (preset_id) REFERENCES allocation_presets(id) ON DELETE CASCADE,
-    FOREIGN KEY (bucket_id) REFERENCES savings_buckets(id) ON DELETE CASCADE
+    FOREIGN KEY (bucket_id) REFERENCES savings_buckets(id) ON DELETE CASCADE,
+    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
 );
 `;
 

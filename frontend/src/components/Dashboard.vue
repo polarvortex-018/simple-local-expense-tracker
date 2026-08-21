@@ -177,14 +177,14 @@
         <span class="text-xs text-[#9e9cae] font-semibold">Real-time Balances</span>
       </div>
 
-      <div v-if="accounts.length === 0" class="py-4 text-center text-xs text-[#9e9cae]">
+      <div v-if="physicalAccounts.length === 0" class="py-4 text-center text-xs text-[#9e9cae]">
         No storage accounts configured. Go to Settings -> Storage Accounts to add custom accounts.
       </div>
 
       <!-- Compact Horizontal Grid with Hairline Dividers -->
       <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 divide-x divide-y divide-[#29293a] border border-[#29293a] rounded-xl bg-[#0f0f15] overflow-hidden">
         <div 
-          v-for="acc in accounts" 
+          v-for="acc in physicalAccounts" 
           :key="acc.id"
           class="p-2.5 sm:p-3 hover:bg-[#191924] transition flex items-center justify-between gap-2 min-h-[50px]"
         >
@@ -228,8 +228,12 @@ const props = defineProps({
 defineEmits(['add-transaction']);
 
 // Metrics
+const physicalAccounts = computed(() => {
+  return props.accounts.filter(acc => acc.type !== 'Unassigned' && acc.id !== 'acc_unassigned_pool');
+});
+
 const netWorth = computed(() => {
-  return props.accounts.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
+  return physicalAccounts.value.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
 });
 
 const currentMonthTransactions = computed(() => {
@@ -238,6 +242,7 @@ const currentMonthTransactions = computed(() => {
   const month = today.getMonth();
   return props.transactions.filter(t => {
     if (!t.date) return false;
+    if (t.account_id === 'acc_unassigned_pool') return false;
     const d = new Date(t.date);
     return d.getFullYear() === year && d.getMonth() === month;
   });
@@ -245,7 +250,7 @@ const currentMonthTransactions = computed(() => {
 
 const totalIncome = computed(() => {
   return currentMonthTransactions.value
-    .filter(t => t.transaction_type === 'income')
+    .filter(t => t.transaction_type === 'income' || (t.transaction_type === 'adjustment' && t.adjustment_direction === 'add'))
     .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 });
 
@@ -263,9 +268,9 @@ const activeBuckets = computed(() => props.buckets.filter(bucket => {
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   currentMonthTransactions.value.forEach(t => {
-    if (t.transaction_type === 'expense') {
-      const catName = t.category?.name || 'Uncategorized';
-      const catColor = t.category?.color || '#ef4444';
+    if (t.transaction_type === 'expense' && t.category && t.category.name !== 'Uncategorized') {
+      const catName = t.category.name;
+      const catColor = t.category.color || '#ef4444';
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
         map[catName] = { name: catName, color: catColor, total: 0 };

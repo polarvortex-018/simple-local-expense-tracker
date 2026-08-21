@@ -401,7 +401,7 @@
                   </div>
                   <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto p-1 bg-[#0f0f15] border border-[#29293a] rounded-xl">
                     <button
-                      v-for="cat in categories"
+                      v-for="cat in filteredCategories"
                       :key="cat.id"
                       type="button"
                       @click="toggleCategoryFilter(cat.id)"
@@ -1115,6 +1115,7 @@ const toggleTimeMode = () => {
 };
 
 // Filter Drawer State & Values
+const filteredCategories = computed(() => props.categories.filter(c => c.name !== 'Uncategorized'));
 const showFilterDrawer = ref(false);
 const sortBy = ref('date_desc'); // 'date_desc', 'date_asc', 'amount_desc', 'amount_asc'
 const filters = ref({
@@ -1336,6 +1337,7 @@ const parseYearMonth = (dateStr) => {
 // Transaction Filtering Logic
 const isMatchingTransaction = (t) => {
   if (!t || !t.date) return false;
+  if (t.account_id === 'acc_unassigned_pool') return false;
 
   // 1. Time Horizon Filter
   let dateMatch = true;
@@ -1482,8 +1484,9 @@ const formatDateHeader = (dateStr) => {
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   allPeriodTransactions.value.forEach(t => {
-    if (t.transaction_type === 'expense') {
+    if (t.transaction_type === 'expense' && t.category_id) {
       const catName = getCategoryName(t.category_id);
+      if (!catName || catName === 'Uncategorized') return;
       const catColor = getCategoryColor(t.category_id);
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
@@ -1502,8 +1505,10 @@ const totalFilteredCategoryExpense = computed(() => {
 const filteredCategoryIncome = computed(() => {
   const map = {};
   allPeriodTransactions.value.forEach(t => {
-    if (t.transaction_type === 'income') {
+    const isIncome = t.transaction_type === 'income' || (t.transaction_type === 'adjustment' && t.adjustment_direction === 'add');
+    if (isIncome && t.category_id) {
       const catName = getCategoryName(t.category_id);
+      if (!catName || catName === 'Uncategorized') return;
       const catColor = getCategoryColor(t.category_id);
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
@@ -1772,13 +1777,21 @@ const transactionBadgeClass = (tx) => {
 
 const transactionAmountClass = (tx) => {
   if (tx.transaction_type === 'income') return 'text-[#4edea3]';
-  if (tx.transaction_type === 'adjustment') return 'text-[#d2bbff]';
+  if (tx.transaction_type === 'adjustment') {
+    if (tx.adjustment_direction === 'add') return 'text-[#4edea3]';
+    if (tx.adjustment_direction === 'subtract') return 'text-[#ffb4ab]';
+    return 'text-[#d2bbff]';
+  }
   return 'text-[#ffb4ab]';
 };
 
 const transactionSign = (tx) => {
   if (tx.transaction_type === 'income') return '+';
-  if (tx.transaction_type === 'adjustment') return '±';
+  if (tx.transaction_type === 'adjustment') {
+    if (tx.adjustment_direction === 'add') return '+';
+    if (tx.adjustment_direction === 'subtract') return '-';
+    return '±';
+  }
   return '-';
 };
 
