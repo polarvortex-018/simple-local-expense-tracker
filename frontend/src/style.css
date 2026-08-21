@@ -14,6 +14,14 @@
   --color-error: #ffb4ab;
   --color-on-surface: #f1f0f5;
   --color-on-surface-variant: #9e9cae;
+
+  /* Motion Tokens (Emil Kowalski design engineering standard) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-micro: 130ms;
+  --duration-fast: 180ms;
+  --duration-modal: 220ms;
 }
 
 body {
@@ -36,6 +44,17 @@ body, p, span, div, button, input, select, textarea, .font-bold {
 
 .font-medium, .font-semibold {
   font-weight: 400 !important;
+}
+
+/* Interactive Tap/Press Response */
+button:not(:disabled):active {
+  transform: scale(0.975);
+}
+
+button, a, input, select, textarea {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-timing-function: var(--ease-out);
+  transition-duration: var(--duration-fast);
 }
 
 .material-symbols-outlined {
@@ -84,6 +103,29 @@ select {
   padding-right: 2.5rem !important;
 }
 
+/* Standardized Modal & Sheet Transitions */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity var(--duration-modal) var(--ease-out), transform var(--duration-modal) var(--ease-out);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.96) translateY(6px);
+}
+
+.sheet-enter-active,
+.sheet-leave-active {
+  transition: opacity var(--duration-modal) var(--ease-drawer), transform var(--duration-modal) var(--ease-drawer);
+}
+
+.sheet-enter-from,
+.sheet-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
 /* Mobile Camera Notch & Home Bar Safe Area Insets */
 .safe-area-pt {
   padding-top: max(12px, env(safe-area-inset-top));
@@ -91,4 +133,14 @@ select {
 
 .safe-area-pb {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* Accessibility: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

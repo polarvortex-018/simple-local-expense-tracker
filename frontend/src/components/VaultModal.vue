@@ -1,6 +1,7 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm">
-    <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-xl p-5 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb flex flex-col">
+  <Transition name="modal">
+    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm" @click.self="$emit('close')">
+      <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-xl p-5 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb flex flex-col">
       
       <!-- Header -->
       <div class="flex justify-between items-center border-b border-[#29293a] pb-3 shrink-0">
@@ -176,6 +177,7 @@
 
     </div>
   </div>
+  </Transition>
 </template>
 
 <script setup>

@@ -1806,7 +1806,19 @@ const transactionLabel = (tx) => {
 .flip-list-move,
 .flip-list-enter-active,
 .flip-list-leave-active {
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.22s var(--ease-out), opacity 0.22s var(--ease-out);
+}
+
+/* Modal and Dropdown Sheet Transitions */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out);
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: scale(0.96) translateY(6px);
 }
 
 /* Full Month Slide Out & Slide In Animations */
@@ -1814,7 +1826,8 @@ const transactionLabel = (tx) => {
 .slide-next-leave-active,
 .slide-prev-enter-active,
 .slide-prev-leave-active {
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
+  transition: transform 0.22s var(--ease-out), opacity 0.22s var(--ease-out);
+  will-change: transform, opacity;
 }
 
 /* Going Next: Old slide slides LEFT (-100%), new slide enters from RIGHT (100%) */

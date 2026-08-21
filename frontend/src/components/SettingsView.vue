@@ -841,138 +841,143 @@
     </div>
 
     <!-- Bucket Transfer Modal -->
-    <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
-      <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
-        <!-- Header -->
-        <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
-          <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Allocation</h3>
-          <button @click="showTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+    <Transition name="modal">
+      <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showTransferModal = false">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+          <!-- Header -->
+          <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
+            <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Allocation</h3>
+            <button @click="showTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+          </div>
+
+          <form @submit.prevent="submitBucketTransfer" class="flex flex-col flex-1 min-h-0">
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto p-5 space-y-4 flex-1">
+              <div class="p-3 bg-[#1a1030]/30 border border-[#D4BFFF]/15 rounded-xl text-xs text-[#ccc3d8]">
+                <p>This moves allocated funds from one bucket to another. Your physical <strong>bank account balances remain 100% unchanged</strong>.</p>
+              </div>
+
+              <!-- From Bucket -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-[#ccc3d8]">From Bucket *</label>
+                <BucketGrid :buckets="activeBuckets" v-model="transferForm.from_bucket_id" />
+              </div>
+
+              <!-- To Bucket -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-[#ccc3d8]">To Bucket *</label>
+                <BucketGrid :buckets="activeBuckets" v-model="transferForm.to_bucket_id" :show-unassigned="true" />
+              </div>
+
+              <!-- Amount -->
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move (₹) *</label>
+                <input 
+                  v-model="transferForm.amount"
+                  type="text"
+                  inputmode="decimal"
+                  pattern="[0-9]*[.,]?[0-9]*"
+                  autocomplete="off"
+                  placeholder="0.00"
+                  required
+                  class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
+                />
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Reason / Description (Optional)</label>
+                <input 
+                  v-model="transferForm.description"
+                  type="text"
+                  placeholder="e.g. Reallocating trip funds to laptop"
+                  class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
+                />
+              </div>
+            </div>
+
+            <!-- Sticky Footer -->
+            <div class="flex justify-end gap-3 px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
+              <button 
+                type="button" 
+                @click="showTransferModal = false" 
+                class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                :disabled="submittingTransfer"
+                class="px-4 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+              >
+                {{ submittingTransfer ? 'Transferring...' : 'Transfer Funds' }}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form @submit.prevent="submitBucketTransfer" class="flex flex-col flex-1 min-h-0">
-          <!-- Scrollable Body -->
-          <div class="overflow-y-auto p-5 space-y-4 flex-1">
-            <div class="p-3 bg-[#1a1030]/30 border border-[#D4BFFF]/15 rounded-xl text-xs text-[#ccc3d8]">
-              <p>This moves allocated funds from one bucket to another. Your physical <strong>bank account balances remain 100% unchanged</strong>.</p>
-            </div>
-
-            <!-- From Bucket -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[#ccc3d8]">From Bucket *</label>
-              <BucketGrid :buckets="activeBuckets" v-model="transferForm.from_bucket_id" />
-            </div>
-
-            <!-- To Bucket -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[#ccc3d8]">To Bucket *</label>
-              <BucketGrid :buckets="activeBuckets" v-model="transferForm.to_bucket_id" :show-unassigned="true" />
-            </div>
-
-            <!-- Amount -->
-            <div>
-              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move (₹) *</label>
-              <input 
-                v-model="transferForm.amount"
-                type="text"
-                inputmode="decimal"
-                pattern="[0-9]*[.,]?[0-9]*"
-                autocomplete="off"
-                placeholder="0.00"
-                required
-                class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
-              />
-            </div>
-
-            <!-- Description -->
-            <div>
-              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Reason / Description (Optional)</label>
-              <input 
-                v-model="transferForm.description"
-                type="text"
-                placeholder="e.g. Reallocating trip funds to laptop"
-                class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
-              />
-            </div>
-          </div>
-
-          <!-- Sticky Footer -->
-          <div class="flex justify-end gap-3 px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
-            <button 
-              type="button" 
-              @click="showTransferModal = false" 
-              class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              :disabled="submittingTransfer"
-              class="px-4 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
-            >
-              {{ submittingTransfer ? 'Transferring...' : 'Transfer Funds' }}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+    </Transition>
 
     <!-- Account Transfer Modal -->
-    <div v-if="showAccountTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
-      <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
-        <!-- Header -->
-        <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
-          <div>
-            <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Between Accounts</h3>
-            <p class="text-[11px] text-[#9e9cae] mt-0.5">Move money between physical accounts</p>
+    <Transition name="modal">
+      <div v-if="showAccountTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showAccountTransferModal = false">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+          <!-- Header -->
+          <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
+            <div>
+              <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Between Accounts</h3>
+              <p class="text-[11px] text-[#9e9cae] mt-0.5">Move money between physical accounts</p>
+            </div>
+            <button @click="showAccountTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
           </div>
-          <button @click="showAccountTransferModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+
+          <form @submit.prevent="submitAccountTransfer" class="flex flex-col flex-1 min-h-0">
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto p-5 space-y-4 flex-1">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">From Account *</label>
+                  <AccountGrid :accounts="accounts" v-model="accountTransferForm.from_account_id" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">To Account *</label>
+                  <AccountGrid :accounts="accounts" v-model="accountTransferForm.to_account_id" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount (₹) *</label>
+                <input v-model="accountTransferForm.amount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
+                <input v-model="accountTransferForm.description" type="text" placeholder="e.g. Moving savings to checking" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+              </div>
+            </div>
+
+            <!-- Sticky Footer -->
+            <div class="flex justify-end gap-3 px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
+              <button type="button" @click="showAccountTransferModal = false" class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer">Cancel</button>
+              <button type="submit" :disabled="submittingAccountTransfer" class="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50">
+                {{ submittingAccountTransfer ? 'Transferring...' : 'Transfer Funds' }}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form @submit.prevent="submitAccountTransfer" class="flex flex-col flex-1 min-h-0">
-          <!-- Scrollable Body -->
-          <div class="overflow-y-auto p-5 space-y-4 flex-1">
-            <div class="space-y-3">
-              <div>
-                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">From Account *</label>
-                <AccountGrid :accounts="accounts" v-model="accountTransferForm.from_account_id" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">To Account *</label>
-                <AccountGrid :accounts="accounts" v-model="accountTransferForm.to_account_id" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount (₹) *</label>
-              <input v-model="accountTransferForm.amount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
-              <input v-model="accountTransferForm.description" type="text" placeholder="e.g. Moving savings to checking" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
-            </div>
-          </div>
-
-          <!-- Sticky Footer -->
-          <div class="flex justify-end gap-3 px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
-            <button type="button" @click="showAccountTransferModal = false" class="px-4 py-2.5 text-xs font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer">Cancel</button>
-            <button type="submit" :disabled="submittingAccountTransfer" class="px-5 py-2.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50">
-              {{ submittingAccountTransfer ? 'Transferring...' : 'Transfer Funds' }}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+    </Transition>
 
     <!-- Salary Allocation Presets Modal -->
-    <div v-if="showPresetsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f15]/80 backdrop-blur-sm">
-      <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
-        <!-- Header -->
-        <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4">
-          <div>
-            <h3 class="text-base font-bold text-[#f1f0f5]">Salary Allocation Presets</h3>
-            <p class="text-[11px] text-[#9e9cae] mt-0.5">Auto-split any amount across your buckets</p>
+    <Transition name="modal">
+      <div v-if="showPresetsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showPresetsModal = false; editingPreset = null">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
+          <!-- Header -->
+          <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4">
+            <div>
+              <h3 class="text-base font-bold text-[#f1f0f5]">Salary Allocation Presets</h3>
+              <p class="text-[11px] text-[#9e9cae] mt-0.5">Auto-split any amount across your buckets</p>
+            </div>
+            <button @click="showPresetsModal = false; editingPreset = null" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
           </div>
-          <button @click="showPresetsModal = false; editingPreset = null" class="text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
-        </div>
 
         <div class="overflow-y-auto flex-1 p-5 space-y-4">
           <!-- Create / Edit preset form -->
@@ -1242,6 +1247,7 @@
         </div>
       </div>
     </div>
+    </Transition>
   </div>
 </template>
 

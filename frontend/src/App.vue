@@ -598,17 +598,19 @@ onMounted(() => {
     </nav>
 
     <!-- Slide-over / Modal Form -->
-    <TransactionForm 
-      v-if="showForm" 
-      :transaction="editingTransaction"
-      :accounts="accounts"
-      :categories="categories"
-      :buckets="buckets"
-      :default-bucket-id="selectedBucketForTx"
-      :default-type="selectedTypeForTx"
-      @close="showForm = false"
-      @save="handleSaveTransaction"
-    />
+    <Transition name="modal">
+      <TransactionForm 
+        v-if="showForm" 
+        :transaction="editingTransaction"
+        :accounts="accounts"
+        :categories="categories"
+        :buckets="buckets"
+        :default-bucket-id="selectedBucketForTx"
+        :default-type="selectedTypeForTx"
+        @close="showForm = false"
+        @save="handleSaveTransaction"
+      />
+    </Transition>
 
     <!-- Multi-Vault Management Modal -->
     <VaultModal 

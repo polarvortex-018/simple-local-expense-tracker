@@ -107,18 +107,6 @@
             <span>Account Assignment:</span>
             <span class="font-bold text-[#FFD1B3]">Unassigned General Pool</span>
           </div>
-
-          <!-- Step 1 Sticky Footer Action CTA -->
-          <div class="sticky bottom-0 z-20 -mx-5 -mb-5 bg-[#14141d] p-4 border-t border-[#29293a] shadow-lg">
-            <button 
-              type="button"
-              @click="goToStep2"
-              class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>Next</span>
-              <span>→</span>
-            </button>
-          </div>
         </div>
 
         <!-- STEP 2: Details, Hero Amount, Type Switcher & Category Grid (Matching Image 2) -->
@@ -275,23 +263,32 @@
               ></textarea>
             </div>
           </div>
-
-          <!-- Step 2 Save Transaction Action CTA -->
-          <div class="pt-4 border-t border-[#29293a]">
-            <button
-              form="transaction-entry-form"
-              type="submit"
-              :disabled="submitting"
-              class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
-              <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
-              <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
-            </button>
-          </div>
-
         </div>
       </form>
+
+      <!-- Fixed Modal Footer (Outside scroll container so content is never cut off) -->
+      <div class="px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
+        <button
+          v-if="currentStep === 1 && !isEdit"
+          type="button"
+          @click="goToStep2"
+          class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+        >
+          <span>Next</span>
+          <span>→</span>
+        </button>
+        <button
+          v-else
+          form="transaction-entry-form"
+          type="submit"
+          :disabled="submitting"
+          class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
+          <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
+          <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
+        </button>
+      </div>
     </div>
 
     <!-- Category Grid Modal -->
