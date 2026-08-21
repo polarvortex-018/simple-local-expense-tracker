@@ -162,25 +162,25 @@
         <form @submit.prevent="submitAddDebt" class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
           <!-- Person Name -->
           <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Person Name *</label>
+            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Person Name *</label>
             <input 
               v-model="newDebt.person_name"
               type="text"
               placeholder="e.g. John Doe"
               required
-              class="w-full px-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs placeholder-slate-600 focus:outline-none transition"
+              class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition"
             />
           </div>
 
           <!-- Debt Type Switcher -->
           <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Debt Type *</label>
-            <div class="grid grid-cols-2 gap-2 p-1 bg-[#131b2e] rounded-full border border-[#31394d]">
+            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Debt Type *</label>
+            <div class="grid grid-cols-2 gap-2 p-1 bg-[#0f0f15] rounded-full border border-[#29293a]">
               <button 
                 type="button"
                 @click="newDebt.type = 'lent'"
                 class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex flex-col items-center justify-center"
-                :class="newDebt.type === 'lent' ? 'bg-[#10b981] text-white shadow-sm' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
+                :class="newDebt.type === 'lent' ? 'bg-[#10b981] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
               >
                 <span>Lent Money</span>
                 <span class="text-[9px] font-normal opacity-80">(Deducts from account)</span>
@@ -189,7 +189,7 @@
                 type="button"
                 @click="newDebt.type = 'borrowed'"
                 class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex flex-col items-center justify-center"
-                :class="newDebt.type === 'borrowed' ? 'bg-[#ef4444] text-white shadow-sm' : 'text-[#ccc3d8] hover:text-[#dae2fd]'"
+                :class="newDebt.type === 'borrowed' ? 'bg-[#ef4444] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
               >
                 <span>Borrowed Money</span>
                 <span class="text-[9px] font-normal opacity-80">(Adds to account)</span>
@@ -201,9 +201,9 @@
           <div class="grid grid-cols-2 gap-4 items-end">
             <!-- Amount Input (Left) -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">AMOUNT *</label>
-              <div class="flex items-center gap-1 border-b border-[#31394d] focus-within:border-[#7c3aed] pb-1">
-                <span class="text-base font-bold text-[#ccc3d8]">₹</span>
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT *</label>
+              <div class="flex items-center gap-1 border-b border-[#29293a] focus-within:border-[#D4BFFF] pb-1">
+                <span class="text-base font-bold text-[#9e9cae]">₹</span>
                 <input 
                   v-model="newDebt.amount"
                   type="text"
@@ -212,21 +212,21 @@
                   autocomplete="off"
                   placeholder="0.00"
                   required
-                  class="w-full text-base sm:text-lg font-bold text-[#dae2fd] tabular-nums bg-transparent focus:outline-none transition"
+                  class="w-full text-base sm:text-lg font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none transition"
                 />
               </div>
             </div>
 
             <!-- Account Selection (Right) -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">ACCOUNT *</label>
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">ACCOUNT *</label>
               <select 
                 v-model="newDebt.account_id"
                 required
-                class="w-full px-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs font-semibold focus:outline-none transition cursor-pointer"
+                class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer"
               >
-                <option value="" disabled class="bg-[#0b1326] text-slate-500">Select Account</option>
-                <option v-for="acc in accounts" :key="acc.id" :value="acc.id" class="bg-[#0b1326] text-[#dae2fd]">
+                <option value="" disabled class="bg-[#14141d] text-slate-500">Select Account</option>
+                <option v-for="acc in accounts" :key="acc.id" :value="acc.id" class="bg-[#14141d] text-[#f1f0f5]">
                   {{ acc.name }} (₹{{ formatAmount(acc.balance) }})
                 </option>
               </select>
@@ -235,30 +235,30 @@
 
           <!-- Savings Bucket Selection -->
           <div class="space-y-1.5">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">SAVINGS BUCKET *</label>
+            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">SAVINGS BUCKET *</label>
             <BucketGrid :buckets="activeBuckets" v-model="newDebt.bucket_id" />
           </div>
 
           <!-- Notes / Description -->
           <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">NOTES / REASON (OPTIONAL)</label>
+            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">NOTES / REASON (OPTIONAL)</label>
             <input 
               v-model="newDebt.description"
               type="text"
               placeholder="e.g. Dinner split, Emergency cash"
-              class="w-full px-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs placeholder-slate-600 focus:outline-none transition"
+              class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition"
             />
           </div>
 
           <!-- Action CTA -->
-          <div class="pt-2 border-t border-[#31394d]">
+          <div class="pt-2 border-t border-[#29293a]">
             <button 
               type="submit" 
               :disabled="submitting"
-              class="w-full py-3.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              class="w-full py-3.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span v-if="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span v-else class="w-4 h-4 rounded-full border border-white flex items-center justify-center text-[10px] font-bold">✓</span>
+              <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
+              <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
               <span>{{ submitting ? 'Saving Debt...' : 'Save Debt' }}</span>
             </button>
           </div>
@@ -277,37 +277,37 @@
         </div>
 
         <div class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
-          <div v-if="settlingDebt" class="p-3.5 bg-[#131b2e] border border-[#31394d] rounded-xl space-y-1">
-            <p class="text-xs text-[#ccc3d8]">Settling debt with <strong class="text-[#dae2fd]">{{ settlingDebt.person_name }}</strong></p>
-            <p class="text-xl font-bold text-[#4edea3] tabular-nums">₹{{ formatAmount(settlingDebt.amount) }}</p>
-            <p class="text-[11px] text-[#ccc3d8] leading-tight">
+          <div v-if="settlingDebt" class="p-3.5 bg-[#0f0f15] border border-[#29293a] rounded-xl space-y-1">
+            <p class="text-xs text-[#9e9cae]">Settling debt with <strong class="text-[#f1f0f5]">{{ settlingDebt.person_name }}</strong></p>
+            <p class="text-xl font-bold text-[#B3F5E1] tabular-nums">₹{{ formatAmount(settlingDebt.amount) }}</p>
+            <p class="text-[11px] text-[#9e9cae] leading-tight">
               {{ settlingDebt.type === 'lent' ? 'Repayment received from person → Deposits into selected account' : 'Repaid money back to person → Deducts from selected account' }}
             </p>
           </div>
 
           <form @submit.prevent="submitSettleDebt" class="space-y-4">
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider block">Target Account *</label>
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Target Account *</label>
               <select 
                 v-model="settleAccountId"
                 required
-                class="w-full px-3 py-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-[#dae2fd] text-xs font-semibold focus:outline-none transition cursor-pointer"
+                class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer"
               >
-                <option value="" disabled class="bg-[#0b1326] text-slate-500">Select Account</option>
-                <option v-for="acc in accounts" :key="acc.id" :value="acc.id" class="bg-[#0b1326] text-[#dae2fd]">
+                <option value="" disabled class="bg-[#14141d] text-slate-500">Select Account</option>
+                <option v-for="acc in accounts" :key="acc.id" :value="acc.id" class="bg-[#14141d] text-[#f1f0f5]">
                   {{ acc.name }} (₹{{ formatAmount(acc.balance) }})
                 </option>
               </select>
             </div>
 
-            <div class="pt-2 border-t border-[#31394d]">
+            <div class="pt-2 border-t border-[#29293a]">
               <button 
                 type="submit" 
                 :disabled="submitting"
-                class="w-full py-3.5 bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                class="w-full py-3.5 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <span v-if="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span v-else class="w-4 h-4 rounded-full border border-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
+                <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
                 <span>{{ submitting ? 'Settling...' : 'Confirm Settlement' }}</span>
               </button>
             </div>
@@ -393,6 +393,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import BucketGrid from './BucketGrid.vue';
+import { formatDateDDMMYYYY } from '../utils/dateUtils';
 
 const props = defineProps({
   debts: {
@@ -436,8 +437,6 @@ const settlingDebt = ref(null);
 const settleAccountId = ref('');
 
 // Formatters
-import { formatDateDDMMYYYY } from '../utils/dateUtils';
-
 const formatAmount = (val) => {
   const num = Number(val);
   return isNaN(num) ? '0.00' : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

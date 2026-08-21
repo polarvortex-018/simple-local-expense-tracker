@@ -173,18 +173,6 @@ const handleRenameVault = async ({ filename, name }) => {
   }
 };
 
-// Filter & Pagination Handlers
-const handleUpdateFilters = (newFilters) => {
-  filters.value = newFilters;
-  page.value = 1;
-  fetchTransactions();
-};
-
-const handleUpdatePage = (newPage) => {
-  page.value = newPage;
-  fetchTransactions();
-};
-
 // Form Open/Close Handlers
 const openAddTransaction = (opts = {}) => {
   editingTransaction.value = null;
@@ -520,16 +508,11 @@ onMounted(() => {
           :accounts="accounts"
           :categories="categories"
           :buckets="buckets"
-          :page="page"
-          :limit="limit"
-          :filters="filters"
           :summary="transactionSummary"
           @add-transaction="openAddTransaction"
           @edit-transaction="openEditTransaction"
           @edit-transaction-save="handleDirectSaveTransaction"
           @delete-transaction="handleDeleteTransaction"
-          @update-filters="handleUpdateFilters"
-          @update-page="handleUpdatePage"
         />
 
         <DebtList 
