@@ -444,7 +444,12 @@ onMounted(() => {
             class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'dashboard' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <span class="material-symbols-outlined text-[16px]">dashboard</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <rect width="7" height="9" x="3" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+              <rect width="7" height="5" x="14" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+              <rect width="7" height="9" x="14" y="12" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+              <rect width="7" height="5" x="3" y="16" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+            </svg>
             <span>Dashboard</span>
           </button>
           <button 
@@ -452,7 +457,12 @@ onMounted(() => {
             class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'transactions' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+              <path d="M16 8H8" />
+              <path d="M16 12H8" />
+              <path d="M13 16H8" />
+            </svg>
             <span>Transactions</span>
           </button>
           <button 
@@ -460,7 +470,10 @@ onMounted(() => {
             class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'debts' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9" :fill="currentTab === 'debts' ? 'currentColor' : 'none'" />
+              <path d="M16 14h.01" />
+            </svg>
             <span>Debt List</span>
           </button>
           <button 
@@ -468,7 +481,10 @@ onMounted(() => {
             class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <span class="material-symbols-outlined text-[16px]">settings</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" :fill="currentTab === 'settings' ? 'currentColor' : 'none'" />
+            </svg>
             <span>Settings</span>
           </button>
         </nav>
@@ -556,7 +572,12 @@ onMounted(() => {
         class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
         :class="currentTab === 'dashboard' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
-        <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'dashboard' ? '\'FILL\' 1' : '\'FILL\' 0' }">dashboard</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
+          <rect width="7" height="9" x="3" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+          <rect width="7" height="5" x="14" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+          <rect width="7" height="9" x="14" y="12" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+          <rect width="7" height="5" x="3" y="16" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
+        </svg>
         <span>Home</span>
       </button>
 
@@ -565,7 +586,12 @@ onMounted(() => {
         class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
         :class="currentTab === 'transactions' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
-        <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'transactions' ? '\'FILL\' 1' : '\'FILL\' 0' }">receipt_long</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
+          <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+          <path d="M16 8H8" />
+          <path d="M16 12H8" />
+          <path d="M13 16H8" />
+        </svg>
         <span>History</span>
       </button>
 
@@ -575,7 +601,10 @@ onMounted(() => {
         class="w-11 h-11 -mt-4 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center font-black text-lg shadow-lg border-2 border-[#0f0f15] transition active:scale-95 cursor-pointer shrink-0"
         title="Add Transaction"
       >
-        <span class="material-symbols-outlined text-[24px]">add</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <path d="M5 12h14" />
+          <path d="M12 5v14" />
+        </svg>
       </button>
 
       <button 
@@ -583,7 +612,10 @@ onMounted(() => {
         class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
         :class="currentTab === 'debts' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
-        <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'debts' ? '\'FILL\' 1' : '\'FILL\' 0' }">account_balance_wallet</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
+          <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9" :fill="currentTab === 'debts' ? 'currentColor' : 'none'" />
+          <path d="M16 14h.01" />
+        </svg>
         <span>Debt</span>
       </button>
 
@@ -592,7 +624,10 @@ onMounted(() => {
         class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
         :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
       >
-        <span class="material-symbols-outlined mb-0.5" :style="{ fontVariationSettings: currentTab === 'settings' ? '\'FILL\' 1' : '\'FILL\' 0' }">settings</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+          <circle cx="12" cy="12" r="3" :fill="currentTab === 'settings' ? 'currentColor' : 'none'" />
+        </svg>
         <span>Settings</span>
       </button>
     </nav>

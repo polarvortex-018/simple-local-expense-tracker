@@ -141,7 +141,7 @@
           <input 
             type="file" 
             ref="fileInput" 
-            accept=".db,.sqlite,.cbbak"
+            accept=".db,.sqlite,.cbbak,*/*"
             class="hidden" 
             @change="handleFileSelected"
           />
