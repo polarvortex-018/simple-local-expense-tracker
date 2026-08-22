@@ -130,7 +130,7 @@
       <div v-if="activeSheet" class="fixed inset-0 z-50 bg-[#0c0d14] flex flex-col w-full h-full overflow-hidden">
         
         <!-- Full Page Header Bar -->
-        <div class="px-4 sm:px-6 py-4 border-b border-[#1f202e] flex items-center justify-between bg-[#0c0d14]/95 backdrop-blur-md shrink-0">
+        <div class="px-4 sm:px-6 pb-3.5 border-b border-[#1f202e] flex items-center justify-between bg-[#0c0d14]/95 backdrop-blur-md shrink-0 safe-area-modal-pt">
           <div class="flex items-center gap-3">
             <button 
               @click="activeSheet = null"
@@ -522,14 +522,14 @@
                 <p class="text-xs text-[#9e9cae] mt-0.5">Export active database file, create local snapshots, or restore backups.</p>
               </div>
               <div class="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0">
-                <a 
-                  :href="exportUrl"
-                  download
+                <button 
+                  type="button"
+                  @click="handleExportActiveDatabase"
                   class="px-3.5 py-2 bg-[#B3F5E1] hover:bg-[#92edd0] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm min-h-[36px]"
                 >
                   <span class="material-symbols-outlined text-sm">download</span>
                   <span>Export Database</span>
-                </a>
+                </button>
                 <label class="px-3.5 py-2 bg-[#0f1019] hover:bg-[#141520] text-[#f1f0f5] border border-[#1f202e] hover:border-[#D4BFFF]/40 font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[36px]">
                   <span class="material-symbols-outlined text-sm">upload</span>
                   <span>Import Backup</span>
@@ -1509,15 +1509,17 @@ const handleRestoreBackup = async (filename) => {
   }
 };
 
+const handleExportActiveDatabase = async () => {
+  try {
+    await api.exportActiveDatabase();
+  } catch (err) {
+    alert(`Failed to export database: ${err.message}`);
+  }
+};
+
 const handleDownloadBackup = async (filename) => {
   try {
-    const url = await api.getBackupDownloadUrl(filename);
-    if (url === '#') throw new Error('Backup file not found.');
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    await api.downloadBackupFile(filename);
   } catch (err) {
     if (!/cancelled/i.test(err.message)) alert(err.message || 'Failed to download backup.');
   }

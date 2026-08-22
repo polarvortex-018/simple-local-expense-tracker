@@ -553,6 +553,12 @@ export async function restoreBackupSnapshot(filename) {
   return activeVaultFilename;
 }
 
+export async function getBackupSnapshotBytes(filename) {
+  const record = await getRecord('backups', filename);
+  if (!record) return null;
+  return decryptBytes(record);
+}
+
 export async function exportBackupBytes(filename, passphrase) {
   const record = await getRecord('backups', filename);
   if (!record) return null;

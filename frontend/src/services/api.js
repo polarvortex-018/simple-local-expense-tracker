@@ -4,6 +4,7 @@ import {
   execRun,
   runInTransaction,
   generateUUID,
+  getActiveVaultName,
   listVaults,
   createNewVault,
   switchActiveVault,
@@ -15,6 +16,7 @@ import {
   createBackupSnapshot,
   listBackupSnapshots,
   restoreBackupSnapshot,
+  getBackupSnapshotBytes,
   exportBackupBytes,
   checkDatabaseIntegrity
 } from './db/local_sqlite.js';
@@ -30,6 +32,33 @@ function uint8ToBase64(uint8) {
     binary += String.fromCharCode(uint8[i]);
   }
   return btoa(binary);
+}
+
+async function handleNativeExportOrShare(filename, uint8Array, title = 'Cash Buddy File', text = 'Cash Buddy Export') {
+  try {
+    const base64Data = uint8ToBase64(uint8Array);
+    
+    const writeResult = await Filesystem.writeFile({
+      path: filename,
+      data: base64Data,
+      directory: Directory.Cache
+    });
+
+    const canShareResult = await Share.canShare();
+    if (canShareResult && canShareResult.value) {
+      await Share.share({
+        title,
+        text,
+        url: writeResult.uri,
+        dialogTitle: title
+      });
+    } else {
+      alert(`File saved to device at: ${writeResult.uri}`);
+    }
+  } catch (err) {
+    console.error('Native export/share error:', err);
+    throw new Error(`Failed to save or share file: ${err.message}`);
+  }
 }
 
 async function normalizeHistoricalTransfers() {
@@ -208,22 +237,28 @@ export const api = {
     if (!['income', 'expense', 'adjustment', 'transfer'].includes(type)) throw new Error('Invalid transaction type.');
     if ((type === 'adjustment' || type === 'transfer') && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.date || '')) throw new Error('A valid transaction date is required.');
-    if (!payload.account_id) throw new Error("Account is required.");
+    
+    const accountId = payload.account_id || 'acc_unassigned_pool';
+    const target = payload.adjustment_target || 'both';
 
     return runInTransaction(async () => {
-    // Update Account Balance
-    const accRows = execQuery('SELECT * FROM accounts WHERE id = ?', [payload.account_id]);
-    if (!accRows.length) throw new Error("Target account not found.");
-    const currentAccBalance = Number(accRows[0].balance) || 0;
-    const multiplier = transactionMultiplier(type, payload.adjustment_direction);
-    const newAccBalance = currentAccBalance + (amount * multiplier);
-    execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [newAccBalance, now, payload.account_id], false);
+    // Update Account Balance (if account_id is valid and NOT bucket_only)
+    if (accountId && accountId !== 'acc_unassigned_pool' && target !== 'bucket_only') {
+      const accRows = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId]);
+      if (accRows.length) {
+        const currentAccBalance = Number(accRows[0].balance) || 0;
+        const multiplier = transactionMultiplier(type, payload.adjustment_direction);
+        const newAccBalance = currentAccBalance + (amount * multiplier);
+        execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [newAccBalance, now, accountId], false);
+      }
+    }
 
-    // Update Savings Bucket Allocation (if bucket_id specified)
-    if (payload.bucket_id) {
+    // Update Savings Bucket Allocation (if bucket_id specified and NOT account_only)
+    if (payload.bucket_id && target !== 'account_only') {
       const bucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [payload.bucket_id]);
       if (bucketRows.length) {
         const currentBucketAlloc = Number(bucketRows[0].allocated_balance) || 0;
+        const multiplier = transactionMultiplier(type, payload.adjustment_direction);
         const newBucketAlloc = currentBucketAlloc + (amount * multiplier);
         execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [newBucketAlloc, now, payload.bucket_id], false);
       }
@@ -233,7 +268,7 @@ export const api = {
     execRun(
       `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, amount, type, type === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, now], false
+      [id, amount, type, type === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, accountId, payload.bucket_id || null, payload.category_id || null, now, now], false
     );
 
     const created = await this.getTransactions({ limit: 1 });
@@ -250,19 +285,27 @@ export const api = {
     if (!Number.isFinite(newAmount) || newAmount <= 0) throw new Error('Amount must be a positive number.');
     if (!['income', 'expense', 'adjustment'].includes(payload.transaction_type)) throw new Error('Invalid transaction type.');
     if (payload.transaction_type === 'adjustment' && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
-    if (!execQuery('SELECT id FROM accounts WHERE id = ?', [payload.account_id]).length) throw new Error('Target account not found.');
+    
+    const accountId = payload.account_id || 'acc_unassigned_pool';
+    const target = payload.adjustment_target || 'both';
+
     return runInTransaction(async () => {
 
     // Revert Old Transaction Impact
     const oldAmount = Number(oldTx.amount);
     const oldType = oldTx.transaction_type;
-    const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
-    if (oldAccRows.length) {
-      const bal = Number(oldAccRows[0].balance);
-      const revertedBal = bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
-      execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
+    const oldTarget = oldTx.adjustment_target || 'both';
+
+    if (oldTx.account_id && oldTx.account_id !== 'acc_unassigned_pool' && oldTarget !== 'bucket_only') {
+      const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
+      if (oldAccRows.length) {
+        const bal = Number(oldAccRows[0].balance);
+        const revertedBal = bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
+        execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
+      }
     }
-    if (oldTx.bucket_id) {
+
+    if (oldTx.bucket_id && oldTarget !== 'account_only') {
       const oldBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [oldTx.bucket_id]);
       if (oldBucketRows.length) {
         const alloc = Number(oldBucketRows[0].allocated_balance);
@@ -275,13 +318,16 @@ export const api = {
     const now = new Date().toISOString();
     const newType = payload.transaction_type;
 
-    const newAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [payload.account_id]);
-    if (newAccRows.length) {
-      const bal = Number(newAccRows[0].balance);
-      const appliedBal = bal + (newAmount * transactionMultiplier(newType, payload.adjustment_direction));
-      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [appliedBal, now, payload.account_id], false);
+    if (accountId && accountId !== 'acc_unassigned_pool' && target !== 'bucket_only') {
+      const newAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId]);
+      if (newAccRows.length) {
+        const bal = Number(newAccRows[0].balance);
+        const appliedBal = bal + (newAmount * transactionMultiplier(newType, payload.adjustment_direction));
+        execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [appliedBal, now, accountId], false);
+      }
     }
-    if (payload.bucket_id) {
+
+    if (payload.bucket_id && target !== 'account_only') {
       const newBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [payload.bucket_id]);
       if (newBucketRows.length) {
         const alloc = Number(newBucketRows[0].allocated_balance);
@@ -294,7 +340,7 @@ export const api = {
       `UPDATE transactions 
        SET amount = ?, transaction_type = ?, adjustment_direction = ?, description = ?, date = ?, account_id = ?, bucket_id = ?, category_id = ?, updated_at = ?
        WHERE id = ?`,
-      [newAmount, newType, newType === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, payload.account_id, payload.bucket_id || null, payload.category_id || null, now, id], false
+      [newAmount, newType, newType === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, accountId, payload.bucket_id || null, payload.category_id || null, now, id], false
     );
 
     return { id, ...payload };
@@ -306,18 +352,24 @@ export const api = {
     const existingRows = execQuery('SELECT * FROM transactions WHERE id = ?', [id]);
     if (!existingRows.length) return null;
     const oldTx = existingRows[0];
+    const oldTarget = oldTx.adjustment_target || 'both';
+
     return runInTransaction(async () => {
 
     // Revert Account & Bucket impact
     const oldAmount = Number(oldTx.amount);
     const oldType = oldTx.transaction_type;
-    const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
-    if (oldAccRows.length) {
-      const bal = Number(oldAccRows[0].balance);
-      const revertedBal = bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
-      execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
+
+    if (oldTx.account_id && oldTx.account_id !== 'acc_unassigned_pool' && oldTarget !== 'bucket_only') {
+      const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
+      if (oldAccRows.length) {
+        const bal = Number(oldAccRows[0].balance);
+        const revertedBal = bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
+        execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
+      }
     }
-    if (oldTx.bucket_id) {
+
+    if (oldTx.bucket_id && oldTarget !== 'account_only') {
       const oldBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [oldTx.bucket_id]);
       if (oldBucketRows.length) {
         const alloc = Number(oldBucketRows[0].allocated_balance);
@@ -868,10 +920,55 @@ export const api = {
   },
 
   // ----------------------------------------------------
-  // BACKUP & EXPORT (ON-PHONE)
+  // BACKUP & EXPORT (ON-PHONE & WEB)
   // ----------------------------------------------------
+  async exportActiveDatabase() {
+    await ensureDB();
+    const binary = exportActiveDatabaseBlob();
+    if (!binary || binary.byteLength === 0) throw new Error("Database is empty or not initialized.");
+
+    const filename = getActiveVaultName() || 'finance.db';
+
+    if (Capacitor.isNativePlatform()) {
+      await handleNativeExportOrShare(filename, binary, `Cash Buddy Database (${filename})`, `Here is my Cash Buddy database file: ${filename}`);
+      return;
+    }
+
+    const blob = new Blob([binary], { type: 'application/x-sqlite3' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
+
+  async downloadBackupFile(filename) {
+    await ensureDB();
+    const binary = await getBackupSnapshotBytes(filename);
+    if (!binary || binary.byteLength === 0) throw new Error('Failed to read backup file data.');
+
+    const outName = filename.endsWith('.db') ? filename : filename.replace(/\.cbbak$/i, '.db');
+
+    if (Capacitor.isNativePlatform()) {
+      await handleNativeExportOrShare(outName, binary, `Cash Buddy Backup (${outName})`, `Backup file: ${outName}`);
+      return;
+    }
+
+    const blob = new Blob([binary], { type: 'application/x-sqlite3' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = outName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
+
   exportDatabaseUrl() {
-    // Generate Blob URL dynamically for 1-click download on phone
     const binary = exportActiveDatabaseBlob();
     if (!binary) return '#';
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
@@ -896,9 +993,8 @@ export const api = {
   },
 
   async getBackupDownloadUrl(filename) {
-    const passphrase = prompt('Create a passphrase (at least 8 characters) for this portable encrypted backup:');
-    if (passphrase === null) throw new Error('Backup export cancelled.');
-    const binary = await exportBackupBytes(filename, passphrase || 'default_cashbuddy_pass');
+    await ensureDB();
+    const binary = await getBackupSnapshotBytes(filename);
     if (!binary) return '#';
     const blob = new Blob([binary], { type: 'application/x-sqlite3' });
     return URL.createObjectURL(blob);

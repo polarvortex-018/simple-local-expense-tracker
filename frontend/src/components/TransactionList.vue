@@ -569,7 +569,6 @@
                           class="transition-all duration-300 pointer-events-none"
                           :style="{
                             transformOrigin: '100px 100px',
-                            filter: activeExpenseIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
                             transform: activeExpenseIndex === segment.originalIndex ? 'scale(1.07)' : 'scale(1)',
                             opacity: activeExpenseIndex === null || activeExpenseIndex === segment.originalIndex ? 1 : 0.35
                           }"
@@ -614,8 +613,7 @@
                   <span 
                     class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
                     :style="{ 
-                      color: item.color,
-                      filter: activeExpenseIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
+                      color: item.color
                     }"
                   >
                     {{ resolveIcon(item.icon, 'category') }}
@@ -706,7 +704,6 @@
                           class="transition-all duration-300 pointer-events-none"
                           :style="{
                             transformOrigin: '100px 100px',
-                            filter: activeIncomeIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
                             transform: activeIncomeIndex === segment.originalIndex ? 'scale(1.07)' : 'scale(1)',
                             opacity: activeIncomeIndex === null || activeIncomeIndex === segment.originalIndex ? 1 : 0.35
                           }"
@@ -751,8 +748,7 @@
                   <span 
                     class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
                     :style="{ 
-                      color: item.color,
-                      filter: activeIncomeIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
+                      color: item.color
                     }"
                   >
                     {{ resolveIcon(item.icon, 'category') }}
@@ -2115,6 +2111,5 @@ const transactionLabel = (tx) => {
   transform-origin: center;
   animation: spinRing 0.55s linear infinite;
   pointer-events: none;
-  filter: drop-shadow(0 0 10px rgba(212, 191, 255, 0.6));
 }
 </style>

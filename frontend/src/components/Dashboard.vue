@@ -104,53 +104,47 @@
                   <circle 
                     cx="222" cy="100" r="2.2" 
                     :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#D4BFFF'" 
-                    class="particle-dot transition-colors duration-500"
-                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#D4BFFF'})` }"
+                    class="particle-dot transition-colors duration-500 opacity-90"
                   />
                 </g>
                 <g class="animate-orbit-2 origin-[100px_100px]">
                   <circle 
                     cx="161" cy="205" r="1.8" 
                     :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#B3F5E1'" 
-                    class="particle-dot transition-colors duration-500"
+                    class="particle-dot transition-colors duration-500 opacity-90"
                     style="animation-delay: 0.5s;"
-                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#B3F5E1'})` }"
                   />
                 </g>
                 <g class="animate-orbit-3 origin-[100px_100px]">
                   <circle 
                     cx="39" cy="205" r="2.5" 
                     :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#FFD1B3'" 
-                    class="particle-dot transition-colors duration-500"
+                    class="particle-dot transition-colors duration-500 opacity-90"
                     style="animation-delay: 1s;"
-                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#FFD1B3'})` }"
                   />
                 </g>
                 <g class="animate-orbit-4 origin-[100px_100px]">
                   <circle 
                     cx="-22" cy="100" r="1.6" 
                     :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#c084fc'" 
-                    class="particle-dot transition-colors duration-500"
+                    class="particle-dot transition-colors duration-500 opacity-90"
                     style="animation-delay: 1.5s;"
-                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#c084fc'})` }"
                   />
                 </g>
                 <g class="animate-orbit-5 origin-[100px_100px]">
                   <circle 
                     cx="39" cy="-5" r="2.2" 
                     :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#38bdf8'" 
-                    class="particle-dot transition-colors duration-500"
+                    class="particle-dot transition-colors duration-500 opacity-90"
                     style="animation-delay: 2s;"
-                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#38bdf8'})` }"
                   />
                 </g>
                 <g class="animate-orbit-6 origin-[100px_100px]">
                   <circle 
                     cx="161" cy="-5" r="1.8" 
                     :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#f472b6'" 
-                    class="particle-dot transition-colors duration-500"
+                    class="particle-dot transition-colors duration-500 opacity-90"
                     style="animation-delay: 2.5s;"
-                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#f472b6'})` }"
                   />
                 </g>
               </g>
@@ -178,9 +172,8 @@
                     class="transition-all duration-300 pointer-events-none"
                     :style="{
                       transformOrigin: '100px 100px',
-                      filter: activeDashboardIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
                       transform: activeDashboardIndex === segment.originalIndex ? 'scale(1.07)' : 'scale(1)',
-                      opacity: activeDashboardIndex === null || activeDashboardIndex === segment.originalIndex ? 1 : 0.3
+                      opacity: activeDashboardIndex === null || activeDashboardIndex === segment.originalIndex ? 1 : 0.35
                     }"
                   />
                 </g>

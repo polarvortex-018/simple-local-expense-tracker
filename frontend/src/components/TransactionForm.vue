@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 pt-4 sm:pt-10 bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
-    <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] my-0 sm:my-auto">
+  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 pt-[max(2.5rem,env(safe-area-inset-top))] sm:pt-10 safe-area-modal-pt bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
+    <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[86vh] my-0 sm:my-auto">
       
       <!-- Header -->
       <div class="px-4 py-2.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
@@ -102,8 +102,27 @@
 
             <!-- 2. From Account Section (2-Column Mobile Grid) -->
             <div ref="accountSectionRef" class="space-y-1.5 pt-1 border-t border-[#1f202e]/60">
-              <h4 class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">2. Select Account</h4>
+              <h4 class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">2. Select Account (Optional)</h4>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <!-- No Account / Unassigned Option -->
+                <button
+                  type="button"
+                  @click="selectAccountAndAutoAdvance('acc_unassigned_pool')"
+                  class="flex items-center gap-2 p-2.5 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[46px]"
+                  :class="form.account_id === 'acc_unassigned_pool' || (!form.account_id && currentStep === 2)
+                    ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
+                    : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
+                >
+                  <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-sm leading-none text-[#9e9cae]">credit_card_off</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-[#f1f0f5] truncate">No Account</p>
+                    <p class="text-[10px] text-[#9e9cae] truncate mt-0.5">Unassigned</p>
+                  </div>
+                </button>
+
+                <!-- Physical User Accounts -->
                 <button
                   v-for="acc in userAccounts" 
                   :key="acc.id"
@@ -170,10 +189,40 @@
               </button>
             </div>
 
-            <!-- Adjustment direction logic -->
-            <div v-if="form.transaction_type === 'adjustment'" class="rounded-xl border border-amber-900/40 bg-[#0f1019] p-2.5 space-y-1.5">
-              <p class="text-[10px] text-amber-200">Reconcile account balance. Enter reason in Description.</p>
-              <div class="grid grid-cols-2 gap-2">
+            <!-- Adjustment Target & Direction logic (Reconcile Just Account, Just Bucket, or Both) -->
+            <div v-if="form.transaction_type === 'adjustment'" class="rounded-xl border border-amber-900/40 bg-[#0f1019] p-3 space-y-2">
+              <p class="text-[10px] text-amber-200 font-semibold">Reconciliation Target (Correct mistakes in tallying):</p>
+              
+              <!-- 3-Way Target Selector -->
+              <div class="grid grid-cols-3 gap-1 p-0.5 bg-[#141520] rounded-lg border border-[#1f202e] text-[10px] font-bold">
+                <button 
+                  type="button" 
+                  @click="form.adjustment_target = 'both'" 
+                  class="py-1 px-1 rounded transition cursor-pointer text-center" 
+                  :class="form.adjustment_target === 'both' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                >
+                  ⚖️ Both
+                </button>
+                <button 
+                  type="button" 
+                  @click="form.adjustment_target = 'account_only'" 
+                  class="py-1 px-1 rounded transition cursor-pointer text-center" 
+                  :class="form.adjustment_target === 'account_only' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                >
+                  🏦 Account Only
+                </button>
+                <button 
+                  type="button" 
+                  @click="form.adjustment_target = 'bucket_only'" 
+                  class="py-1 px-1 rounded transition cursor-pointer text-center" 
+                  :class="form.adjustment_target === 'bucket_only' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                >
+                  🪣 Bucket Only
+                </button>
+              </div>
+
+              <!-- Direction (+ Add / - Subtract) -->
+              <div class="grid grid-cols-2 gap-2 pt-0.5">
                 <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'add' ? 'border-[#B3F5E1] bg-[#B3F5E1]/20 text-[#B3F5E1]' : 'border-[#1f202e] text-[#9e9cae]'">+ Add amount</button>
                 <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'subtract' ? 'border-[#FFD1B3] bg-[#FFD1B3]/20 text-[#FFD1B3]' : 'border-[#1f202e] text-[#9e9cae]'">− Subtract amount</button>
               </div>
@@ -405,8 +454,7 @@ const goToStep1 = () => {
 const goToStep2 = () => {
   error.value = '';
   if (!form.value.account_id) {
-    error.value = 'Please select an Account.';
-    return;
+    form.value.account_id = 'acc_unassigned_pool';
   }
   slideDirection.value = 'next';
   currentStep.value = 2;
@@ -421,7 +469,7 @@ const selectBucket = (bId) => {
 };
 
 const selectAccountAndAutoAdvance = (accId) => {
-  form.value.account_id = accId;
+  form.value.account_id = accId || 'acc_unassigned_pool';
   goToStep2();
 };
 
@@ -470,6 +518,7 @@ const form = ref({
   description: '',
   transaction_type: props.defaultType || 'expense',
   adjustment_direction: 'add',
+  adjustment_target: 'both',
   notes: '',
   account_id: '',
   category_id: '',
@@ -489,8 +538,11 @@ const selectedBucketName = computed(() => {
 });
 
 const selectedAccountName = computed(() => {
+  if (!form.value.account_id || form.value.account_id === 'acc_unassigned_pool') {
+    return 'No Account';
+  }
   const acc = props.accounts.find(a => a.id === form.value.account_id);
-  return acc ? acc.name : 'Not Selected';
+  return acc ? acc.name : 'No Account';
 });
 
 const formatAmount = (val) => {
@@ -508,14 +560,15 @@ onMounted(() => {
       description: props.transaction.description,
       transaction_type: props.transaction.transaction_type,
       adjustment_direction: props.transaction.adjustment_direction || 'add',
+      adjustment_target: props.transaction.adjustment_target || 'both',
       notes: props.transaction.notes || '',
-      account_id: props.transaction.account_id,
+      account_id: props.transaction.account_id || 'acc_unassigned_pool',
       category_id: props.transaction.category_id,
       bucket_id: props.transaction.bucket_id || ''
     };
     focusAmountInput();
   } else {
-    // Reset account_id and category_id: NEVER auto-choose an account!
+    // Reset account_id and category_id
     form.value.account_id = '';
     form.value.category_id = '';
 
@@ -534,10 +587,7 @@ const handleSubmit = async () => {
   }
   
   // Validation checks
-  if (!form.value.account_id) {
-    error.value = 'Please select a valid account.';
-    return;
-  }
+  const accountId = form.value.account_id || 'acc_unassigned_pool';
   const normalizedAmount = String(form.value.amount).replace(',', '.');
   if (Number(normalizedAmount) <= 0 || !Number.isFinite(Number(normalizedAmount))) {
     error.value = 'Amount must be greater than zero.';
@@ -557,6 +607,7 @@ const handleSubmit = async () => {
 
     const payload = {
       ...form.value,
+      account_id: accountId,
       amount: Number(normalizedAmount),
       description: finalDesc,
       notes: form.value.notes ? form.value.notes.trim() : null
