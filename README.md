@@ -1,34 +1,36 @@
-# 🏦 Personal Financial Tracker v2 (Local-First & Multi-Vault)
+# 💸 Cash Buddy — Local-First Personal Finance & Debt Tracker
 
-A modern, high-performance, **local-first personal finance and expense tracking web application** built with FastAPI, Vue 3, Vite, SQLModel, and SQLite.
+A modern, ultra-sleek, **local-first personal finance tracking application** for Web and Android built with FastAPI, Vue 3, Vite, Capacitor 7, SQLModel, and SQLite.
 
-Designed for complete data ownership and zero-friction setup: your financial data remains 100% local, private, and portable.
+Designed for complete data ownership, 60fps fluid motion, and zero cloud lock-in: your financial data remains 100% local, private, and portable.
 
 ---
 
 ## 🌟 Key Features
 
-- **🚀 1-Command Startup**: Start both the FastAPI backend and Vue 3 frontend simultaneously with `npm run dev`.
+- **🚀 1-Command Web Launch**: Start both the FastAPI backend and Vue 3 frontend simultaneously with `npm run dev`.
+- **📱 Android & Mobile Native Integration**: Built with **Capacitor 7**, featuring native filesystem support (`@capacitor/filesystem`), file sharing (`@capacitor/share`), and native status bar styling.
 - **🏛️ Obsidian-Style Financial Vaults**: Manage multiple isolated database files (`Personal.db`, `Freelance.db`, `Family.db`) and switch between them dynamically in 1 click.
-- **⚡ Automatic Database Creation & Migrations**: Zero manual SQL setup. The application automatically creates `data/finance.db`, runs Alembic migrations (`alembic upgrade head`), and seeds default categories on first launch.
-- **🪣 Dual-Dimension Savings Buckets**: Track **where** your money is stored (Bank Accounts, Cash, Wallet) independently of **why** your money exists (Emergency Fund, Japan Trip, Rent, Investments).
-- **📊 Dynamic Analytics & Filtering**: Real-time spending breakdown pie charts, monthly time-range selectors, multi-category filtering, and debt tracking.
-- **💾 Export, Import & Snapshots**: 1-click database exports, timestamped local snapshots (`backups/`), and seamless database restoration.
-- **🔒 Privacy First & Portable**: 100% local-first SQLite architecture. No third-party data tracking or external cloud lock-in.
+- **🌊 Staggered Cascade Motion & Animations**: Fluid 60fps entrance animations across all views, tactile spring micro-presses on CTAs, sliding bottom navigation pill indicators, animated number tickers, and spring float toast notifications.
+- **📈 Interactive Donut Charts & Physics**: Donut charts on Dashboard and History with ambient continuous rotation, snap-to-top slice alignment physics, active category color auras, and floating sparkle particles.
+- **🪣 Dual-Dimension Savings Allocations**: Track **where** your money is stored (Bank Accounts, Cash, Wallet) independently of **why** your money exists (Emergency Fund, Travel, Rent, Investments) presented in a clean hairline grid.
+- **🤝 Debt & IOU Tracker**: Keep track of money lent to others and money borrowed, with full settlement history and net position calculation.
+- **⚡ Automatic Database Creation & Migrations**: Zero manual SQL setup. The application automatically creates `data/finance.db`, runs Alembic migrations (`alembic upgrade head`), and seeds default categories on launch.
+- **💾 Export, Import & Local Snapshots**: 1-click database exports, timestamped local snapshots (`backups/`), and seamless database restoration.
+- **🔒 Privacy First & Portable**: 100% local-first SQLite architecture. No third-party data tracking or cloud lock-in.
 
 ---
 
-## 🛠️ Prerequisites
+## 🛠️ Tech Stack & Architecture
 
-Before getting started, ensure you have the following installed on your machine:
-
-- **Python**: `v3.10` or higher
-- **Node.js**: `v18.0.0` or higher
-- **npm**: `v9.0.0` or higher
+- **Frontend**: Vue 3 (Composition API `<script setup>`), Vite, Tailwind CSS, Material Symbols.
+- **Mobile Runtime**: Capacitor 7 (@capacitor/android, @capacitor/filesystem, @capacitor/share, @capacitor/status-bar).
+- **Backend**: FastAPI (Python 3.10+), SQLModel (SQLAlchemy 2.0), Pydantic v2, Alembic.
+- **Database**: Local SQLite database files (`data/finance.db`) with fallback WebAssembly SQLite support (`sql-wasm.wasm`).
 
 ---
 
-## 🚀 Quick Start (1-Command Launch)
+## 🚀 Quick Start
 
 ### 1. Clone the Repository
 
@@ -39,13 +41,13 @@ cd financial-tracking-app-v2
 
 ### 2. Install Dependencies
 
-Install root and frontend dependencies with a single command:
+Install root and frontend dependencies:
 
 ```bash
 npm run install:all
 ```
 
-*(Optionally install Python dependencies into a virtual environment):*
+*(Optionally install Python backend dependencies into a virtual environment)*:
 
 ```bash
 python -m venv backend/.venv
@@ -59,7 +61,7 @@ source backend/.venv/bin/activate
 pip install -r backend/requirements.txt
 ```
 
-### 3. Run the Development Server
+### 3. Run the Web Development Server
 
 Start both backend (FastAPI @ `http://localhost:8000`) and frontend (Vite @ `http://localhost:5173`) with **one command**:
 
@@ -67,16 +69,35 @@ Start both backend (FastAPI @ `http://localhost:8000`) and frontend (Vite @ `htt
 npm run dev
 ```
 
-Open **`http://localhost:5173`** in your browser. The database and schema will be initialized automatically!
+Open **`http://localhost:5173`** in your browser. The database and schema will initialize automatically!
+
+---
+
+## 📱 Building & Syncing for Android Mobile
+
+To build the web frontend and sync assets to the Android Capacitor project:
+
+```bash
+cd frontend
+
+# 1. Build production Web assets
+npm run build
+
+# 2. Sync assets with native Android platform
+npx cap sync android
+
+# 3. Open project in Android Studio (to run on device/emulator)
+npx cap open android
+```
 
 ---
 
 ## 🏛️ Financial Vaults (Multi-Database System)
 
-Just like **Obsidian Vaults**, this application supports managing multiple completely independent database files:
+Just like **Obsidian Vaults**, Cash Buddy supports managing multiple completely independent database files:
 
-- **Switching Vaults**: Click the **`🏦 Vault: Personal ▾`** pill button in the top navigation header to open the Vault Manager modal and switch vaults instantly.
-- **Creating a Vault**: Enter a name (e.g. *Freelance*, *Family*) and click **+ Create Vault**. A new SQLite file will be created in `data/`, migrated to the latest schema, and initialized with defaults.
+- **Switching Vaults**: Click **Settings → Database & Vaults** (or the Vault indicator) to open the Vault Manager and switch vaults instantly.
+- **Creating a Vault**: Enter a name (e.g. *Freelance*, *Family*) and click **+ Create Vault**. A new SQLite file will be created in `data/`, migrated to the latest schema, and initialized with default categories.
 - **Importing a Vault**: Select an existing `.db` file from your machine to import it as a new vault without overwriting your current data.
 
 ---
@@ -84,12 +105,12 @@ Just like **Obsidian Vaults**, this application supports managing multiple compl
 ## 💾 Backup, Export & Restore
 
 ### Export Active Database
-- Navigate to **Settings** -> **Data Backup & Export Controls**.
+- Navigate to **More / Settings** -> **Database Backup & Snapshots**.
 - Click **⬇️ Export Active Database** to download your current SQLite database file.
 
 ### Snapshot Backups
-- Click **📸 Create Local Snapshot** in Settings to save a timestamped copy (e.g. `backup_finance_20260728_150000.db`) into the `backups/` directory.
-- Click **Restore** next to any snapshot to revert to that state.
+- Click **📸 Create Local Snapshot** in Settings to save a timestamped copy (e.g. `backup_finance_20260822_180000.db`) into the `backups/` directory.
+- Click **Restore** next to any snapshot to revert to that exact state.
 
 ---
 
@@ -110,14 +131,17 @@ financial-tracking-app-v2/
 │   ├── alembic.ini           # Alembic configuration
 │   └── requirements.txt      # Python dependencies
 │
-├── frontend/                 # Vue 3 + Vite Application
+├── frontend/                 # Vue 3 + Vite + Capacitor Application
+│   ├── android/              # Native Android Capacitor Platform
 │   ├── src/
-│   │   ├── components/       # UI Components (Dashboard, TransactionList, SettingsView, VaultModal)
-│   │   ├── services/         # API Service Client
-│   │   └── utils/            # Date and currency formatting helpers
+│   │   ├── components/       # UI Components (Dashboard, TransactionList, DebtList, SettingsView, VaultModal)
+│   │   ├── services/         # API & Database Service Client
+│   │   ├── utils/            # Date, icon, and currency formatting helpers
+│   │   └── style.css         # Global Tailwind & Motion System CSS
+│   ├── capacitor.config.json # Capacitor 7 App Configuration
 │   └── package.json
 │
-├── data/                     # Local SQLite Databases (Vaults) [Git-Ignored]
+├── data/                     # Local SQLite Database Files (Vaults) [Git-Ignored]
 │   └── finance.db
 │
 ├── backups/                  # Snapshot Backups [Git-Ignored]
@@ -135,9 +159,9 @@ financial-tracking-app-v2/
 
 ---
 
-## 🧪 Running Unit Tests
+## 🧪 Verification & Testing
 
-Run the full pytest suite (covering API endpoints, transaction logic, savings buckets, dynamic vaults, and backup handlers):
+Run the backend Pytest suite:
 
 ```bash
 # Windows
@@ -150,19 +174,9 @@ pytest
 Run frontend build verification:
 
 ```bash
+cd frontend
 npm run build
 ```
-
----
-
-## ❓ Troubleshooting
-
-- **Port Conflicts (`8000` or `5173` in use)**:
-  - You can customize `BACKEND_PORT` or `FRONTEND_PORT` in your `.env` file.
-- **SQLite Database File Lock on Windows**:
-  - If a file lock warning appears when deleting a vault, switch to another vault first or restart `npm run dev`.
-- **Missing Dependencies**:
-  - Re-run `npm run install:all` and `pip install -r backend/requirements.txt`.
 
 ---
 
