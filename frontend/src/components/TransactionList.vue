@@ -1722,17 +1722,8 @@ const closeViewModal = () => {
 const startModalEdit = () => {
   const tx = selectedTransactionForView.value;
   if (!tx) return;
-  editForm.value = {
-    description: tx.description || '',
-    notes: tx.notes || '',
-    amount: tx.amount,
-    date: tx.date || '',
-    category_id: tx.category_id,
-    account_id: tx.account_id,
-    bucket_id: tx.bucket_id || '',
-    transaction_type: tx.transaction_type || 'expense'
-  };
-  isEditingInModal.value = true;
+  closeViewModal();
+  emit('edit-transaction', tx);
 };
 
 const cancelModalEdit = () => {

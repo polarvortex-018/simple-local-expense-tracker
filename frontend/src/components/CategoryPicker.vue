@@ -4,6 +4,7 @@
     
     <!-- Compact Trigger Button -->
     <button
+      v-if="!hideTrigger"
       type="button"
       :disabled="disabled"
       @click="isOpen = true"
@@ -121,7 +122,8 @@ const props = defineProps({
   label: { type: String, default: '' },
   placeholder: { type: String, default: 'Select Category' },
   title: { type: String, default: 'Select Category' },
-  disabled: { type: Boolean, default: false }
+  disabled: { type: Boolean, default: false },
+  hideTrigger: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);

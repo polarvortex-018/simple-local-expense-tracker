@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-start justify-center p-3 pt-4 sm:pt-10 bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
-    <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] modal-drop-card my-0 sm:my-auto">
+    <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] my-0 sm:my-auto">
       
       <!-- Header -->
       <div class="px-4 py-2.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
@@ -126,107 +126,108 @@
             </div>
           </div>
 
-          <!-- STEP 2: Ultra-Compact Details (Category -> Amount -> Description -> Submit) -->
-          <div v-else key="step-2" class="space-y-2.5 pb-4">
+          <!-- STEP 2: Details (Category -> Amount -> Description -> Submit) -->
+          <div v-else key="step-2" class="space-y-3.5 pb-2">
             
             <!-- Selected Allocation Badges Bar -->
-            <div v-if="!isEdit" class="flex items-center justify-between gap-2 p-1.5 px-2.5 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs">
+            <div v-if="!isEdit" class="flex items-center justify-between gap-2 p-2 px-3 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs">
               <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-                <span class="px-1.5 py-0.2 rounded bg-[#D4BFFF]/15 text-[#D4BFFF] font-semibold text-[10px] truncate">{{ selectedBucketName }}</span>
+                <span class="px-2 py-0.5 rounded-md bg-[#D4BFFF]/15 text-[#D4BFFF] font-semibold text-[10px] truncate">{{ selectedBucketName }}</span>
                 <span class="text-[#9e9cae] shrink-0 text-[10px]">•</span>
-                <span class="px-1.5 py-0.2 rounded bg-[#141520] border border-[#1f202e] text-[#f1f0f5] font-semibold text-[10px] truncate">{{ selectedAccountName }}</span>
+                <span class="px-2 py-0.5 rounded-md bg-[#141520] border border-[#1f202e] text-[#f1f0f5] font-semibold text-[10px] truncate">{{ selectedAccountName }}</span>
               </div>
               <button type="button" @click="goToStep1" class="text-[10px] text-[#D4BFFF] hover:underline font-semibold cursor-pointer shrink-0 ml-auto">Change</button>
             </div>
 
             <!-- Transaction Type Switcher -->
-            <div class="grid grid-cols-3 gap-1 p-0.5 bg-[#0f1019] rounded-lg border border-[#1f202e]">
+            <div class="grid grid-cols-3 gap-1 p-1 bg-[#0f1019] rounded-xl border border-[#1f202e]">
               <button 
                 type="button"
                 @click="form.transaction_type = 'expense'"
-                class="py-1 text-[11px] font-semibold rounded transition cursor-pointer flex items-center justify-center gap-1"
-                :class="form.transaction_type === 'expense' ? 'bg-[#FFD1B3] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+                :class="form.transaction_type === 'expense' ? 'bg-[#FFD1B3] text-[#0f0f15] font-bold shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
               >
-                <span class="material-symbols-outlined text-xs">trending_down</span>
+                <span class="material-symbols-outlined text-sm">trending_down</span>
                 <span>Expense</span>
               </button>
               <button 
                 type="button"
                 @click="form.transaction_type = 'income'"
-                class="py-1 text-[11px] font-semibold rounded transition cursor-pointer flex items-center justify-center gap-1"
-                :class="form.transaction_type === 'income' ? 'bg-[#B3F5E1] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+                :class="form.transaction_type === 'income' ? 'bg-[#B3F5E1] text-[#0f0f15] font-bold shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
               >
-                <span class="material-symbols-outlined text-xs">trending_up</span>
+                <span class="material-symbols-outlined text-sm">trending_up</span>
                 <span>Income</span>
               </button>
               <button 
                 type="button"
                 @click="form.transaction_type = 'adjustment'"
-                class="py-1 text-[11px] font-semibold rounded transition cursor-pointer flex items-center justify-center gap-1"
-                :class="form.transaction_type === 'adjustment' ? 'bg-[#D4BFFF] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+                class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+                :class="form.transaction_type === 'adjustment' ? 'bg-[#D4BFFF] text-[#0f0f15] font-bold shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
               >
-                <span class="material-symbols-outlined text-xs">tune</span>
+                <span class="material-symbols-outlined text-sm">tune</span>
                 <span>Adjust</span>
               </button>
             </div>
 
             <!-- Adjustment direction logic -->
-            <div v-if="form.transaction_type === 'adjustment'" class="rounded-lg border border-amber-900/40 bg-[#0f1019] p-2 space-y-1.5">
+            <div v-if="form.transaction_type === 'adjustment'" class="rounded-xl border border-amber-900/40 bg-[#0f1019] p-2.5 space-y-1.5">
               <p class="text-[10px] text-amber-200">Reconcile account balance. Enter reason in Description.</p>
-              <div class="grid grid-cols-2 gap-1.5">
-                <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-md border py-1 text-[10px] font-semibold cursor-pointer" :class="form.adjustment_direction === 'add' ? 'border-[#B3F5E1] bg-[#B3F5E1]/20 text-[#B3F5E1]' : 'border-[#1f202e] text-[#9e9cae]'">+ Add amount</button>
-                <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-md border py-1 text-[10px] font-semibold cursor-pointer" :class="form.adjustment_direction === 'subtract' ? 'border-[#FFD1B3] bg-[#FFD1B3]/20 text-[#FFD1B3]' : 'border-[#1f202e] text-[#9e9cae]'">− Subtract amount</button>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'add' ? 'border-[#B3F5E1] bg-[#B3F5E1]/20 text-[#B3F5E1]' : 'border-[#1f202e] text-[#9e9cae]'">+ Add amount</button>
+                <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'subtract' ? 'border-[#FFD1B3] bg-[#FFD1B3]/20 text-[#FFD1B3]' : 'border-[#1f202e] text-[#9e9cae]'">− Subtract amount</button>
               </div>
             </div>
 
-            <!-- 1. CATEGORY SELECTION FIRST (Compact 3-Column Grid) -->
-            <div class="space-y-1">
-              <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider block">SELECT CATEGORY *</label>
+            <!-- 1. CATEGORY SELECTION FIRST (3-Column Grid) -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">SELECT CATEGORY *</label>
 
-              <!-- 3-Column Ultra-Compact Quick Category Grid -->
-              <div class="grid grid-cols-3 gap-1.5">
+              <!-- 3-Column Spacious Quick Category Grid -->
+              <div class="grid grid-cols-3 gap-2">
                 <button 
                   type="button"
                   v-for="cat in displayedQuickCategories" 
                   :key="cat.id"
                   @click="selectCategoryAndFocusAmount(cat.id)"
-                  class="p-1.5 rounded-lg border text-xs transition flex items-center justify-start gap-1.5 text-left cursor-pointer min-h-[42px] active:scale-[0.98]"
+                  class="p-2 rounded-xl border text-xs transition flex items-center justify-start gap-2 text-left cursor-pointer min-h-[46px] active:scale-[0.98]"
                   :class="form.category_id === cat.id ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] text-[#f1f0f5] ring-1 ring-[#D4BFFF]/40' : 'bg-[#0f1019] border-[#1f202e] text-[#9e9cae] hover:border-[#D4BFFF]/30'"
                 >
-                  <div class="w-6 h-6 rounded-md bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-xs shrink-0" :style="{ color: cat.color || '#D4BFFF' }">{{ resolveIcon(cat.icon, 'category') }}</span>
+                  <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-sm shrink-0" :style="{ color: cat.color || '#D4BFFF' }">{{ resolveIcon(cat.icon, 'category') }}</span>
                   </div>
-                  <span class="text-[10px] font-bold truncate max-w-full leading-tight text-[#f1f0f5]">{{ cat.name }}</span>
+                  <span class="text-[11px] font-bold truncate max-w-full leading-tight text-[#f1f0f5]">{{ cat.name }}</span>
                 </button>
 
                 <!-- More Categories Picker Trigger Card -->
                 <button
                   type="button"
                   @click="categoryPickerRef?.open()"
-                  class="p-1.5 rounded-lg border text-xs transition flex items-center justify-start gap-1.5 text-left cursor-pointer min-h-[42px] w-full active:scale-[0.98]"
+                  class="p-2 rounded-xl border text-xs transition flex items-center justify-start gap-2 text-left cursor-pointer min-h-[46px] w-full active:scale-[0.98]"
                   :class="selectedCategoryIsNonQuick ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] text-[#D4BFFF] ring-1 ring-[#D4BFFF]/40' : 'bg-[#0f1019] border-[#1f202e] text-[#9e9cae] hover:border-[#D4BFFF]/30'"
                 >
-                  <div class="w-6 h-6 rounded-md bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
                     <span 
                       v-if="selectedCategoryIsNonQuick"
-                      class="material-symbols-outlined text-xs shrink-0"
+                      class="material-symbols-outlined text-sm shrink-0"
                       :style="{ color: categories.find(c => c.id === form.category_id)?.color || '#D4BFFF' }"
                     >
                       {{ resolveIcon(categories.find(c => c.id === form.category_id)?.icon, 'category') }}
                     </span>
-                    <span v-else class="material-symbols-outlined text-xs text-[#D4BFFF]">more_horiz</span>
+                    <span v-else class="material-symbols-outlined text-sm text-[#D4BFFF]">more_horiz</span>
                   </div>
-                  <span class="text-[10px] font-bold truncate max-w-full leading-tight">
+                  <span class="text-[11px] font-bold truncate max-w-full leading-tight">
                     {{ selectedCategoryIsNonQuick ? categories.find(c => c.id === form.category_id)?.name : 'More' }}
                   </span>
                 </button>
               </div>
 
-              <!-- Reusable Category Picker Modal -->
+              <!-- Reusable Category Picker Modal (Hidden inline trigger) -->
               <CategoryPicker 
                 ref="categoryPickerRef"
                 :categories="categories" 
                 v-model="form.category_id" 
+                :hide-trigger="true"
                 @change="focusAmountInput"
                 title="Select Category" 
                 placeholder="Choose Category"
@@ -234,12 +235,12 @@
             </div>
 
             <!-- 2. AMOUNT & DATE SECOND -->
-            <div class="grid grid-cols-2 gap-2.5 items-end">
+            <div class="grid grid-cols-2 gap-3 items-end">
               <!-- Amount Input (Left) -->
-              <div class="space-y-0.5">
-                <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT *</label>
-                <div class="flex items-center gap-1 border-b border-[#1f202e] focus-within:border-[#D4BFFF] pb-0.5">
-                  <span class="text-sm font-bold text-[#9e9cae]">₹</span>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT *</label>
+                <div class="flex items-center gap-1.5 border-b border-[#1f202e] focus-within:border-[#D4BFFF] pb-1">
+                  <span class="text-base font-bold text-[#9e9cae]">₹</span>
                   <input 
                     ref="amountInputRef"
                     v-model="form.amount"
@@ -256,27 +257,27 @@
                     placeholder="0.00"
                     required
                     @keydown.enter.prevent="focusDescriptionInput"
-                    class="w-full text-base font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none transition"
+                    class="w-full text-lg font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none transition"
                   />
                 </div>
               </div>
 
               <!-- Date Selector (Right) -->
-              <div class="space-y-0.5">
-                <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider block">DATE</label>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DATE</label>
                 <input 
                   v-model="form.date"
                   @click="$event.target.showPicker?.()"
                   type="date" 
                   required
-                  class="w-full h-7 px-2 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-[11px] font-semibold focus:outline-none transition cursor-pointer [color-scheme:dark]"
+                  class="w-full h-8.5 px-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer [color-scheme:dark]"
                 />
               </div>
             </div>
 
             <!-- 3. DESCRIPTION THIRD -->
-            <div class="space-y-0.5">
-              <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION (OPTIONAL)</label>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION (OPTIONAL)</label>
               <input 
                 ref="descriptionInputRef"
                 v-model="form.description"
@@ -290,13 +291,13 @@
                 data-lpignore="true"
                 placeholder="e.g. Lunch with friends"
                 @keydown.enter.prevent="handleSubmit"
-                class="w-full h-8 px-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition"
+                class="w-full h-8.5 px-3 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition"
               />
             </div>
 
             <!-- Note Field -->
-            <div class="space-y-0.5">
-              <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider block">NOTE (OPTIONAL)</label>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">NOTE (OPTIONAL)</label>
               <textarea 
                 v-model="form.notes"
                 rows="1"
@@ -309,7 +310,7 @@
                 data-lpignore="true"
                 placeholder="Optional note"
                 @keydown.enter.prevent="handleSubmit"
-                class="w-full h-7 py-1 px-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition resize-none"
+                class="w-full h-8 px-3 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition resize-none"
               ></textarea>
             </div>
           </div>
@@ -569,46 +570,32 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-/* Top Drop-Down Modal Animation */
-@keyframes modalDrop {
-  from {
-    transform: translateY(-24px) scale(0.97);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-}
-
-.modal-drop-card {
-  animation: modalDrop 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Step Slide Animations */
+/* Step Slide Animations (Step 1 -> Step 2 / Editing Part) */
 .step-next-enter-active,
 .step-next-leave-active,
 .step-prev-enter-active,
 .step-prev-leave-active {
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
 }
 
+/* Going Next: Old slide moves LEFT (-100%), new editing slide enters from RIGHT (100%) */
 .step-next-enter-from {
-  transform: translateX(20px);
+  transform: translateX(100%);
   opacity: 0;
 }
 .step-next-leave-to {
-  transform: translateX(-20px);
+  transform: translateX(-100%);
   opacity: 0;
 }
 
+/* Going Prev: Old slide moves RIGHT (100%), new slide enters from LEFT (-100%) */
 .step-prev-enter-from {
-  transform: translateX(-20px);
+  transform: translateX(-100%);
   opacity: 0;
 }
 .step-prev-leave-to {
-  transform: translateX(20px);
+  transform: translateX(100%);
   opacity: 0;
 }
 </style>
