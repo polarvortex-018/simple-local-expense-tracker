@@ -86,26 +86,102 @@
         <div class="flex items-center justify-center py-2">
           <div class="relative w-56 h-56 flex items-center justify-center shrink-0">
             <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
-              <g
-                v-for="segment in dashboardPiePaths"
-                :key="segment.name"
-                class="cursor-pointer"
-                @mouseenter="hoveredCategoryIndex = segment.originalIndex"
-                @mouseleave="hoveredCategoryIndex = null"
-                @click="toggleSelectCategory(segment.originalIndex)"
+              <!-- Glowing Background Aura for Active Category -->
+              <circle
+                v-if="activeHoveredCategoryInfo"
+                cx="100"
+                cy="100"
+                r="85"
+                :fill="activeHoveredCategoryInfo.color"
+                class="opacity-20 blur-2xl transition-all duration-500 pointer-events-none"
+              />
+
+              <!-- Floating Orbiting Sparkle Particles -->
+              <g class="pointer-events-none">
+                <g class="animate-orbit-1 origin-[100px_100px]">
+                  <circle 
+                    cx="222" cy="100" r="2.2" 
+                    :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#D4BFFF'" 
+                    class="particle-dot transition-colors duration-500"
+                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#D4BFFF'})` }"
+                  />
+                </g>
+                <g class="animate-orbit-2 origin-[100px_100px]">
+                  <circle 
+                    cx="161" cy="205" r="1.8" 
+                    :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#B3F5E1'" 
+                    class="particle-dot transition-colors duration-500"
+                    style="animation-delay: 0.5s;"
+                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#B3F5E1'})` }"
+                  />
+                </g>
+                <g class="animate-orbit-3 origin-[100px_100px]">
+                  <circle 
+                    cx="39" cy="205" r="2.5" 
+                    :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#FFD1B3'" 
+                    class="particle-dot transition-colors duration-500"
+                    style="animation-delay: 1s;"
+                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#FFD1B3'})` }"
+                  />
+                </g>
+                <g class="animate-orbit-4 origin-[100px_100px]">
+                  <circle 
+                    cx="-22" cy="100" r="1.6" 
+                    :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#c084fc'" 
+                    class="particle-dot transition-colors duration-500"
+                    style="animation-delay: 1.5s;"
+                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#c084fc'})` }"
+                  />
+                </g>
+                <g class="animate-orbit-5 origin-[100px_100px]">
+                  <circle 
+                    cx="39" cy="-5" r="2.2" 
+                    :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#38bdf8'" 
+                    class="particle-dot transition-colors duration-500"
+                    style="animation-delay: 2s;"
+                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#38bdf8'})` }"
+                  />
+                </g>
+                <g class="animate-orbit-6 origin-[100px_100px]">
+                  <circle 
+                    cx="161" cy="-5" r="1.8" 
+                    :fill="activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#f472b6'" 
+                    class="particle-dot transition-colors duration-500"
+                    style="animation-delay: 2.5s;"
+                    :style="{ filter: `drop-shadow(0 0 4px ${activeHoveredCategoryInfo ? activeHoveredCategoryInfo.color : '#f472b6'})` }"
+                  />
+                </g>
+              </g>
+
+              <!-- Donut Slices Group with Smooth Orbit & Snap-to-Top Rotation -->
+              <g 
+                class="transition-transform duration-700 ease-out origin-[100px_100px]"
+                :style="{
+                  transformOrigin: '100px 100px',
+                  transform: chartRotationTransform
+                }"
               >
-                <path :d="segment.hitD" fill="transparent" />
-                <path
-                  :d="segment.d"
-                  :fill="segment.color"
-                  class="transition-all duration-300 pointer-events-none"
-                  :style="{
-                    transformOrigin: '100px 100px',
-                    filter: activeDashboardIndex === segment.originalIndex ? `drop-shadow(0 0 10px ${segment.color})` : 'none',
-                    transform: activeDashboardIndex === segment.originalIndex ? 'scale(1.04)' : 'scale(1)',
-                    opacity: activeDashboardIndex === null || activeDashboardIndex === segment.originalIndex ? 1 : 0.4
-                  }"
-                />
+                <g
+                  v-for="segment in dashboardPiePaths"
+                  :key="segment.name"
+                  class="cursor-pointer"
+                  @mouseenter="hoveredCategoryIndex = segment.originalIndex"
+                  @mouseleave="hoveredCategoryIndex = null"
+                  @click="toggleSelectCategory(segment.originalIndex)"
+                >
+                  <path :d="segment.hitD" fill="transparent" />
+                  <path
+                    :d="segment.d"
+                    :fill="segment.color"
+                    class="transition-all duration-300 pointer-events-none"
+                    :style="{
+                      transformOrigin: '100px 100px',
+                      filter: activeDashboardIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
+                      transform: activeDashboardIndex === segment.originalIndex ? 'scale(1.07)' : 'scale(1)',
+                      opacity: activeDashboardIndex === null || activeDashboardIndex === segment.originalIndex ? 1 : 0.3
+                    }"
+                  />
+                </g>
               </g>
             </svg>
 
@@ -191,7 +267,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 
 const props = defineProps({
@@ -316,6 +392,58 @@ const activeHoveredCategoryInfo = computed(() => {
   return null;
 });
 
+const currentOrbitAngle = ref(0);
+let animFrameId = null;
+let lastTimestamp = 0;
+
+const animateOrbit = (timestamp) => {
+  if (activeDashboardIndex.value === null) {
+    if (lastTimestamp) {
+      const dt = timestamp - lastTimestamp;
+      currentOrbitAngle.value = (currentOrbitAngle.value + dt * 0.0048) % 360;
+    }
+    lastTimestamp = timestamp;
+    animFrameId = requestAnimationFrame(animateOrbit);
+  } else {
+    lastTimestamp = 0;
+  }
+};
+
+onMounted(() => {
+  animFrameId = requestAnimationFrame(animateOrbit);
+});
+
+onUnmounted(() => {
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+});
+
+watch(activeDashboardIndex, (newVal) => {
+  if (newVal === null) {
+    lastTimestamp = 0;
+    animFrameId = requestAnimationFrame(animateOrbit);
+  } else {
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+  }
+});
+
+const chartRotationTransform = computed(() => {
+  const currentIdx = activeDashboardIndex.value;
+  if (currentIdx === null) {
+    return `rotate(${currentOrbitAngle.value}deg)`;
+  }
+  const segment = dashboardPiePaths.value.find(s => s.originalIndex === currentIdx);
+  if (!segment || segment.midAngle === undefined) return `rotate(${currentOrbitAngle.value}deg)`;
+  
+  const midAngleDeg = (segment.midAngle * 180) / Math.PI;
+  const rawSnapRot = -90 - midAngleDeg;
+  
+  const baseOrbit = currentOrbitAngle.value;
+  const k = Math.round((baseOrbit - rawSnapRot) / 360);
+  const targetRot = rawSnapRot + k * 360;
+  
+  return `rotate(${targetRot}deg)`;
+});
+
 const dashboardPiePaths = computed(() => {
   const total = totalFilteredCategoryExpense.value;
   if (!total || filteredCategoryExpenses.value.length === 0) return [];
@@ -334,6 +462,7 @@ const dashboardPiePaths = computed(() => {
     const angleSpan = fraction * 2 * Math.PI;
     const startAngle = currentAngle;
     const endAngle = currentAngle + angleSpan;
+    const midAngle = startAngle + angleSpan / 2;
     const percentage = Math.round((item.total / total) * 100);
     currentAngle = endAngle;
 
@@ -363,6 +492,7 @@ const dashboardPiePaths = computed(() => {
       ...item,
       amount: item.total,
       percentage,
+      midAngle,
       d: createArcPath(outerR, innerR),
       hitD: createArcPath(hitOuterR, hitInnerR),
       originalIndex: idx
@@ -371,13 +501,7 @@ const dashboardPiePaths = computed(() => {
 });
 
 const activeDashboardLegendItems = computed(() => {
-  const items = dashboardPiePaths.value;
-  const currentIdx = activeDashboardIndex.value;
-  if (currentIdx === null) return items;
-  const selectedItem = items.find(it => it.originalIndex === currentIdx);
-  if (!selectedItem) return items;
-  const rest = items.filter(it => it.originalIndex !== currentIdx);
-  return [selectedItem, ...rest];
+  return dashboardPiePaths.value;
 });
 
 const formatAmount = (val) => {
@@ -391,5 +515,45 @@ const formatAmount = (val) => {
 .flip-list-enter-active,
 .flip-list-leave-active {
   transition: transform 0.22s var(--ease-out), opacity 0.22s var(--ease-out);
+}
+
+@keyframes slowOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbitCW {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitCCW {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes particlePulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50% { opacity: 0.95; transform: scale(1.35); }
+}
+
+.animate-slow-orbit {
+  animation: slowOrbit 75s linear infinite;
+}
+
+.animate-orbit-1 { animation: orbitCW 24s linear infinite; transform-origin: 100px 100px; }
+.animate-orbit-2 { animation: orbitCCW 36s linear infinite; transform-origin: 100px 100px; }
+.animate-orbit-3 { animation: orbitCW 48s linear infinite; transform-origin: 100px 100px; }
+.animate-orbit-4 { animation: orbitCCW 28s linear infinite; transform-origin: 100px 100px; }
+.animate-orbit-5 { animation: orbitCW 42s linear infinite; transform-origin: 100px 100px; }
+.animate-orbit-6 { animation: orbitCCW 56s linear infinite; transform-origin: 100px 100px; }
+
+.particle-dot {
+  animation: particlePulse 3s ease-in-out infinite;
+  transform-origin: center;
 }
 </style>

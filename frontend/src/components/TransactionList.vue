@@ -516,6 +516,16 @@
             <div class="md:col-span-6 flex items-center justify-center">
               <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
                 <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
+                  <!-- Glowing Background Aura for Active Category -->
+                  <circle
+                    v-if="activeHoveredExpenseInfo"
+                    cx="100"
+                    cy="100"
+                    r="85"
+                    :fill="activeHoveredExpenseInfo.color"
+                    class="opacity-20 blur-2xl transition-all duration-500 pointer-events-none"
+                  />
+
                   <defs>
                     <!-- Option A Clockwise Radial Sweep Mask -->
                     <mask id="expense-donut-mask">
@@ -534,28 +544,37 @@
                     </mask>
                   </defs>
 
-                  <!-- Segmented Category Donut Paths (Option A Clockwise Radial Sweep, Starts from 0%) -->
-                  <g mask="url(#expense-donut-mask)" :style="{ opacity: expSweepProgress > 0.01 ? 1 : 0, transition: 'opacity 0.15s ease-out' }">
-                    <g
-                      v-for="segment in expensePiePaths"
-                      :key="segment.name"
-                      class="cursor-pointer"
-                      @mouseenter="hoveredExpenseIndex = segment.originalIndex"
-                      @mouseleave="hoveredExpenseIndex = null"
-                      @click="toggleSelectExpenseCategory(segment.originalIndex)"
-                    >
-                      <path :d="segment.hitD" fill="transparent" />
-                      <path
-                        :d="segment.d"
-                        :fill="segment.color"
-                        class="transition-all duration-300 pointer-events-none"
-                        :style="{
-                          transformOrigin: '100px 100px',
-                          filter: activeExpenseIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
-                          transform: activeExpenseIndex === segment.originalIndex ? 'scale(1.05)' : 'scale(1)',
-                          opacity: activeExpenseIndex === null || activeExpenseIndex === segment.originalIndex ? 1 : 0.45
-                        }"
-                      />
+                  <!-- Donut Slices Group with Snap-to-Top Rotation -->
+                  <g 
+                    class="transition-transform duration-700 ease-out origin-[100px_100px]"
+                    :style="{
+                      transformOrigin: '100px 100px',
+                      transform: expenseChartRotationTransform
+                    }"
+                  >
+                    <!-- Segmented Category Donut Paths -->
+                    <g mask="url(#expense-donut-mask)" :style="{ opacity: expSweepProgress > 0.01 ? 1 : 0, transition: 'opacity 0.15s ease-out' }">
+                      <g
+                        v-for="segment in expensePiePaths"
+                        :key="segment.name"
+                        class="cursor-pointer"
+                        @mouseenter="hoveredExpenseIndex = segment.originalIndex"
+                        @mouseleave="hoveredExpenseIndex = null"
+                        @click="toggleSelectExpenseCategory(segment.originalIndex)"
+                      >
+                        <path :d="segment.hitD" fill="transparent" />
+                        <path
+                          :d="segment.d"
+                          :fill="segment.color"
+                          class="transition-all duration-300 pointer-events-none"
+                          :style="{
+                            transformOrigin: '100px 100px',
+                            filter: activeExpenseIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
+                            transform: activeExpenseIndex === segment.originalIndex ? 'scale(1.07)' : 'scale(1)',
+                            opacity: activeExpenseIndex === null || activeExpenseIndex === segment.originalIndex ? 1 : 0.35
+                          }"
+                        />
+                      </g>
                     </g>
                   </g>
                 </svg>
@@ -634,6 +653,16 @@
             <div class="md:col-span-6 flex items-center justify-center">
               <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
                 <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
+                  <!-- Glowing Background Aura for Active Category -->
+                  <circle
+                    v-if="activeHoveredIncomeInfo"
+                    cx="100"
+                    cy="100"
+                    r="85"
+                    :fill="activeHoveredIncomeInfo.color"
+                    class="opacity-20 blur-2xl transition-all duration-500 pointer-events-none"
+                  />
+
                   <defs>
                     <!-- Option A Clockwise Radial Sweep Mask -->
                     <mask id="income-donut-mask">
@@ -652,28 +681,37 @@
                     </mask>
                   </defs>
 
-                  <!-- Segmented Category Donut Paths (Option A Clockwise Radial Sweep, Starts from 0%) -->
-                  <g mask="url(#income-donut-mask)" :style="{ opacity: incSweepProgress > 0.01 ? 1 : 0, transition: 'opacity 0.15s ease-out' }">
-                    <g
-                      v-for="segment in incomePiePaths"
-                      :key="segment.name"
-                      class="cursor-pointer"
-                      @mouseenter="hoveredIncomeIndex = segment.originalIndex"
-                      @mouseleave="hoveredIncomeIndex = null"
-                      @click="toggleSelectIncomeCategory(segment.originalIndex)"
-                    >
-                      <path :d="segment.hitD" fill="transparent" />
-                      <path
-                        :d="segment.d"
-                        :fill="segment.color"
-                        class="transition-all duration-300 pointer-events-none"
-                        :style="{
-                          transformOrigin: '100px 100px',
-                          filter: activeIncomeIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
-                          transform: activeIncomeIndex === segment.originalIndex ? 'scale(1.05)' : 'scale(1)',
-                          opacity: activeIncomeIndex === null || activeIncomeIndex === segment.originalIndex ? 1 : 0.45
-                        }"
-                      />
+                  <!-- Donut Slices Group with Snap-to-Top Rotation -->
+                  <g 
+                    class="transition-transform duration-700 ease-out origin-[100px_100px]"
+                    :style="{
+                      transformOrigin: '100px 100px',
+                      transform: incomeChartRotationTransform
+                    }"
+                  >
+                    <!-- Segmented Category Donut Paths -->
+                    <g mask="url(#income-donut-mask)" :style="{ opacity: incSweepProgress > 0.01 ? 1 : 0, transition: 'opacity 0.15s ease-out' }">
+                      <g
+                        v-for="segment in incomePiePaths"
+                        :key="segment.name"
+                        class="cursor-pointer"
+                        @mouseenter="hoveredIncomeIndex = segment.originalIndex"
+                        @mouseleave="hoveredIncomeIndex = null"
+                        @click="toggleSelectIncomeCategory(segment.originalIndex)"
+                      >
+                        <path :d="segment.hitD" fill="transparent" />
+                        <path
+                          :d="segment.d"
+                          :fill="segment.color"
+                          class="transition-all duration-300 pointer-events-none"
+                          :style="{
+                            transformOrigin: '100px 100px',
+                            filter: activeIncomeIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
+                            transform: activeIncomeIndex === segment.originalIndex ? 'scale(1.07)' : 'scale(1)',
+                            opacity: activeIncomeIndex === null || activeIncomeIndex === segment.originalIndex ? 1 : 0.35
+                          }"
+                        />
+                      </g>
                     </g>
                   </g>
                 </svg>
@@ -1766,6 +1804,29 @@ const activeHoveredIncomeInfo = computed(() => {
   return null;
 });
 
+// Snap-to-Top Rotation Transforms (Static at 0deg when idle, snaps to 12 o'clock on selection)
+const expenseChartRotationTransform = computed(() => {
+  const currentIdx = activeExpenseIndex.value;
+  if (currentIdx === null) return 'rotate(0deg)';
+  const segment = expensePiePaths.value.find(s => s.originalIndex === currentIdx);
+  if (!segment || segment.midAngle === undefined) return 'rotate(0deg)';
+  
+  const midAngleDeg = (segment.midAngle * 180) / Math.PI;
+  const rot = -90 - midAngleDeg;
+  return `rotate(${rot}deg)`;
+});
+
+const incomeChartRotationTransform = computed(() => {
+  const currentIdx = activeIncomeIndex.value;
+  if (currentIdx === null) return 'rotate(0deg)';
+  const segment = incomePiePaths.value.find(s => s.originalIndex === currentIdx);
+  if (!segment || segment.midAngle === undefined) return 'rotate(0deg)';
+  
+  const midAngleDeg = (segment.midAngle * 180) / Math.PI;
+  const rot = -90 - midAngleDeg;
+  return `rotate(${rot}deg)`;
+});
+
 // Donut Chart SVG Arc Calculation Helper
 const generatePiePaths = (items, totalSum) => {
   if (!totalSum || items.length === 0) return [];
@@ -1784,6 +1845,7 @@ const generatePiePaths = (items, totalSum) => {
     const angleSpan = fraction * 2 * Math.PI;
     const startAngle = currentAngle;
     const endAngle = currentAngle + angleSpan;
+    const midAngle = startAngle + angleSpan / 2;
     const percentage = Math.round(fraction * 100);
     currentAngle = endAngle;
 
@@ -1813,6 +1875,7 @@ const generatePiePaths = (items, totalSum) => {
       ...item,
       amount: item.total,
       percentage,
+      midAngle,
       d: createArcPath(outerR, innerR),
       hitD: createArcPath(hitOuterR, hitInnerR),
       originalIndex: idx
@@ -1825,13 +1888,7 @@ const expensePiePaths = computed(() => {
 });
 
 const activeExpenseLegendItems = computed(() => {
-  const items = expensePiePaths.value;
-  const currentIdx = activeExpenseIndex.value;
-  if (currentIdx === null) return items;
-  const selectedItem = items.find(it => it.originalIndex === currentIdx);
-  if (!selectedItem) return items;
-  const rest = items.filter(it => it.originalIndex !== currentIdx);
-  return [selectedItem, ...rest];
+  return expensePiePaths.value;
 });
 
 const incomePiePaths = computed(() => {
@@ -1839,13 +1896,7 @@ const incomePiePaths = computed(() => {
 });
 
 const activeIncomeLegendItems = computed(() => {
-  const items = incomePiePaths.value;
-  const currentIdx = activeIncomeIndex.value;
-  if (currentIdx === null) return items;
-  const selectedItem = items.find(it => it.originalIndex === currentIdx);
-  if (!selectedItem) return items;
-  const rest = items.filter(it => it.originalIndex !== currentIdx);
-  return [selectedItem, ...rest];
+  return incomePiePaths.value;
 });
 
 // Transaction Modal State & Logic
