@@ -490,8 +490,8 @@ onMounted(() => {
             class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <span class="material-symbols-outlined text-base">settings</span>
-            <span>Settings</span>
+            <span class="material-symbols-outlined text-base">widgets</span>
+            <span>More</span>
           </button>
         </nav>
 
@@ -623,8 +623,8 @@ onMounted(() => {
         class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
         :class="currentTab === 'settings' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <span class="material-symbols-outlined text-xl mb-0.5">settings</span>
-        <span class="text-[10px] font-semibold leading-none">Settings</span>
+        <span class="material-symbols-outlined text-xl mb-0.5">widgets</span>
+        <span class="text-[10px] font-semibold leading-none">More</span>
       </button>
     </nav>
 
