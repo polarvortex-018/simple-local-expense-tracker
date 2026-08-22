@@ -92,15 +92,15 @@ CREATE TABLE IF NOT EXISTS allocation_preset_rules (
 `;
 
 export const DEFAULT_CATEGORIES = [
-  { name: 'Food & Dining', color: '#ef4444', icon: '🍔', is_quick_select: 1 },
-  { name: 'Groceries', color: '#10b981', icon: '🛒', is_quick_select: 1 },
-  { name: 'Rent & Housing', color: '#3b82f6', icon: '🏠', is_quick_select: 1 },
-  { name: 'Utilities', color: '#f59e0b', icon: '⚡', is_quick_select: 1 },
-  { name: 'Salary & Income', color: '#10b981', icon: '💰', is_quick_select: 0 },
-  { name: 'Shopping', color: '#8b5cf6', icon: '🛍️', is_quick_select: 1 },
-  { name: 'Entertainment', color: '#ec4899', icon: '🎬', is_quick_select: 0 },
-  { name: 'Transportation', color: '#06b6d4', icon: '🚗', is_quick_select: 0 },
-  { name: 'General', color: '#64748b', icon: '🏷️', is_quick_select: 0 }
+  { name: 'Food & Dining', color: '#ef4444', icon: 'restaurant', is_quick_select: 1 },
+  { name: 'Groceries', color: '#10b981', icon: 'shopping_cart', is_quick_select: 1 },
+  { name: 'Rent & Housing', color: '#3b82f6', icon: 'home', is_quick_select: 1 },
+  { name: 'Utilities', color: '#f59e0b', icon: 'bolt', is_quick_select: 1 },
+  { name: 'Salary & Income', color: '#10b981', icon: 'payments', is_quick_select: 0 },
+  { name: 'Shopping', color: '#8b5cf6', icon: 'shopping_bag', is_quick_select: 1 },
+  { name: 'Entertainment', color: '#ec4899', icon: 'movie', is_quick_select: 0 },
+  { name: 'Transportation', color: '#06b6d4', icon: 'directions_car', is_quick_select: 0 },
+  { name: 'General', color: '#64748b', icon: 'category', is_quick_select: 0 }
 ];
 
 export const DEFAULT_ACCOUNTS = [

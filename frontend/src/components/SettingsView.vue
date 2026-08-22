@@ -62,29 +62,30 @@
       </div>
     </div>
 
-    <!-- Click Interceptor Overlay for active Emoji Pickers -->
-    <div 
-      v-if="showNewEmojiPicker || activeEditEmojiPickerId !== null" 
-      class="fixed inset-0 z-30" 
-      @click="closeAllEmojiPickers"
-    ></div>
-
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       
       <!-- 1. Savings Buckets Management Card -->
       <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
-        <div class="flex justify-between items-start">
+        <div class="flex justify-between items-center">
           <div>
             <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Savings Buckets</h3>
             <p class="text-xs text-[#9e9cae]">Allocate purposes for your money</p>
           </div>
-          <button 
-            @click="showArchivedBuckets = !showArchivedBuckets"
-            class="text-[11px] font-bold text-[#D4BFFF] hover:underline cursor-pointer"
-          >
-            {{ showArchivedBuckets ? 'Hide Archived' : 'Show Archived' }}
-          </button>
+          <div class="flex items-center gap-2">
+            <button 
+              @click="showArchivedBuckets = !showArchivedBuckets"
+              class="text-[11px] font-bold text-[#9e9cae] hover:text-[#D4BFFF] hover:underline cursor-pointer"
+            >
+              {{ showArchivedBuckets ? 'Hide Archived' : 'Show Archived' }}
+            </button>
+            <button 
+              @click="openCreateBucketModal"
+              class="px-3.5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
+            >
+              <span>+ Create Bucket</span>
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
@@ -98,225 +99,62 @@
           </div>
         </div>
 
-        <!-- Add Bucket Form -->
-        <form @submit.prevent="submitBucket" class="p-3 bg-[#0b1326] border border-[#31394d] rounded-lg space-y-2.5">
-          <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add Savings Bucket</p>
-          
-          <div class="space-y-2">
-            <div class="flex gap-2 relative">
-              <!-- Emoji Button & Input Trigger -->
-              <div class="relative z-50">
-                <button
-                  type="button"
-                  @click="showNewEmojiPicker = !showNewEmojiPicker"
-                  class="w-10 h-8 flex items-center justify-center bg-[#131b2e] border border-[#31394d] hover:border-[#7c3aed] rounded-md text-base transition cursor-pointer"
-                  title="Click to pick an emoji"
-                >
-                  {{ newBucket.icon || '🪣' }}
-                </button>
-
-                <!-- Emoji Picker Dropdown Overlay for New Bucket -->
-                <div 
-                  v-if="showNewEmojiPicker" 
-                  class="absolute left-0 top-10 z-50 w-64 bg-[#131b2e] border border-[#31394d] rounded-lg p-3 shadow-xl space-y-2"
-                >
-                  <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider mb-1">Select Bucket Emoji</p>
-                  <div class="grid grid-cols-6 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                    <button
-                      v-for="emoji in presetEmojis"
-                      :key="emoji"
-                      type="button"
-                      @click="selectNewEmoji(emoji)"
-                      class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#0b1326] text-base transition cursor-pointer"
-                    >
-                      {{ emoji }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bucket Name -->
-              <input 
-                v-model="newBucket.name"
-                type="text"
-                placeholder="Bucket Name"
-                required
-                class="flex-grow px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-500 focus:outline-none transition"
-              />
-            </div>
-
-            <div class="flex justify-between items-center pt-1">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] text-[#ccc3d8] uppercase font-semibold">Color:</span>
-                <div class="relative w-6 h-6 rounded-md overflow-hidden border border-[#31394d] bg-[#131b2e] flex items-center justify-center shrink-0">
-                  <input 
-                    v-model="newBucket.color"
-                    type="color"
-                    class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
-                    style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
-                  />
-                  <div class="w-3 h-3 rounded-full border border-white/20" :style="{ backgroundColor: newBucket.color }"></div>
-                </div>
-              </div>
-
-              <button 
-                type="submit"
-                :disabled="submittingBucket"
-                class="px-4 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full transition cursor-pointer disabled:opacity-50 shadow-sm"
-              >
-                {{ submittingBucket ? 'Creating...' : '+ Create Bucket' }}
-              </button>
-            </div>
-          </div>
-        </form>
-
         <!-- Bucket List -->
         <div class="flex-grow">
           <div v-if="displayedBuckets.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
             <div 
               v-for="(bucket, idx) in displayedBuckets" 
               :key="bucket.id"
-              class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
+              class="p-3 hover:bg-[#0f0f15]/30 transition duration-150 flex items-center justify-between"
             >
-              <!-- Editing Mode -->
-              <div v-if="editingBucketId === bucket.id" class="space-y-3">
-                <div class="flex gap-2 relative">
-                  <!-- Edit Emoji Trigger -->
-                  <div class="relative z-50">
-                    <button
-                      type="button"
-                      @click="activeEditEmojiPickerId = activeEditEmojiPickerId === bucket.id ? null : bucket.id"
-                      class="w-10 h-8 flex items-center justify-center bg-[#14141d] border border-[#29293a] hover:border-[#D4BFFF] rounded-lg text-sm transition cursor-pointer"
-                    >
-                      {{ editBucketIcon || '🪣' }}
-                    </button>
-
-                    <!-- Edit Emoji Picker Overlay -->
-                    <div 
-                      v-if="activeEditEmojiPickerId === bucket.id" 
-                      class="absolute left-0 top-10 z-50 w-64 bg-[#14141d] border border-[#29293a] rounded-2xl p-3 shadow-2xl space-y-2"
-                    >
-                      <p class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider mb-1">Select Bucket Emoji</p>
-                      <div class="grid grid-cols-6 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                        <button
-                          v-for="emoji in presetEmojis"
-                          :key="emoji"
-                          type="button"
-                          @click="selectEditEmoji(emoji)"
-                          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#1a1030] text-base transition cursor-pointer"
-                        >
-                          {{ emoji }}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <input 
-                    v-model="editBucketName"
-                    type="text"
-                    required
-                    class="flex-grow px-3 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
-                  />
-                  <!-- Color -->
-                  <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-[#29293a] bg-[#14141d] flex items-center justify-center shrink-0">
-                    <input 
-                      v-model="editBucketColor"
-                      type="color"
-                      class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
-                      style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
-                    />
-                    <div class="w-4 h-4 rounded-full border border-white/20" :style="{ backgroundColor: editBucketColor }"></div>
-                  </div>
+              <div class="flex items-center gap-2.5 min-w-0 flex-grow">
+                <!-- Up/Down Priority Buttons -->
+                <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
+                  <button 
+                    type="button"
+                    @click="moveBucketPriority(idx, -1)"
+                    :disabled="idx === 0"
+                    class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                    title="Move Priority Up in Grid"
+                  >▲</button>
+                  <button 
+                    type="button"
+                    @click="moveBucketPriority(idx, 1)"
+                    :disabled="idx === displayedBuckets.length - 1"
+                    class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                    title="Move Priority Down in Grid"
+                  >▼</button>
                 </div>
 
-                <div class="flex items-center justify-between">
-                  <label class="flex items-center gap-1.5 text-xs text-[#9e9cae] cursor-pointer">
-                    <input type="checkbox" v-model="editBucketArchived" class="rounded border-[#29293a] text-indigo-600 bg-[#14141d]" />
-                    <span>Archive Bucket</span>
-                  </label>
-
-                  <div class="flex gap-2">
-                    <button 
-                      type="button"
-                      @click="editingBucketId = null"
-                      class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="button"
-                      @click="saveBucketEdit(bucket)"
-                      class="px-2.5 py-1 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
-                    >
-                      Save
-                    </button>
+                <span class="material-symbols-outlined text-base shrink-0" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5">
+                    <p class="text-xs font-semibold text-[#dae2fd] truncate">{{ bucket.name }}</p>
+                    <span v-if="bucket.is_archived" class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-amber-950/60 text-amber-400 border border-amber-800/40 shrink-0">Archived</span>
                   </div>
+                  <p class="text-[10px] text-[#9e9cae] font-medium mt-0.5">
+                    Allocated: <span class="text-[#D4BFFF] font-semibold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
+                  </p>
                 </div>
               </div>
 
-              <!-- Normal Mode -->
-              <div v-else class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                  <!-- Up/Down Priority Buttons -->
-                  <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
-                    <button 
-                      type="button"
-                      @click="moveBucketPriority(idx, -1)"
-                      :disabled="idx === 0"
-                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Up in Grid"
-                    >
-                      ▲
-                    </button>
-                    <button 
-                      type="button"
-                      @click="moveBucketPriority(idx, 1)"
-                      :disabled="idx === displayedBuckets.length - 1"
-                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Down in Grid"
-                    >
-                      ▼
-                    </button>
-                  </div>
-
-                  <span class="text-base">{{ bucket.icon || '🪣' }}</span>
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <p class="text-xs font-semibold text-[#dae2fd]">{{ bucket.name }}</p>
-                      <span v-if="bucket.is_archived" class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-amber-950/60 text-amber-400 border border-amber-800/40">Archived</span>
-                    </div>
-                    <p class="text-[10px] text-[#9e9cae] font-medium mt-0.5">
-                      Allocated: <span class="text-[#D4BFFF] font-semibold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div class="flex gap-1.5">
-                  <button
-                    v-if="unassignedAmount > 0 && !bucket.is_archived"
-                    @click="allocateToBucket(bucket)"
-                    class="px-2 py-1.5 rounded-lg border border-amber-800/50 bg-amber-950/40 text-[9px] font-bold text-amber-300"
-                    title="Allocate unassigned money"
-                  >Allocate</button>
-                  <button 
-                    @click="startEditBucket(bucket)"
-                    class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-2 rounded-lg transition cursor-pointer"
-                    title="Edit Bucket"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button 
-                    @click="confirmDeleteBucket(bucket)"
-                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
-                    title="Delete / Archive Bucket"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button
+                  v-if="unassignedAmount > 0 && !bucket.is_archived"
+                  @click="allocateToBucket(bucket)"
+                  class="px-2 py-1.5 rounded-lg border border-amber-800/50 bg-amber-950/40 text-[9px] font-bold text-amber-300 cursor-pointer"
+                  title="Allocate unassigned money"
+                >Allocate</button>
+                <button 
+                  @click="openEditBucketModal(bucket)"
+                  class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-1.5 rounded-lg transition cursor-pointer text-xs"
+                  title="Edit Bucket"
+                >✏️</button>
+                <button 
+                  @click="confirmDeleteBucket(bucket)"
+                  class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer text-xs"
+                  title="Delete / Archive Bucket"
+                >🗑️</button>
               </div>
             </div>
           </div>
@@ -359,7 +197,7 @@
           <button 
             type="submit"
             :disabled="submittingAccount"
-            class="w-full py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold text-xs rounded-full shadow-sm transition cursor-pointer disabled:opacity-50"
+            class="w-full py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer disabled:opacity-50 min-h-[40px]"
           >
             {{ submittingAccount ? 'Creating...' : '+ Create Account' }}
           </button>
@@ -451,65 +289,18 @@
 
       <!-- 3. Category Management Card -->
       <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
-        <div>
-          <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Manage Categories</h3>
-          <p class="text-xs text-[#9e9cae]">Create categories (for spending analytics)</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Manage Categories</h3>
+            <p class="text-xs text-[#9e9cae]">Create and organize spending categories</p>
+          </div>
+          <button 
+            @click="openCreateCategoryModal"
+            class="px-3.5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer flex items-center gap-1 shrink-0"
+          >
+            <span>+ Create New Category</span>
+          </button>
         </div>
-
-        <!-- Add Category Form -->
-        <form @submit.prevent="submitCategory" class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl space-y-3">
-          <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add New Category</p>
-          
-          <div class="flex gap-2 items-center">
-            <input 
-              v-model="newCategory.icon"
-              type="text"
-              placeholder="Icon"
-              class="w-12 px-2 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-center text-xs focus:outline-none transition"
-            />
-
-            <input 
-              v-model="newCategory.name"
-              type="text"
-              placeholder="Category Name"
-              required
-              class="flex-grow px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-500 focus:outline-none transition"
-            />
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <label class="flex items-center gap-1.5 text-xs text-[#ccc3d8] cursor-pointer">
-              <input 
-                type="checkbox" 
-                v-model="newCategory.is_quick_select" 
-                class="rounded border-[#31394d] text-amber-500 bg-[#131b2e] cursor-pointer"
-              />
-              <span class="text-[11px]">⭐ Pin to Quick Select</span>
-            </label>
-
-            <div class="flex items-center gap-2 ml-auto">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] text-[#ccc3d8] uppercase font-semibold">Color:</span>
-                <div class="relative w-6 h-6 rounded-md overflow-hidden border border-[#31394d] bg-[#131b2e] flex items-center justify-center shrink-0">
-                  <input 
-                    v-model="newCategory.color"
-                    type="color"
-                    class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
-                    style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
-                  />
-                  <div class="w-3 h-3 rounded-full border border-white/20" :style="{ backgroundColor: newCategory.color }"></div>
-                </div>
-              </div>
-              <button 
-                type="submit"
-                :disabled="submittingCategory"
-                class="px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-sm transition cursor-pointer disabled:opacity-50 min-h-[36px]"
-              >
-                {{ submittingCategory ? 'Creating...' : '+ Create Category' }}
-              </button>
-            </div>
-          </div>
-        </form>
 
         <!-- Category List -->
         <div class="flex-grow">
@@ -517,119 +308,46 @@
             <div 
               v-for="(category, idx) in categories" 
               :key="category.id"
-              class="py-1.5 px-3 hover:bg-[#0f0f15]/30 transition duration-150"
+              class="py-2 px-3 flex items-center justify-between gap-2 hover:bg-[#0f0f15]/30 transition duration-150"
             >
-              <!-- Editing Mode -->
-              <div v-if="editingCategoryId === category.id" class="space-y-3">
-                <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap">
-                  <input 
-                    v-model="editCategoryIcon"
-                    type="text"
-                    placeholder="Icon"
-                    class="w-12 px-2 py-2 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-center text-xs focus:outline-none transition min-h-[36px]"
-                  />
-                  <input 
-                    v-model="editCategoryName"
-                    type="text"
-                    required
-                    class="flex-grow px-3 py-2 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition min-h-[36px]"
-                  />
-                  <div class="relative w-9 h-9 rounded-lg overflow-hidden border border-[#29293a] bg-[#14141d] flex items-center justify-center shrink-0">
-                    <input 
-                      v-model="editCategoryColor"
-                      type="color"
-                      class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer bg-transparent opacity-0"
-                      style="width: 150%; height: 150%; transform: translate(-20%, -20%);"
-                    />
-                    <div class="w-4 h-4 rounded-full border border-white/20" :style="{ backgroundColor: editCategoryColor }"></div>
-                  </div>
-                </div>
-                <div class="flex justify-end gap-2">
+              <!-- Left: Identity & Reorder -->
+              <div class="flex items-center gap-2.5 min-w-0 flex-grow">
+                <!-- Reorder Controls -->
+                <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
                   <button 
                     type="button"
-                    @click="cancelEditCategory"
-                    class="px-3 py-1.5 bg-[#191924] border border-[#29293a] text-xs text-[#9e9cae] hover:text-[#f1f0f5] rounded-lg transition cursor-pointer min-h-[28px]"
-                  >
-                    Cancel
-                  </button>
+                    @click="moveCategoryPriority(idx, -1)"
+                    :disabled="idx === 0"
+                    class="text-[9px] p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                    title="Move Priority Up"
+                  >▲</button>
                   <button 
                     type="button"
-                    @click="saveCategoryEdit(category)"
-                    class="px-3 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-lg transition cursor-pointer min-h-[28px]"
-                  >
-                    Save
-                  </button>
+                    @click="moveCategoryPriority(idx, 1)"
+                    :disabled="idx === categories.length - 1"
+                    class="text-[9px] p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
+                    title="Move Priority Down"
+                  >▼</button>
                 </div>
+                <!-- Material Symbol Icon -->
+                <span class="material-symbols-outlined text-base shrink-0" :style="{ color: category.color || '#D4BFFF' }">{{ resolveIcon(category.icon, 'category') }}</span>
+                <!-- Category Name -->
+                <p class="text-xs font-semibold text-[#dae2fd] truncate" :title="category.name">{{ category.name }}</p>
+                <span v-if="category.is_quick_select" class="text-[10px] font-bold text-[#D4BFFF] bg-[#D4BFFF]/10 px-1.5 py-0.2 rounded-md border border-[#D4BFFF]/20 shrink-0">⭐ Pinned</span>
               </div>
 
-              <!-- Normal Mode -->
-              <div v-else class="flex flex-row items-center justify-between gap-2">
-                <!-- Left: Identity & Reorder -->
-                <div class="flex items-center gap-2 min-w-0 flex-grow">
-                  <!-- Reorder Controls -->
-                  <div class="flex flex-col gap-0.5 shrink-0 mr-1">
-                    <button 
-                      type="button"
-                      @click="moveCategoryPriority(idx, -1)"
-                      :disabled="idx === 0"
-                      class="text-[9px] p-0.5 text-[#6b6a7d] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Up"
-                    >
-                      ▲
-                    </button>
-                    <button 
-                      type="button"
-                      @click="moveCategoryPriority(idx, 1)"
-                      :disabled="idx === categories.length - 1"
-                      class="text-[9px] p-0.5 text-[#6b6a7d] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Down"
-                    >
-                      ▼
-                    </button>
-                  </div>
-                  <!-- Emoji Icon -->
-                  <span class="text-base shrink-0">{{ category.icon || '🏷️' }}</span>
-                  <!-- Color Dot -->
-                  <span class="w-2.5 h-2.5 rounded-full border border-white/10 shrink-0" :style="{ backgroundColor: category.color }"></span>
-                  <!-- Category Name -->
-                  <p class="text-xs font-semibold text-[#dae2fd] truncate" :title="category.name">{{ category.name }}</p>
-                </div>
-
-                <!-- Right: Actions & States (Reflows nicely on mobile) -->
-                <div class="flex items-center justify-end gap-1.5 shrink-0">
-                  <!-- Quick Select / Pin -->
-                  <button 
-                    @click="$emit('update-category', category.id, { name: category.name, color: category.color, icon: category.icon || '🏷️', is_quick_select: category.is_quick_select ? 0 : 1 })"
-                    class="px-2 py-0.5 text-[10px] font-semibold rounded-lg border transition cursor-pointer flex items-center gap-1 min-h-[24px]"
-                    :class="category.is_quick_select ? 'bg-[#D4BFFF]/10 text-[#D4BFFF] border-[#D4BFFF]/30' : 'bg-[#191924] text-[#9e9cae] border border-[#29293a] hover:border-[#D4BFFF]/30 hover:text-[#f1f0f5]'"
-                    :title="category.is_quick_select ? 'Quick Select active' : 'Pin to Quick Select'"
-                  >
-                    <span>{{ category.is_quick_select ? '★ Quick' : '☆ Pin' }}</span>
-                  </button>
-
-                  <div class="flex items-center border-l border-[#29293a] pl-2 gap-1">
-                    <!-- Edit -->
-                    <button 
-                      @click="startEditCategory(category)"
-                      class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-1 rounded-lg transition cursor-pointer"
-                      title="Edit Category"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <!-- Delete -->
-                    <button 
-                      @click="confirmDeleteCategory(category)"
-                      class="text-[#9e9cae] hover:text-[#FFD1B3] hover:bg-[#FFD1B3]/10 p-1 rounded-lg transition cursor-pointer"
-                      title="Delete Category"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+              <!-- Right: Actions & States -->
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button 
+                  @click="openEditCategoryModal(category)"
+                  class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-1.5 rounded-lg transition cursor-pointer text-xs"
+                  title="Edit Category"
+                >✏️</button>
+                <button 
+                  @click="confirmDeleteCategory(category)"
+                  class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer text-xs"
+                  title="Delete Category"
+                >🗑️</button>
               </div>
             </div>
           </div>
@@ -1086,22 +804,13 @@
                     </div>
 
                     <!-- Category Selection Option -->
-                    <div class="space-y-1.5">
-                      <label class="text-[9px] font-bold text-[#9e9cae] uppercase tracking-wider">Income Category *</label>
-                      <div class="relative">
-                        <select
-                          v-model="rule.category_id"
-                          required
-                          class="w-full px-3 py-2.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-bold focus:outline-none transition cursor-pointer appearance-none"
-                        >
-                          <option value="" disabled>Select Category</option>
-                          <option v-for="c in categories" :key="c.id" :value="c.id">
-                            {{ c.icon || '🏷️' }} {{ c.name }}
-                          </option>
-                        </select>
-                        <span class="absolute right-3 top-3.5 pointer-events-none text-xs text-[#9e9cae]">▼</span>
-                      </div>
-                    </div>
+                    <CategoryPicker 
+                      :categories="categories" 
+                      v-model="rule.category_id" 
+                      label="Income Category *" 
+                      title="Select Income Category"
+                      placeholder="Choose Category"
+                    />
 
                     <!-- Split Controls (Only Value Input Field remains!) -->
                     <div class="space-y-1">
@@ -1152,8 +861,9 @@
             <div class="p-3 bg-[#1a1030]/50 border border-[#D4BFFF]/15 rounded-xl">
               <p class="text-xs font-bold text-[#D4BFFF]">Applying: {{ applyingPreset.name }} ({{ applyingPreset.mode === 'percentage' ? 'Percentage' : 'Fixed' }})</p>
               <div class="flex flex-wrap gap-1.5 mt-1.5">
-                <span v-for="rule in applyingPreset.rules" :key="rule.id" class="text-[10px] px-2 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#9e9cae]">
-                  {{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ applyingPreset.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
+                <span v-for="rule in applyingPreset.rules" :key="rule.id" class="text-[10px] px-2.5 py-1 rounded-lg bg-[#14141d] border border-[#29293a] text-[#9e9cae] inline-flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-xs shrink-0" :style="{ color: getCategoryColor(rule.category_id) }">{{ resolveIcon(getCategoryIcon(rule.category_id), 'category') }}</span>
+                  <span>{{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ applyingPreset.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}</span>
                 </span>
               </div>
             </div>
@@ -1220,8 +930,9 @@
                   <div class="space-y-3">
                     <!-- Rule List badges -->
                     <div class="flex flex-wrap gap-1.5">
-                      <span v-for="rule in preset.rules" :key="rule.id" class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#14141d] border border-[#29293a] text-[#dae2fd]">
-                        {{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}
+                      <span v-for="rule in preset.rules" :key="rule.id" class="text-[10px] px-2.5 py-1 rounded-lg bg-[#14141d] border border-[#29293a] text-[#dae2fd] inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-xs shrink-0" :style="{ color: getCategoryColor(rule.category_id) }">{{ resolveIcon(getCategoryIcon(rule.category_id), 'category') }}</span>
+                        <span>{{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}</span>
                       </span>
                     </div>
 
@@ -1247,7 +958,22 @@
         </div>
       </div>
     </div>
-    </Transition>
+  </Transition>
+    <!-- Category Form Modal (Create & Edit) -->
+    <CategoryFormModal 
+      :isOpen="showCategoryModal"
+      :category="activeEditingCategory"
+      @close="showCategoryModal = false"
+      @save="handleSaveCategory"
+    />
+
+    <!-- Savings Bucket Form Modal (Create & Edit) -->
+    <BucketFormModal 
+      :isOpen="showBucketModal"
+      :bucket="activeEditingBucket"
+      @close="showBucketModal = false"
+      @save="handleSaveBucket"
+    />
   </div>
 </template>
 
@@ -1255,6 +981,10 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import BucketGrid from './BucketGrid.vue';
 import AccountGrid from './AccountGrid.vue';
+import CategoryFormModal from './CategoryFormModal.vue';
+import BucketFormModal from './BucketFormModal.vue';
+import CategoryPicker from './CategoryPicker.vue';
+import { resolveIcon } from '../utils/iconResolver.js';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -1341,6 +1071,52 @@ const showArchivedBuckets = ref(false);
 const showTransferModal = ref(false);
 const showAccountTransferModal = ref(false);
 const showPresetsModal = ref(false);
+
+// Category Form Modal State & Handlers
+const showCategoryModal = ref(false);
+const activeEditingCategory = ref(null);
+
+const openCreateCategoryModal = () => {
+  activeEditingCategory.value = null;
+  showCategoryModal.value = true;
+};
+
+const openEditCategoryModal = (category) => {
+  activeEditingCategory.value = category;
+  showCategoryModal.value = true;
+};
+
+const handleSaveCategory = ({ id, name, icon, color, is_quick_select }) => {
+  if (id) {
+    emit('update-category', id, { name, icon, color, is_quick_select });
+  } else {
+    emit('create-category', { name, icon, color, is_quick_select });
+  }
+  showCategoryModal.value = false;
+};
+
+// Savings Bucket Form Modal State & Handlers
+const showBucketModal = ref(false);
+const activeEditingBucket = ref(null);
+
+const openCreateBucketModal = () => {
+  activeEditingBucket.value = null;
+  showBucketModal.value = true;
+};
+
+const openEditBucketModal = (bucket) => {
+  activeEditingBucket.value = bucket;
+  showBucketModal.value = true;
+};
+
+const handleSaveBucket = ({ id, name, icon, color, is_archived }) => {
+  if (id) {
+    emit('update-bucket', id, { name, icon, color, is_archived });
+  } else {
+    emit('create-bucket', { name, icon, color });
+  }
+  showBucketModal.value = false;
+};
 const editingPreset = ref(null);
 const applyingPreset = ref(null);
 const localPresets = ref([]);
@@ -1358,6 +1134,16 @@ const getAccountName = (id) => {
 const getCategoryName = (id) => {
   if (!id) return 'Uncategorized';
   return props.categories.find(c => c.id === id)?.name || 'Unknown Category';
+};
+
+const getCategoryIcon = (id) => {
+  if (!id) return 'category';
+  return props.categories.find(c => c.id === id)?.icon || 'category';
+};
+
+const getCategoryColor = (id) => {
+  if (!id) return '#D4BFFF';
+  return props.categories.find(c => c.id === id)?.color || '#D4BFFF';
 };
 
 const userAccounts = computed(() => props.accounts.filter(a => a.type !== 'Unassigned' && a.id !== 'acc_unassigned_pool'));

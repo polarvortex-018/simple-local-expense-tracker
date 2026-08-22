@@ -25,8 +25,8 @@
         <!-- Income Card -->
         <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 flex-1 flex flex-col justify-between gap-1 shadow-sm">
           <div class="flex items-center gap-1.5 text-[#9e9cae]">
-            <span class="text-sm">📉</span>
-            <h2 class="text-xs font-semibold uppercase tracking-wider">Total Income</h2>
+            <span class="material-symbols-outlined text-sm text-[#B3F5E1]">trending_up</span>
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-[#B3F5E1]">Total Income</h2>
           </div>
           <div class="text-lg sm:text-xl font-semibold text-[#B3F5E1] tabular-nums tracking-tight">
             ₹{{ formatAmount(totalIncome) }}
@@ -36,8 +36,8 @@
         <!-- Expense Card -->
         <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 flex-1 flex flex-col justify-between gap-1 shadow-sm">
           <div class="flex items-center gap-1.5 text-[#9e9cae]">
-            <span class="text-sm">📈</span>
-            <h2 class="text-xs font-semibold uppercase tracking-wider">Total Expense</h2>
+            <span class="material-symbols-outlined text-sm text-[#FFD1B3]">trending_down</span>
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-[#FFD1B3]">Total Expense</h2>
           </div>
           <div class="text-lg sm:text-xl font-semibold text-[#FFD1B3] tabular-nums tracking-tight">
             ₹{{ formatAmount(totalExpenses) }}
@@ -66,7 +66,7 @@
           title="Click to add transaction for this bucket"
         >
           <div class="w-8 h-8 rounded-lg bg-[#191924] border border-[#29293a] flex items-center justify-center text-sm shrink-0">
-            {{ bucket.icon || '🪣' }}
+            <span class="material-symbols-outlined text-base" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
           </div>
           <div class="overflow-hidden min-w-0 flex-1">
             <p class="text-xs font-semibold text-[#f1f0f5] truncate leading-tight">{{ bucket.name }}</p>
@@ -146,15 +146,17 @@
             class="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#0f0f15]"
             :class="activeDashboardIndex === item.originalIndex ? 'bg-[#0f0f15]' : ''"
           >
-            <!-- Left: Color dot + Category Name -->
+            <!-- Left: Material Symbol Icon + Category Name -->
             <div class="flex items-center gap-2 min-w-0">
               <span 
-                class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
+                class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
                 :style="{ 
-                  backgroundColor: item.color,
-                  boxShadow: activeDashboardIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
+                  color: item.color,
+                  filter: activeDashboardIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
                 }"
-              ></span>
+              >
+                {{ resolveIcon(item.icon, 'category') }}
+              </span>
               <span class="text-xs font-bold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
             </div>
 
@@ -205,6 +207,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { resolveIcon } from '../utils/iconResolver.js';
 
 const props = defineProps({
   transactions: {
@@ -268,12 +271,14 @@ const activeBuckets = computed(() => props.buckets.filter(bucket => {
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   currentMonthTransactions.value.forEach(t => {
-    if (t.transaction_type === 'expense' && t.category && t.category.name !== 'Uncategorized') {
-      const catName = t.category.name;
-      const catColor = t.category.color || '#ef4444';
+    const category = props.categories.find(c => c.id === t.category_id) || t.category;
+    if (t.transaction_type === 'expense' && category && category.name !== 'Uncategorized') {
+      const catName = category.name;
+      const catColor = category.color || '#ef4444';
+      const catIcon = category.icon || 'category';
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
-        map[catName] = { name: catName, color: catColor, total: 0 };
+        map[catName] = { id: category.id, name: catName, color: catColor, icon: catIcon, total: 0 };
       }
       map[catName].total += amt;
     }

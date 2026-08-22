@@ -10,7 +10,7 @@
         ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
         : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/40'"
     >
-      <span class="text-base leading-none shrink-0">🌊</span>
+      <span class="material-symbols-outlined text-base leading-none text-[#D4BFFF] shrink-0">savings</span>
       <div class="min-w-0">
         <p class="text-[11px] font-bold text-[#f1f0f5] truncate">Unassigned</p>
         <p class="text-[9px] text-[#9e9cae] truncate mt-0.5">No bucket</p>
@@ -28,7 +28,7 @@
         ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
         : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/40'"
     >
-      <span class="text-base leading-none shrink-0">{{ bucket.icon || '🪣' }}</span>
+      <span class="material-symbols-outlined text-base leading-none shrink-0" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
       <div class="min-w-0">
         <p class="text-[11px] font-bold text-[#f1f0f5] truncate">{{ bucket.name }}</p>
         <p class="text-[9px] text-[#9e9cae] truncate mt-0.5">₹{{ formatAmount(bucket.allocated_balance) }}</p>
@@ -38,6 +38,8 @@
 </template>
 
 <script setup>
+import { resolveIcon } from '../utils/iconResolver.js';
+
 defineProps({
   buckets: { type: Array, required: true },
   modelValue: { type: String, default: null },

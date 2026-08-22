@@ -396,7 +396,7 @@ export const api = {
     const now = new Date().toISOString();
     execRun(
       'INSERT INTO categories (id, name, color, icon, is_quick_select, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [id, payload.name.trim(), payload.color || '#6366f1', payload.icon || '🏷️', payload.is_quick_select ? 1 : 0, now, now]
+      [id, payload.name.trim(), payload.color || '#D4BFFF', payload.icon || 'category', payload.is_quick_select ? 1 : 0, now, now]
     );
     const rows = execQuery('SELECT * FROM categories WHERE id = ?', [id]);
     return rows[0];
@@ -407,7 +407,7 @@ export const api = {
     const now = new Date().toISOString();
     execRun(
       'UPDATE categories SET name = ?, color = ?, icon = ?, is_quick_select = ?, updated_at = ? WHERE id = ?',
-      [payload.name.trim(), payload.color || '#6366f1', payload.icon || '🏷️', payload.is_quick_select ? 1 : 0, now, id]
+      [payload.name.trim(), payload.color || '#D4BFFF', payload.icon || 'category', payload.is_quick_select ? 1 : 0, now, id]
     );
     const rows = execQuery('SELECT * FROM categories WHERE id = ?', [id]);
     return rows[0];
@@ -446,7 +446,7 @@ export const api = {
     const now = new Date().toISOString();
     execRun(
       'INSERT INTO savings_buckets (id, name, allocated_balance, target_amount, icon, color, is_archived, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, payload.name.trim(), payload.allocated_balance || 0.0, payload.target_amount || null, payload.icon || '🪣', payload.color || '#6366f1', 0, now, now]
+      [id, payload.name.trim(), payload.allocated_balance || 0.0, payload.target_amount || null, payload.icon || 'savings', payload.color || '#D4BFFF', 0, now, now]
     );
     const rows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [id]);
     return rows[0];
@@ -457,7 +457,7 @@ export const api = {
     const now = new Date().toISOString();
     execRun(
       'UPDATE savings_buckets SET name = ?, icon = ?, color = ?, is_archived = ?, updated_at = ? WHERE id = ?',
-      [payload.name.trim(), payload.icon || '🪣', payload.color || '#6366f1', payload.is_archived ? 1 : 0, now, id]
+      [payload.name.trim(), payload.icon || 'savings', payload.color || '#D4BFFF', payload.is_archived ? 1 : 0, now, id]
     );
     const rows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [id]);
     return rows[0];

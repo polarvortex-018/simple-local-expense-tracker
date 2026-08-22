@@ -509,6 +509,15 @@ onMounted(() => {
             <span>Settings</span>
           </button>
         </nav>
+
+        <!-- Desktop Quick Add Button -->
+        <button
+          @click="openAddTransaction()"
+          class="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer shadow-sm ml-2"
+        >
+          <span class="text-sm font-black leading-none">+</span>
+          <span>New Transaction</span>
+        </button>
       </div>
     </header>
 

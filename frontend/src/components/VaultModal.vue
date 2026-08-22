@@ -7,7 +7,7 @@
       <div class="flex justify-between items-center border-b border-[#29293a] pb-3 shrink-0">
         <div>
           <h3 class="text-base font-bold text-[#f1f0f5] flex items-center gap-2 tracking-tight">
-            <span>🏦</span> Financial Vaults Management
+            <span class="material-symbols-outlined text-[#D4BFFF] text-xl">account_balance</span> Financial Vaults Management
           </h3>
           <p class="text-xs text-[#9e9cae] mt-0.5">Switch between isolated database vaults stored locally.</p>
         </div>
@@ -48,7 +48,7 @@
           >
             <div class="flex items-center gap-3 min-w-0 flex-grow">
               <div class="w-9 h-9 rounded-xl bg-[#0f0f15] border border-[#29293a] flex items-center justify-center text-lg shrink-0">
-                {{ v.is_active ? '📂' : '📁' }}
+                <span class="material-symbols-outlined text-lg text-[#D4BFFF]">{{ v.is_active ? 'folder_open' : 'folder' }}</span>
               </div>
               <div class="min-w-0 flex-grow">
                 <!-- Inline rename input form -->

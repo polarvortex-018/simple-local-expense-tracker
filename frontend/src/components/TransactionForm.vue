@@ -56,7 +56,7 @@
               >
                 <div class="flex items-center gap-3">
                   <span class="w-1 h-5 rounded-full bg-[#FFD1B3] shrink-0"></span>
-                  <span class="text-lg">🪣</span>
+                  <span class="material-symbols-outlined text-xl text-[#FFD1B3] shrink-0">savings</span>
                   <span class="text-xs font-semibold">Unassigned (Account Only)</span>
                 </div>
                 <span class="text-xs font-bold tabular-nums text-[#FFD1B3]">₹{{ formatAmount(unassignedAmount) }}</span>
@@ -72,7 +72,7 @@
               >
                 <div class="flex items-center gap-3 overflow-hidden">
                   <span class="w-1 h-5 rounded-full shrink-0" :style="{ backgroundColor: b.color || '#D4BFFF' }"></span>
-                  <span class="text-lg shrink-0">{{ b.icon || '🪣' }}</span>
+                  <span class="material-symbols-outlined text-xl shrink-0" :style="{ color: b.color || '#D4BFFF' }">{{ resolveIcon(b.icon, 'savings') }}</span>
                   <span class="text-xs font-semibold truncate">{{ b.name }}</span>
                 </div>
                 <span class="text-xs font-bold tabular-nums shrink-0" :class="b.allocated_balance >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
@@ -130,7 +130,8 @@
               class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
               :class="form.transaction_type === 'expense' ? 'bg-[#ef4444] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
             >
-              <span>↓ Expense</span>
+              <span class="material-symbols-outlined text-sm">trending_down</span>
+              <span>Expense</span>
             </button>
             <button 
               type="button"
@@ -138,7 +139,8 @@
               class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
               :class="form.transaction_type === 'income' ? 'bg-[#10b981] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
             >
-              <span>↑ Income</span>
+              <span class="material-symbols-outlined text-sm">trending_up</span>
+              <span>Income</span>
             </button>
             <button
               type="button"
@@ -146,7 +148,8 @@
               class="py-2 px-1 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
               :class="form.transaction_type === 'adjustment' ? 'bg-amber-600 text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
             >
-              <span>⇄ Adjust</span>
+              <span class="material-symbols-outlined text-sm">tune</span>
+              <span>Adjust</span>
             </button>
           </div>
 
@@ -192,13 +195,13 @@
             </div>
           </div>
 
-          <!-- Category Selection Grid -->
+          <!-- Category Selection Section -->
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">CATEGORY</label>
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">CATEGORY *</label>
             </div>
 
-            <!-- Quick Category Grid (Only shown if a specific bucket is selected) -->
+            <!-- 3-Column Quick Category Grid (with Material Symbol icons + saved colors) -->
             <div v-if="form.bucket_id !== ''" class="grid grid-cols-3 gap-2">
               <button 
                 type="button"
@@ -208,19 +211,28 @@
                 class="p-2.5 rounded-xl border text-xs font-semibold transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[72px]"
                 :class="form.category_id === cat.id ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#f1f0f5] ring-1 ring-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#D4BFFF]/40'"
               >
-                <span class="w-8 h-8 rounded-lg bg-[#14141d] border border-[#29293a] flex items-center justify-center text-base">{{ cat.icon || '🏷️' }}</span>
-                <span class="text-xs font-bold truncate max-w-full leading-tight">{{ cat.name }}</span>
+                <span class="w-8 h-8 rounded-lg bg-[#14141d] border border-[#29293a] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-lg shrink-0" :style="{ color: cat.color || '#D4BFFF' }">{{ resolveIcon(cat.icon, 'category') }}</span>
+                </span>
+                <span class="text-xs font-bold truncate max-w-full leading-tight text-[#f1f0f5]">{{ cat.name }}</span>
               </button>
 
-              <!-- All Categories Grid Modal Trigger -->
+              <!-- More Categories Picker Trigger Card -->
               <button
                 type="button"
-                @click="showCategoryModal = true"
+                @click="categoryPickerRef?.open()"
                 class="p-2.5 rounded-xl border text-xs font-semibold transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[72px] w-full"
                 :class="selectedCategoryIsNonQuick ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] text-[#D4BFFF] ring-1 ring-[#D4BFFF]/40' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#D4BFFF]/40'"
               >
-                <span class="w-8 h-8 rounded-lg bg-[#14141d] border border-[#29293a] flex items-center justify-center text-base">
-                  {{ selectedCategoryIsNonQuick ? (categories.find(c => c.id === form.category_id)?.icon || '🏷️') : '•••' }}
+                <span class="w-8 h-8 rounded-lg bg-[#14141d] border border-[#29293a] flex items-center justify-center shrink-0">
+                  <span 
+                    v-if="selectedCategoryIsNonQuick"
+                    class="material-symbols-outlined text-lg shrink-0"
+                    :style="{ color: categories.find(c => c.id === form.category_id)?.color || '#D4BFFF' }"
+                  >
+                    {{ resolveIcon(categories.find(c => c.id === form.category_id)?.icon, 'category') }}
+                  </span>
+                  <span v-else class="text-xs font-bold text-[#D4BFFF]">•••</span>
                 </span>
                 <span class="text-xs font-bold truncate max-w-full leading-tight">
                   {{ selectedCategoryIsNonQuick ? categories.find(c => c.id === form.category_id)?.name : 'More' }}
@@ -233,18 +245,26 @@
               <span>Category Assignment:</span>
               <span class="font-bold text-[#FFD1B3]">Unassigned (No Category)</span>
             </div>
+
+            <!-- Reusable Category Picker Modal (Opened via Ref) -->
+            <CategoryPicker 
+              ref="categoryPickerRef"
+              :categories="categories" 
+              v-model="form.category_id" 
+              title="Select Category" 
+              placeholder="Choose Category"
+            />
           </div>
 
           <!-- Description Field -->
           <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION</label>
+            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION (OPTIONAL)</label>
             <div class="relative">
               <span class="absolute left-3 top-2.5 text-[#9e9cae] text-xs">≡</span>
               <input 
                 v-model="form.description"
                 type="text" 
-                placeholder="Optional description"
-                required
+                placeholder="e.g. Lunch with friends"
                 class="w-full pl-8 pr-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition"
               />
             </div>
@@ -290,54 +310,13 @@
         </button>
       </div>
     </div>
-
-    <!-- Category Grid Modal -->
-    <div
-      v-if="showCategoryModal"
-      class="fixed inset-0 z-[60] flex items-end justify-center bg-[#0f0f15]/85 backdrop-blur-sm"
-      @click.self="showCategoryModal = false"
-    >
-      <div class="w-full max-w-md bg-[#14141d] border-t border-[#29293a] rounded-t-2xl shadow-2xl flex flex-col max-h-[80vh]">
-        <!-- Handle bar -->
-        <div class="flex justify-center pt-2.5 pb-1 shrink-0">
-          <div class="w-10 h-1 rounded-full bg-[#29293a]"></div>
-        </div>
-        <!-- Header -->
-        <div class="px-5 pb-3 pt-1 flex justify-between items-center shrink-0">
-          <h3 class="text-sm font-bold text-[#f1f0f5]">Select Category</h3>
-          <button @click="showCategoryModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] text-base cursor-pointer p-1">✕</button>
-        </div>
-        <!-- Grid -->
-        <div class="overflow-y-auto flex-1 px-4 pb-6">
-          <div class="grid grid-cols-3 gap-2.5">
-            <button
-              v-for="cat in categories"
-              :key="cat.id"
-              type="button"
-              @click="form.category_id = cat.id; showCategoryModal = false"
-              class="p-3 rounded-2xl border flex flex-col items-center justify-center gap-2 text-center cursor-pointer transition min-h-[80px]"
-              :class="form.category_id === cat.id
-                ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
-                : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/30'"
-            >
-              <span
-                class="w-10 h-10 rounded-xl flex items-center justify-center text-xl transition"
-                :class="form.category_id === cat.id ? 'bg-[#D4BFFF]/20' : 'bg-[#191924]'"
-              >{{ cat.icon || '🏷️' }}</span>
-              <span
-                class="text-[11px] font-bold leading-tight truncate w-full"
-                :class="form.category_id === cat.id ? 'text-[#D4BFFF]' : 'text-[#ccc3d8]'"
-              >{{ cat.name }}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
+import CategoryPicker from './CategoryPicker.vue';
+import { resolveIcon } from '../utils/iconResolver.js';
 
 const props = defineProps({
   transaction: {
@@ -381,8 +360,8 @@ const displayedQuickCategories = computed(() => {
   return pinned.length > 0 ? pinned : props.categories.slice(0, 5);
 });
 
-// Category grid modal
-const showCategoryModal = ref(false);
+// Category grid picker ref
+const categoryPickerRef = ref(null);
 const selectedCategoryIsNonQuick = computed(() => {
   if (!form.value.category_id) return false;
   return !displayedQuickCategories.value.some(c => c.id === form.value.category_id);
@@ -499,10 +478,6 @@ const handleSubmit = async () => {
     error.value = 'Amount must be greater than zero.';
     return;
   }
-  if (!form.value.description || !form.value.description.trim()) {
-    error.value = 'Description cannot be empty.';
-    return;
-  }
   if (form.value.bucket_id !== '' && !form.value.category_id) {
     error.value = 'Please select a category.';
     return;
@@ -510,10 +485,15 @@ const handleSubmit = async () => {
 
   submitting.value = true;
   try {
+    const selectedCat = props.categories.find(c => c.id === form.value.category_id);
+    const finalDesc = form.value.description && form.value.description.trim() 
+      ? form.value.description.trim() 
+      : (selectedCat ? selectedCat.name : 'Transaction');
+
     const payload = {
       ...form.value,
       amount: Number(normalizedAmount),
-      description: form.value.description.trim(),
+      description: finalDesc,
       notes: form.value.notes ? form.value.notes.trim() : null
     };
     emit('save', payload);

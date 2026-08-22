@@ -409,7 +409,7 @@
                       :class="filters.category_ids.includes(cat.id) ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF] font-semibold' : 'bg-[#14141d] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
                     >
                       <div class="flex items-center gap-1.5 min-w-0">
-                        <span class="text-xs shrink-0">{{ cat.icon || '🏷️' }}</span>
+                        <span class="material-symbols-outlined text-xs leading-none shrink-0" :style="{ color: cat.color || '#D4BFFF' }">{{ resolveIcon(cat.icon, 'category') }}</span>
                         <span class="truncate text-[11px]">{{ cat.name }}</span>
                       </div>
                       <span v-if="filters.category_ids.includes(cat.id)" class="text-[10px] font-bold text-[#D4BFFF] shrink-0">✓</span>
@@ -564,15 +564,17 @@
                 class="flex items-center justify-between py-2 px-2.5 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#191924]"
                 :class="activeExpenseIndex === item.originalIndex ? 'bg-[#191924] ring-1 ring-[#D4BFFF]/50' : ''"
               >
-                <!-- Left: Color dot + Category Name -->
+                <!-- Left: Material Symbol Icon + Category Name -->
                 <div class="flex items-center gap-2.5 min-w-0">
                   <span 
-                    class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
+                    class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
                     :style="{ 
-                      backgroundColor: item.color,
-                      boxShadow: activeExpenseIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
+                      color: item.color,
+                      filter: activeExpenseIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
                     }"
-                  ></span>
+                  >
+                    {{ resolveIcon(item.icon, 'category') }}
+                  </span>
                   <span class="text-xs font-extrabold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
                 </div>
 
@@ -659,15 +661,17 @@
                 class="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#171f33]"
                 :class="activeIncomeIndex === item.originalIndex ? 'bg-[#171f33] ring-1 ring-[#7c3aed]/50' : ''"
               >
-                <!-- Left: Color dot + Category Name -->
+                <!-- Left: Material Symbol Icon + Category Name -->
                 <div class="flex items-center gap-2 min-w-0">
                   <span 
-                    class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-200"
+                    class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
                     :style="{ 
-                      backgroundColor: item.color,
-                      boxShadow: activeIncomeIndex === item.originalIndex ? `0 0 8px ${item.color}` : 'none' 
+                      color: item.color,
+                      filter: activeIncomeIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
                     }"
-                  ></span>
+                  >
+                    {{ resolveIcon(item.icon, 'category') }}
+                  </span>
                   <span class="text-xs font-bold text-[#dae2fd] truncate leading-none">{{ item.name }}</span>
                 </div>
 
@@ -714,7 +718,7 @@
             <!-- Left: Bucket Icon & Description Details -->
             <div class="flex items-center gap-2.5 min-w-0 flex-1">
               <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#0f0f15] border border-[#29293a] text-sm shrink-0">
-                {{ getBucketIcon(tx.bucket_id) }}
+                <span class="material-symbols-outlined text-[#D4BFFF] text-base leading-none">{{ resolveIcon(getBucketIcon(tx.bucket_id) !== '🪣' ? getBucketIcon(tx.bucket_id) : getCategoryIcon(tx.category_id), 'savings') }}</span>
               </span>
 
               <!-- Center: Description & Metadata -->
@@ -782,7 +786,7 @@
 
               <td class="py-2.5 px-3 text-xs">
                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#0b1326] text-[#d2bbff] border border-[#31394d] text-[10px] font-semibold">
-                  <span>{{ getBucketIcon(tx.bucket_id) }}</span>
+                  <span class="material-symbols-outlined text-xs leading-none" :style="{ color: getBucketColor(tx.bucket_id) }">{{ resolveIcon(getBucketIcon(tx.bucket_id), 'savings') }}</span>
                   <span class="break-words">{{ getBucketName(tx.bucket_id) }}</span>
                 </span>
               </td>
@@ -852,8 +856,8 @@
         <!-- Modal Header -->
         <div class="flex justify-between items-center px-5 py-3.5 border-b border-[#31394d] bg-[#131b2e]/60">
           <div class="flex items-center gap-2.5">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-[#0b1326] border border-[#31394d] text-base">
-              {{ getBucketIcon(selectedTransactionForView.bucket_id) }}
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-[#0b1326] border border-[#31394d]">
+              <span class="material-symbols-outlined text-base" :style="{ color: getBucketColor(selectedTransactionForView.bucket_id) }">{{ resolveIcon(getBucketIcon(selectedTransactionForView.bucket_id), 'savings') }}</span>
             </span>
             <div>
               <h3 class="text-sm font-bold text-[#dae2fd]">
@@ -896,7 +900,7 @@
             <div class="bg-[#131b2e]/70 border border-[#31394d] rounded-xl p-3 space-y-1">
               <span class="text-[10px] font-bold uppercase tracking-wider text-[#ccc3d8]">Category</span>
               <div class="flex items-center gap-1.5 pt-0.5">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(selectedTransactionForView.category_id) }"></span>
+                <span class="material-symbols-outlined text-sm leading-none shrink-0" :style="{ color: getCategoryColor(selectedTransactionForView.category_id) }">{{ resolveIcon(getCategoryIcon(selectedTransactionForView.category_id), 'category') }}</span>
                 <span class="font-bold text-[#dae2fd] break-words">{{ getCategoryName(selectedTransactionForView.category_id) }}</span>
               </div>
             </div>
@@ -914,7 +918,7 @@
             <div class="bg-[#131b2e]/70 border border-[#31394d] rounded-xl p-3 space-y-1">
               <span class="text-[10px] font-bold uppercase tracking-wider text-[#ccc3d8]">Bucket</span>
               <div class="flex items-center gap-1.5 pt-0.5">
-                <span>{{ getBucketIcon(selectedTransactionForView.bucket_id) }}</span>
+                <span class="material-symbols-outlined text-sm leading-none shrink-0" :style="{ color: getBucketColor(selectedTransactionForView.bucket_id) }">{{ resolveIcon(getBucketIcon(selectedTransactionForView.bucket_id), 'savings') }}</span>
                 <span class="font-bold text-[#dae2fd] break-words">{{ getBucketName(selectedTransactionForView.bucket_id) }}</span>
               </div>
             </div>
@@ -967,17 +971,13 @@
           </div>
 
           <div class="grid grid-cols-2 gap-2.5">
-            <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Category</label>
-              <select 
-                v-model="editForm.category_id"
-                class="w-full h-8 px-2 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-lg text-xs text-[#dae2fd] focus:outline-none transition cursor-pointer"
-              >
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                  {{ cat.icon || '🏷️' }} {{ cat.name }}
-                </option>
-              </select>
-            </div>
+            <CategoryPicker 
+              :categories="categories" 
+              v-model="editForm.category_id" 
+              label="Category" 
+              title="Select Category"
+              placeholder="Choose Category"
+            />
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Storage Account</label>
               <select 
@@ -1073,6 +1073,8 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import CategoryPicker from './CategoryPicker.vue';
+import { resolveIcon } from '../utils/iconResolver.js';
 
 const props = defineProps({
   transactions: {
@@ -1488,9 +1490,10 @@ const filteredCategoryExpenses = computed(() => {
       const catName = getCategoryName(t.category_id);
       if (!catName || catName === 'Uncategorized') return;
       const catColor = getCategoryColor(t.category_id);
+      const catIcon = getCategoryIcon(t.category_id);
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
-        map[catName] = { id: t.category_id, name: catName, color: catColor, total: 0 };
+        map[catName] = { id: t.category_id, name: catName, color: catColor, icon: catIcon, total: 0 };
       }
       map[catName].total += amt;
     }
@@ -1510,9 +1513,10 @@ const filteredCategoryIncome = computed(() => {
       const catName = getCategoryName(t.category_id);
       if (!catName || catName === 'Uncategorized') return;
       const catColor = getCategoryColor(t.category_id);
+      const catIcon = getCategoryIcon(t.category_id);
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
-        map[catName] = { id: t.category_id, name: catName, color: catColor, total: 0 };
+        map[catName] = { id: t.category_id, name: catName, color: catColor, icon: catIcon, total: 0 };
       }
       map[catName].total += amt;
     }
@@ -1753,10 +1757,12 @@ const bucketMap = computed(() => new Map(props.buckets.map(b => [b.id, b])));
 
 // Helper Lookup Methods (O(1) Speed)
 const getCategoryName = (id) => categoryMap.value.get(id)?.name || 'Uncategorized';
+const getCategoryIcon = (id) => categoryMap.value.get(id)?.icon || 'label';
 const getCategoryColor = (id) => categoryMap.value.get(id)?.color || '#64748b';
 const getAccountName = (id) => accountMap.value.get(id)?.name || 'Unknown Account';
 const getBucketName = (id) => (id ? bucketMap.value.get(id)?.name || 'General' : 'General');
-const getBucketIcon = (id) => (id ? bucketMap.value.get(id)?.icon || '🪣' : '🪣');
+const getBucketIcon = (id) => (id ? bucketMap.value.get(id)?.icon || 'savings' : 'savings');
+const getBucketColor = (id) => (id ? bucketMap.value.get(id)?.color || '#D4BFFF' : '#D4BFFF');
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
