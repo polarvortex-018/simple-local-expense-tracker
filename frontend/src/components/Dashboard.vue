@@ -1,76 +1,69 @@
 <template>
-  <div class="space-y-4">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+  <div class="space-y-6">
+    <!-- 1. Header & Net Worth Overview Section (Flush, Hairline Dividers) -->
+    <section class="space-y-3 pb-4 border-b border-[#1f202e]">
       <div>
-        <h2 class="text-xl font-bold text-[#f1f0f5] tracking-tight">Financial Overview</h2>
+        <h2 class="text-base font-bold text-[#f1f0f5] tracking-tight">Financial Overview</h2>
         <p class="text-xs text-[#9e9cae]">Real-time summary of your accounts, income, expenses, and savings buckets.</p>
       </div>
-    </div>
 
-    <!-- 1. Net Worth & Income/Expense Metrics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-      <!-- Net Worth Card (Flat, no gradient) -->
-      <section class="bg-[#14141d] border border-[#29293a]/70 rounded-xl p-3.5 flex flex-col gap-1 shadow-none">
-        <div class="flex justify-between items-center">
-          <h2 class="text-xs font-semibold text-[#9e9cae] uppercase tracking-wider">Net Worth</h2>
-        </div>
-        <div class="text-2xl font-semibold tabular-nums tracking-tight" :class="netWorth >= 0 ? 'text-[#f1f0f5]' : 'text-[#FFD1B3]'">
+      <!-- Hero Net Worth Readout -->
+      <div class="pt-1">
+        <span class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">NET WORTH</span>
+        <div class="text-3xl font-bold tabular-nums tracking-tight mt-0.5" :class="netWorth >= 0 ? 'text-[#f1f0f5]' : 'text-[#FFD1B3]'">
           ₹{{ formatAmount(netWorth) }}
         </div>
-      </section>
-
-      <!-- Income & Expense Summary Side-by-Side Cards -->
-      <div class="flex gap-3 col-span-1 md:col-span-1 lg:col-span-2">
-        <!-- Income Card -->
-        <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 flex-1 flex flex-col justify-between gap-1 shadow-sm">
-          <div class="flex items-center gap-1.5 text-[#9e9cae]">
-            <span class="material-symbols-outlined text-sm text-[#B3F5E1]">trending_up</span>
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-[#B3F5E1]">Total Income</h2>
-          </div>
-          <div class="text-lg sm:text-xl font-semibold text-[#B3F5E1] tabular-nums tracking-tight">
-            ₹{{ formatAmount(totalIncome) }}
-          </div>
-        </section>
-
-        <!-- Expense Card -->
-        <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 flex-1 flex flex-col justify-between gap-1 shadow-sm">
-          <div class="flex items-center gap-1.5 text-[#9e9cae]">
-            <span class="material-symbols-outlined text-sm text-[#FFD1B3]">trending_down</span>
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-[#FFD1B3]">Total Expense</h2>
-          </div>
-          <div class="text-lg sm:text-xl font-semibold text-[#FFD1B3] tabular-nums tracking-tight">
-            ₹{{ formatAmount(totalExpenses) }}
-          </div>
-        </section>
-      </div>
-    </div>
-
-    <!-- 2. SAVINGS ALLOCATIONS (Card Container with Horizontal Compact Grid) -->
-    <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 space-y-3 shadow-sm">
-      <div class="flex justify-between items-center border-b border-[#29293a] pb-2">
-        <h2 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Savings Allocations</h2>
       </div>
 
-      <div v-if="activeBuckets.length === 0" class="py-4 text-center text-xs text-[#9e9cae]">
-        No active savings buckets configured. Go to Settings -> Savings Buckets to add custom buckets.
+      <!-- Side-by-Side Income & Expense Metrics Split 50/50 Down the Middle -->
+      <div class="grid grid-cols-2 divide-x divide-[#1f202e] pt-3 mt-3 border-t border-[#1f202e]/60">
+        <div class="flex items-center gap-2.5 pr-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-sm text-[#B3F5E1]">north_east</span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[#B3F5E1] block truncate">INCOME ({{ currentMonthLabel }})</span>
+            <span class="text-sm font-bold text-[#B3F5E1] tabular-nums tracking-tight block truncate">₹{{ formatAmount(totalIncome) }}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 pl-3 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-sm text-[#FFD1B3]">south_east</span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[#FFD1B3] block truncate">EXPENSE ({{ currentMonthLabel }})</span>
+            <span class="text-sm font-bold text-[#FFD1B3] tabular-nums tracking-tight block truncate">₹{{ formatAmount(totalExpenses) }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SAVINGS ALLOCATIONS (Hairline Dividers List / 2-Col Grid) -->
+    <section class="space-y-2">
+      <div class="px-0.5">
+        <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Savings Allocations</h3>
       </div>
 
-      <!-- Compact Horizontal Grid with Hairline Dividers -->
-      <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 divide-x divide-y divide-[#29293a] border border-[#29293a] rounded-xl bg-[#0f0f15] overflow-hidden">
+      <div v-if="activeBuckets.length === 0" class="py-6 text-center text-xs text-[#9e9cae] border-y border-[#1f202e]">
+        No active savings buckets configured. Go to Settings → Savings Buckets to add buckets.
+      </div>
+
+      <!-- 2-Column Mobile-First Responsive Grid -->
+      <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2">
         <div 
           v-for="bucket in activeBuckets" 
           :key="bucket.id"
           @click="$emit('add-transaction', { bucketId: bucket.id, type: 'expense' })"
-          class="p-2.5 sm:p-3 hover:bg-[#191924] transition cursor-pointer flex items-center gap-2.5 min-h-[50px]"
+          class="flex items-center gap-2.5 p-3 rounded-xl border border-[#1f202e] bg-[#0f1019] hover:bg-[#141520] hover:border-[#D4BFFF]/40 text-left transition cursor-pointer active:scale-[0.98] min-h-[52px]"
           title="Click to add transaction for this bucket"
         >
-          <div class="w-8 h-8 rounded-lg bg-[#191924] border border-[#29293a] flex items-center justify-center text-sm shrink-0">
-            <span class="material-symbols-outlined text-base" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
+          <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-base leading-none" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
           </div>
-          <div class="overflow-hidden min-w-0 flex-1">
-            <p class="text-xs font-semibold text-[#f1f0f5] truncate leading-tight">{{ bucket.name }}</p>
-            <p class="text-xs sm:text-sm font-semibold tracking-tight tabular-nums truncate leading-tight" :class="Number(bucket.allocated_balance) >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ bucket.name }}</p>
+            <p class="text-[10px] font-bold tabular-nums truncate mt-0.5" :class="Number(bucket.allocated_balance) >= 0 ? 'text-[#D4BFFF]' : 'text-[#FFD1B3]'">
               ₹{{ formatAmount(bucket.allocated_balance) }}
             </p>
           </div>
@@ -78,20 +71,20 @@
       </div>
     </section>
 
-    <!-- 3. Current Month Expenses Breakdown Section Card -->
-    <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 space-y-4 shadow-sm">
-      <div class="border-b border-[#29293a] pb-2.5">
-        <h2 class="text-sm font-semibold text-[#f1f0f5] tracking-tight">Current Month Expenses Breakdown</h2>
+    <!-- 3. Current Month Expenses Breakdown (Hairline Divided Section) -->
+    <section class="space-y-3 pt-2">
+      <div class="border-b border-[#1f202e] pb-2 px-0.5">
+        <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Expenses Breakdown ({{ currentMonthLabel }})</h3>
       </div>
 
-      <div v-if="dashboardPiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#9e9cae]">
+      <div v-if="dashboardPiePaths.length === 0" class="py-8 text-center text-xs font-medium text-[#9e9cae]">
         No expense records found for this month.
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center py-2">
+      <div v-else class="space-y-4 py-1">
         <!-- Donut Chart SVG -->
-        <div class="sm:col-span-6 flex items-center justify-center">
-          <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
+        <div class="flex items-center justify-center py-2">
+          <div class="relative w-56 h-56 flex items-center justify-center shrink-0">
             <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
               <g
                 v-for="segment in dashboardPiePaths"
@@ -108,9 +101,9 @@
                   class="transition-all duration-300 pointer-events-none"
                   :style="{
                     transformOrigin: '100px 100px',
-                    filter: activeDashboardIndex === segment.originalIndex ? `drop-shadow(0 0 12px ${segment.color})` : 'none',
-                    transform: activeDashboardIndex === segment.originalIndex ? 'scale(1.05)' : 'scale(1)',
-                    opacity: activeDashboardIndex === null || activeDashboardIndex === segment.originalIndex ? 1 : 0.45
+                    filter: activeDashboardIndex === segment.originalIndex ? `drop-shadow(0 0 10px ${segment.color})` : 'none',
+                    transform: activeDashboardIndex === segment.originalIndex ? 'scale(1.04)' : 'scale(1)',
+                    opacity: activeDashboardIndex === null || activeDashboardIndex === segment.originalIndex ? 1 : 0.4
                   }"
                 />
               </g>
@@ -118,24 +111,24 @@
 
             <!-- Center Readout -->
             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-3">
-              <span class="text-xs font-semibold text-[#9e9cae] truncate max-w-[130px]">
-                {{ activeHoveredCategoryInfo ? activeHoveredCategoryInfo.name : 'Expenses' }}
+              <span class="text-[11px] font-semibold text-[#9e9cae] uppercase tracking-wider truncate max-w-[120px]">
+                {{ activeHoveredCategoryInfo ? activeHoveredCategoryInfo.name : 'Total' }}
               </span>
-              <div class="text-xl sm:text-2xl font-bold text-[#f1f0f5] tabular-nums tracking-tight mt-0.5">
-                <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredCategoryInfo ? activeHoveredCategoryInfo.amount : totalFilteredCategoryExpense) }}
+              <div class="text-xl font-bold text-[#f1f0f5] tabular-nums tracking-tight mt-0.5">
+                ₹{{ formatAmount(activeHoveredCategoryInfo ? activeHoveredCategoryInfo.amount : totalFilteredCategoryExpense) }}
               </div>
-              <span v-if="activeHoveredCategoryInfo" class="text-xs font-bold text-[#B3F5E1] mt-0.5 px-2 py-0.5 rounded-full bg-[#B3F5E1]/10">
-                {{ activeHoveredCategoryInfo.percentage }}% of total
+              <span v-if="activeHoveredCategoryInfo" class="text-[10px] font-semibold text-[#B3F5E1] mt-0.5">
+                {{ activeHoveredCategoryInfo.percentage }}%
               </span>
             </div>
           </div>
         </div>
 
-        <!-- Interactive Legend List -->
+        <!-- Hairline Divided Legend List -->
         <TransitionGroup 
           name="flip-list" 
           tag="div" 
-          class="sm:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 max-h-56 overflow-y-auto p-1"
+          class="border-y border-[#1f202e] divide-y divide-[#1f202e]"
         >
           <div 
             v-for="item in activeDashboardLegendItems"
@@ -143,27 +136,19 @@
             @mouseenter="hoveredCategoryIndex = item.originalIndex"
             @mouseleave="hoveredCategoryIndex = null"
             @click="toggleSelectCategory(item.originalIndex)"
-            class="flex items-center justify-between py-1.5 px-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-[#0f0f15]"
-            :class="activeDashboardIndex === item.originalIndex ? 'bg-[#0f0f15]' : ''"
+            class="flex items-center justify-between py-2.5 px-1 transition cursor-pointer hover:bg-[#141520] active:bg-[#141520]"
+            :class="activeDashboardIndex === item.originalIndex ? 'bg-[#141520]' : ''"
           >
-            <!-- Left: Material Symbol Icon + Category Name -->
-            <div class="flex items-center gap-2 min-w-0">
-              <span 
-                class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
-                :style="{ 
-                  color: item.color,
-                  filter: activeDashboardIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
-                }"
-              >
-                {{ resolveIcon(item.icon, 'category') }}
-              </span>
-              <span class="text-xs font-bold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
+            <!-- Left: Color Indicator Dot + Category Name -->
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: item.color }"></span>
+              <span class="text-xs font-semibold text-[#f1f0f5] truncate">{{ item.name }}</span>
             </div>
 
             <!-- Right: Percentage + Amount -->
-            <div class="flex items-center gap-2 shrink-0 tabular-nums">
-              <span class="text-[10px] font-semibold text-[#9e9cae] bg-[#0f0f15] px-1.5 py-0.2 rounded border border-[#29293a]">{{ item.percentage }}%</span>
-              <span class="text-xs font-bold" :style="{ color: activeDashboardIndex === item.originalIndex ? item.color : '#f1f0f5' }">
+            <div class="flex items-center gap-4 shrink-0 tabular-nums">
+              <span class="text-[11px] text-[#9e9cae] font-medium w-10 text-right">{{ item.percentage }}%</span>
+              <span class="text-xs font-bold text-[#f1f0f5] text-right min-w-[70px]">
                 ₹{{ formatAmount(item.amount) }}
               </span>
             </div>
@@ -172,32 +157,32 @@
       </div>
     </section>
 
-    <!-- 4. STORAGE ACCOUNTS BREAKDOWN (Card Container with Horizontal Compact Grid) -->
-    <section class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 space-y-3 shadow-sm">
-      <div class="flex justify-between items-center border-b border-[#29293a] pb-2">
-        <h2 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Storage Accounts</h2>
-        <span class="text-xs text-[#9e9cae] font-semibold">Real-time Balances</span>
+    <!-- 4. STORAGE ACCOUNTS BREAKDOWN (Hairline Divider Section) -->
+    <section class="space-y-2 pt-2">
+      <div class="flex justify-between items-center border-b border-[#1f202e] pb-2 px-0.5">
+        <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Storage Accounts</h3>
+        <span class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider">Real-time Balances</span>
       </div>
 
-      <div v-if="physicalAccounts.length === 0" class="py-4 text-center text-xs text-[#9e9cae]">
-        No storage accounts configured. Go to Settings -> Storage Accounts to add custom accounts.
+      <div v-if="physicalAccounts.length === 0" class="py-6 text-center text-xs text-[#9e9cae] border-y border-[#1f202e]">
+        No storage accounts configured. Go to Settings → Storage Accounts to add accounts.
       </div>
 
-      <!-- Compact Horizontal Grid with Hairline Dividers -->
-      <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 divide-x divide-y divide-[#29293a] border border-[#29293a] rounded-xl bg-[#0f0f15] overflow-hidden">
+      <!-- Hairline Divided Accounts List -->
+      <div v-else class="border-y border-[#1f202e] divide-y divide-[#1f202e]">
         <div 
           v-for="acc in physicalAccounts" 
           :key="acc.id"
-          class="p-2.5 sm:p-3 hover:bg-[#191924] transition flex items-center justify-between gap-2 min-h-[50px]"
+          class="py-3 px-1 flex items-center justify-between gap-2 hover:bg-[#141520] transition"
         >
           <div class="overflow-hidden min-w-0 flex-1">
-            <p class="text-xs font-bold text-[#f1f0f5] truncate leading-tight">{{ acc.name }}</p>
-            <p class="text-xs sm:text-sm font-bold tracking-tight tabular-nums truncate leading-tight" :class="Number(acc.balance) >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
+            <p class="text-xs font-semibold text-[#f1f0f5] truncate leading-tight">{{ acc.name }}</p>
+            <p class="text-xs font-bold tracking-tight tabular-nums truncate leading-tight mt-0.5" :class="Number(acc.balance) >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
               ₹{{ formatAmount(acc.balance) }}
             </p>
           </div>
-          <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#191924] text-[#9e9cae] border border-[#29293a] shrink-0">
-            {{ acc.account_type || 'Account' }}
+          <span class="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border border-[#1f202e] text-[#9e9cae] shrink-0">
+            {{ acc.account_type || 'ACCOUNT' }}
           </span>
         </div>
       </div>
@@ -235,6 +220,10 @@ const physicalAccounts = computed(() => {
   return props.accounts.filter(acc => acc.type !== 'Unassigned' && acc.id !== 'acc_unassigned_pool');
 });
 
+const currentMonthLabel = computed(() => {
+  return new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+});
+
 const netWorth = computed(() => {
   return physicalAccounts.value.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
 });
@@ -251,45 +240,56 @@ const currentMonthTransactions = computed(() => {
   });
 });
 
-const totalIncome = computed(() => {
-  return currentMonthTransactions.value
-    .filter(t => t.transaction_type === 'income' || (t.transaction_type === 'adjustment' && t.adjustment_direction === 'add'))
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+const filteredCategoryExpenses = computed(() => {
+  const map = {};
+  currentMonthTransactions.value.forEach(t => {
+    if (t.transaction_type !== 'expense') return;
+    const category = props.categories.find(c => c.id === t.category_id) || t.category;
+    const catName = category ? category.name : 'Uncategorized';
+    const catColor = category?.color || '#ef4444';
+    const catIcon = category?.icon || 'category';
+    const amt = Number(t.amount) || 0;
+    if (!map[catName]) {
+      map[catName] = { id: category?.id || null, name: catName, color: catColor, icon: catIcon, total: 0 };
+    }
+    map[catName].total += amt;
+  });
+
+  return Object.values(map).sort((a, b) => b.total - a.total);
 });
 
 const totalExpenses = computed(() => {
-  return currentMonthTransactions.value
-    .filter(t => t.transaction_type === 'expense')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  return filteredCategoryExpenses.value.reduce((sum, c) => sum + c.total, 0);
+});
+
+const totalFilteredCategoryExpense = totalExpenses;
+
+const filteredCategoryIncome = computed(() => {
+  const map = {};
+  currentMonthTransactions.value.forEach(t => {
+    if (t.transaction_type !== 'income') return;
+    const category = props.categories.find(c => c.id === t.category_id) || t.category;
+    const catName = category ? category.name : 'Uncategorized';
+    const catColor = category?.color || '#10b981';
+    const catIcon = category?.icon || 'category';
+    const amt = Number(t.amount) || 0;
+    if (!map[catName]) {
+      map[catName] = { id: category?.id || null, name: catName, color: catColor, icon: catIcon, total: 0 };
+    }
+    map[catName].total += amt;
+  });
+
+  return Object.values(map).sort((a, b) => b.total - a.total);
+});
+
+const totalIncome = computed(() => {
+  return filteredCategoryIncome.value.reduce((sum, c) => sum + c.total, 0);
 });
 
 const activeBuckets = computed(() => props.buckets.filter(bucket => {
   if (bucket.is_archived) return false;
   return Number.isFinite(Number(bucket.allocated_balance));
 }));
-
-const filteredCategoryExpenses = computed(() => {
-  const map = {};
-  currentMonthTransactions.value.forEach(t => {
-    const category = props.categories.find(c => c.id === t.category_id) || t.category;
-    if (t.transaction_type === 'expense' && category && category.name !== 'Uncategorized') {
-      const catName = category.name;
-      const catColor = category.color || '#ef4444';
-      const catIcon = category.icon || 'category';
-      const amt = Number(t.amount) || 0;
-      if (!map[catName]) {
-        map[catName] = { id: category.id, name: catName, color: catColor, icon: catIcon, total: 0 };
-      }
-      map[catName].total += amt;
-    }
-  });
-
-  return Object.values(map).sort((a, b) => b.total - a.total);
-});
-
-const totalFilteredCategoryExpense = computed(() => {
-  return filteredCategoryExpenses.value.reduce((sum, c) => sum + c.total, 0);
-});
 
 const hoveredCategoryIndex = ref(null);
 const selectedCategoryIndex = ref(null);

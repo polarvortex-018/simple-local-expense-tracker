@@ -5,15 +5,17 @@
       v-if="showUnassigned"
       type="button"
       @click="$emit('update:modelValue', null)"
-      class="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition cursor-pointer"
+      class="flex items-center gap-2.5 p-3 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[50px]"
       :class="modelValue === null
         ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
-        : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/40'"
+        : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
     >
-      <span class="material-symbols-outlined text-base leading-none text-[#D4BFFF] shrink-0">savings</span>
-      <div class="min-w-0">
-        <p class="text-[11px] font-bold text-[#f1f0f5] truncate">Unassigned</p>
-        <p class="text-[9px] text-[#9e9cae] truncate mt-0.5">No bucket</p>
+      <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-base leading-none text-[#FFD1B3]">savings</span>
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="text-xs font-bold text-[#f1f0f5] truncate">Unassigned</p>
+        <p class="text-[10px] text-[#9e9cae] truncate mt-0.5">No bucket</p>
       </div>
     </button>
 
@@ -23,15 +25,17 @@
       :key="bucket.id"
       type="button"
       @click="$emit('update:modelValue', bucket.id)"
-      class="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition cursor-pointer"
+      class="flex items-center gap-2.5 p-3 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[50px]"
       :class="modelValue === bucket.id
         ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
-        : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/40'"
+        : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
     >
-      <span class="material-symbols-outlined text-base leading-none shrink-0" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
-      <div class="min-w-0">
-        <p class="text-[11px] font-bold text-[#f1f0f5] truncate">{{ bucket.name }}</p>
-        <p class="text-[9px] text-[#9e9cae] truncate mt-0.5">₹{{ formatAmount(bucket.allocated_balance) }}</p>
+      <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-base leading-none" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ bucket.name }}</p>
+        <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(bucket.allocated_balance) }}</p>
       </div>
     </button>
   </div>

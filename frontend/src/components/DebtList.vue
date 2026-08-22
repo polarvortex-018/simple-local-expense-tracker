@@ -1,55 +1,52 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#1f202e] pb-3">
       <div>
-        <h2 class="text-xl font-black text-[#f1f0f5] tracking-tight">Debt Tracker</h2>
-        <p class="text-xs text-[#9e9cae]">Track money lent to people and money borrowed from others.</p>
+        <h2 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Debt Tracker</h2>
+        <p class="text-xs text-[#9e9cae]">Track money lent to people and money borrowed from others</p>
       </div>
       <button 
         @click="openAddModal"
-        class="flex items-center gap-1.5 px-5 py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-black text-xs rounded-full transition shadow-sm cursor-pointer shrink-0"
+        class="flex items-center gap-1.5 px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition shadow-sm cursor-pointer shrink-0 min-h-[38px]"
       >
-        <span class="text-base font-black leading-none">+</span> Record New Debt
+        <span class="material-symbols-outlined text-base leading-none">add</span>
+        <span>Record Debt</span>
       </button>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <!-- Summary Metrics Section (Flush, Hairline Dividers) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-4 border-b border-[#1f202e]">
       <!-- Owed to You -->
-      <div class="rounded-xl bg-[#14141d] border border-[#29293a] p-4 shadow-sm flex flex-col justify-between">
+      <div>
         <div class="flex items-center justify-between">
-          <p class="text-xs font-black uppercase tracking-wider text-[#B3F5E1]">Owed To You</p>
-          <div class="w-7 h-7 rounded-lg bg-[#B3F5E1]/20 border border-[#B3F5E1]/30 text-[#B3F5E1] flex items-center justify-center text-xs font-black">
-            ↙
-          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[#B3F5E1]">Owed To You</span>
+          <span class="material-symbols-outlined text-base text-[#B3F5E1]">south_west</span>
         </div>
-        <p class="mt-2 text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight">
+        <p class="mt-1 text-2xl font-bold text-[#f1f0f5] tabular-nums tracking-tight">
           ₹{{ formatAmount(totalOwedToYou) }}
         </p>
-        <p class="mt-0.5 text-[10px] text-[#9e9cae]">Money you lent to others (Unsettled)</p>
+        <p class="mt-0.5 text-[10px] text-[#9e9cae]">Money lent to others (Unsettled)</p>
       </div>
 
       <!-- You Owe -->
-      <div class="rounded-xl bg-[#14141d] border border-[#29293a] p-4 shadow-sm flex flex-col justify-between">
+      <div>
         <div class="flex items-center justify-between">
-          <p class="text-xs font-black uppercase tracking-wider text-[#FFD1B3]">You Owe</p>
-          <div class="w-7 h-7 rounded-lg bg-[#FFD1B3]/20 border border-[#FFD1B3]/30 text-[#FFD1B3] flex items-center justify-center text-xs font-black">
-            ↗
-          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[#FFD1B3]">You Owe</span>
+          <span class="material-symbols-outlined text-base text-[#FFD1B3]">north_east</span>
         </div>
-        <p class="mt-2 text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight">
+        <p class="mt-1 text-2xl font-bold text-[#f1f0f5] tabular-nums tracking-tight">
           ₹{{ formatAmount(totalYouOwe) }}
         </p>
         <p class="mt-0.5 text-[10px] text-[#9e9cae]">Money borrowed from others (Unsettled)</p>
       </div>
 
-      <!-- Net Debt Position -->
-      <div class="rounded-xl bg-[#14141d] border border-[#29293a] p-4 shadow-sm flex flex-col justify-between">
+      <!-- Net Position -->
+      <div>
         <div class="flex items-center justify-between">
-          <p class="text-xs font-black uppercase tracking-wider text-[#D4BFFF]">Net Debt Position</p>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Net Position</span>
         </div>
-        <p class="mt-2 text-2xl font-black tabular-nums tracking-tight" :class="netPosition >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
+        <p class="mt-1 text-2xl font-bold tabular-nums tracking-tight" :class="netPosition >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
           ₹{{ formatAmount(netPosition) }}
         </p>
         <p class="mt-0.5 text-[10px] text-[#9e9cae]">
@@ -58,28 +55,28 @@
       </div>
     </div>
 
-    <!-- Debt Controls (Tabs & Search) -->
-    <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm space-y-4">
-      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+    <!-- Debt Controls & Hairline List -->
+    <div class="space-y-3">
+      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5">
         <!-- Tabs -->
-        <div class="flex gap-1 bg-[#0f0f15] p-1 rounded-xl border border-[#29293a]">
+        <div class="flex gap-1 bg-[#0f1019] p-1 rounded-xl border border-[#1f202e]">
           <button 
             @click="activeTab = 'active'"
-            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition cursor-pointer"
+            class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer"
             :class="activeTab === 'active' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            Active (Unsettled)
+            Active
           </button>
           <button 
             @click="activeTab = 'settled'"
-            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition cursor-pointer"
+            class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer"
             :class="activeTab === 'settled' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             Settled
           </button>
           <button 
             @click="activeTab = 'all'"
-            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition cursor-pointer"
+            class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer"
             :class="activeTab === 'all' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             All
@@ -91,76 +88,78 @@
           <input 
             v-model="searchQuery"
             type="text"
-            placeholder="Search person or description..."
-            class="w-full pl-9 pr-3.5 py-2 bg-[#0f0f15] border border-[#29293a] hover:border-[#D4BFFF]/50 focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition"
+            placeholder="Search person or notes..."
+            class="w-full pl-8 pr-3 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae] focus:outline-none transition"
           />
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-2.5 text-[#9e9cae]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <span class="material-symbols-outlined text-xs absolute left-2.5 top-2 text-[#9e9cae]">search</span>
         </div>
       </div>
 
-      <!-- Compact Debt Rows -->
-      <div v-if="filteredDebts.length > 0" class="divide-y divide-[#29293a] border border-[#29293a] rounded-xl overflow-hidden">
+      <!-- Hairline Divided Debt Rows -->
+      <div v-if="filteredDebts.length > 0" class="border-y border-[#1f202e] divide-y divide-[#1f202e]">
         <button
           v-for="debt in filteredDebts"
           :key="debt.id"
           @click="openDetailModal(debt)"
-          class="w-full flex items-center gap-3 px-3.5 py-2.5 hover:bg-[#191924] transition duration-150 text-left cursor-pointer"
+          class="w-full flex items-center gap-3 py-3 px-1 hover:bg-[#141520] transition text-left cursor-pointer active:bg-[#141520] min-h-[48px]"
         >
-          <!-- Type Badge -->
-          <span
-            class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-black shrink-0"
-            :class="debt.type === 'lent' ? 'bg-[#B3F5E1]/15 text-[#B3F5E1]' : 'bg-[#FFD1B3]/15 text-[#FFD1B3]'"
-          >{{ debt.type === 'lent' ? '↗' : '↘' }}</span>
+          <!-- Type Icon Badge -->
+          <div
+            class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
+            :class="debt.type === 'lent' ? 'bg-[#B3F5E1]/15 text-[#B3F5E1] border-[#B3F5E1]/30' : 'bg-[#FFD1B3]/15 text-[#FFD1B3] border-[#FFD1B3]/30'"
+          >
+            <span class="material-symbols-outlined text-base leading-none">{{ debt.type === 'lent' ? 'south_west' : 'north_east' }}</span>
+          </div>
 
-          <!-- Name + meta -->
+          <!-- Person Name & Meta -->
           <div class="flex-1 min-w-0">
             <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ debt.person_name }}</p>
             <p class="text-[10px] text-[#9e9cae] truncate mt-0.5">
-              {{ getAccountName(debt.account_id) }} · {{ formatDate(debt.created_at) }}
+              {{ getAccountName(debt.account_id) }} • {{ formatDate(debt.created_at) }}
             </p>
           </div>
 
-          <!-- Description pill -->
-          <span v-if="debt.description" class="hidden sm:inline text-[10px] text-[#9e9cae] italic truncate max-w-[120px]">{{ debt.description }}</span>
+          <!-- Description snippet -->
+          <span v-if="debt.description" class="hidden sm:inline text-[10px] text-[#9e9cae] truncate max-w-[120px]">{{ debt.description }}</span>
 
           <!-- Status dot -->
           <span
             class="w-1.5 h-1.5 rounded-full shrink-0"
-            :class="debt.is_settled ? 'bg-[#29293a]' : 'bg-[#D4BFFF]'"
+            :class="debt.is_settled ? 'bg-[#1f202e]' : 'bg-[#D4BFFF]'"
           ></span>
 
           <!-- Amount -->
           <span
-            class="text-xs font-black tabular-nums shrink-0"
+            class="text-xs font-bold tabular-nums shrink-0"
             :class="debt.type === 'lent' ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'"
           >₹{{ formatAmount(debt.amount) }}</span>
         </button>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-12 border border-dashed border-[#29293a] rounded-xl text-xs text-[#9e9cae] space-y-2">
-        <p class="text-sm text-[#f1f0f5] font-bold">No debts found matching your filters.</p>
-        <p>Click "Record New Debt" to add a new debt entry.</p>
+      <div v-else class="text-center py-8 border-y border-[#1f202e] text-xs text-[#9e9cae] space-y-1">
+        <p class="text-xs text-[#f1f0f5] font-semibold">No debts found matching your filters.</p>
+        <p class="text-[11px]">Tap "Record Debt" above to log a debt entry.</p>
       </div>
     </div>
 
-    <!-- Create Debt Modal -->
+    <!-- Add Debt Modal Sheet -->
     <Transition name="modal">
-      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showAddModal = false">
-        <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md pb-16 sm:pb-0" @click.self="showAddModal = false">
+        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[85vh] sm:max-h-[90vh] flex flex-col my-0 sm:my-auto">
           
           <!-- Header -->
-          <div class="px-5 py-3.5 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
+          <div class="px-5 py-3.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
             <div>
               <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">Record New Debt</h3>
               <p class="text-[11px] text-[#9e9cae]">Track money lent or borrowed</p>
             </div>
-            <button @click="showAddModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer">✕</button>
+            <button @click="showAddModal = false" class="min-w-[36px] min-h-[36px] flex items-center justify-center text-[#9e9cae] hover:text-[#f1f0f5] cursor-pointer">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
           </div>
 
-          <form @submit.prevent="submitAddDebt" class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
+          <form @submit.prevent="submitAddDebt" class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
             <!-- Person Name -->
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Person Name *</label>
@@ -169,18 +168,18 @@
                 type="text"
                 placeholder="e.g. John Doe"
                 required
-                class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition"
+                class="w-full px-3 py-2 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae] focus:outline-none transition"
               />
             </div>
 
             <!-- Debt Type Switcher -->
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Debt Type *</label>
-              <div class="grid grid-cols-2 gap-2 p-1 bg-[#0f0f15] rounded-full border border-[#29293a]">
+              <div class="grid grid-cols-2 gap-2 p-1 bg-[#0f1019] rounded-xl border border-[#1f202e]">
                 <button 
                   type="button"
                   @click="newDebt.type = 'lent'"
-                  class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex flex-col items-center justify-center"
+                  class="py-2 text-xs font-bold rounded-lg transition cursor-pointer flex flex-col items-center justify-center"
                   :class="newDebt.type === 'lent' ? 'bg-[#10b981] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
                 >
                   <span>Lent Money</span>
@@ -189,7 +188,7 @@
                 <button 
                   type="button"
                   @click="newDebt.type = 'borrowed'"
-                  class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex flex-col items-center justify-center"
+                  class="py-2 text-xs font-bold rounded-lg transition cursor-pointer flex flex-col items-center justify-center"
                   :class="newDebt.type === 'borrowed' ? 'bg-[#ef4444] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
                 >
                   <span>Borrowed Money</span>
@@ -198,40 +197,28 @@
               </div>
             </div>
 
-            <!-- Amount and Account Side-by-Side in 2 Columns -->
-            <div class="grid grid-cols-2 gap-4 items-end">
-              <!-- Amount Input (Left) -->
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT *</label>
-                <div class="flex items-center gap-1 border-b border-[#29293a] focus-within:border-[#D4BFFF] pb-1">
-                  <span class="text-base font-bold text-[#9e9cae]">₹</span>
-                  <input 
-                    v-model="newDebt.amount"
-                    type="text"
-                    inputmode="decimal"
-                    pattern="[0-9]*[.,]?[0-9]*"
-                    autocomplete="off"
-                    placeholder="0.00"
-                    required
-                    class="w-full text-base sm:text-lg font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none transition"
-                  />
-                </div>
-              </div>
-
-              <!-- Account Selection (Right) -->
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">ACCOUNT *</label>
-                <select 
-                  v-model="newDebt.account_id"
+            <!-- Amount Input -->
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT *</label>
+              <div class="flex items-center gap-1 border-b border-[#1f202e] focus-within:border-[#D4BFFF] pb-1">
+                <span class="text-base font-bold text-[#9e9cae]">₹</span>
+                <input 
+                  v-model="newDebt.amount"
+                  type="text"
+                  inputmode="decimal"
+                  pattern="[0-9]*[.,]?[0-9]*"
+                  autocomplete="off"
+                  placeholder="0.00"
                   required
-                  class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer"
-                >
-                  <option value="" disabled class="bg-[#14141d] text-slate-500">Select Account</option>
-                  <option v-for="acc in accounts" :key="acc.id" :value="acc.id" class="bg-[#14141d] text-[#f1f0f5]">
-                    {{ acc.name }} (₹{{ formatAmount(acc.balance) }})
-                  </option>
-                </select>
+                  class="w-full text-base sm:text-lg font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none transition"
+                />
               </div>
+            </div>
+
+            <!-- Account Selection (2-Column Mobile Grid) -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">ACCOUNT *</label>
+              <AccountGrid :accounts="accounts" v-model="newDebt.account_id" />
             </div>
 
             <!-- Savings Bucket Selection -->
@@ -247,19 +234,19 @@
                 v-model="newDebt.description"
                 type="text"
                 placeholder="e.g. Dinner split, Emergency cash"
-                class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition"
+                class="w-full px-3 py-2 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae] focus:outline-none transition"
               />
             </div>
 
             <!-- Action CTA -->
-            <div class="pt-2 border-t border-[#29293a]">
+            <div class="pt-2 border-t border-[#1f202e]">
               <button 
                 type="submit" 
                 :disabled="submitting"
-                class="w-full py-3.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
-                <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
+                <span v-else class="material-symbols-outlined text-base">check</span>
                 <span>{{ submitting ? 'Saving Debt...' : 'Save Debt' }}</span>
               </button>
             </div>
@@ -270,17 +257,19 @@
 
     <!-- Settle Debt Modal -->
     <Transition name="modal">
-      <div v-if="showSettleModal" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showSettleModal = false">
-        <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div v-if="showSettleModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md pb-16 sm:pb-0" @click.self="showSettleModal = false">
+        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh]">
           
           <!-- Header -->
-          <div class="px-5 py-3.5 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
+          <div class="px-5 py-3.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
             <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">Settle Debt</h3>
-            <button @click="showSettleModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-base font-bold cursor-pointer">✕</button>
+            <button @click="showSettleModal = false" class="min-w-[36px] min-h-[36px] flex items-center justify-center text-[#9e9cae] hover:text-[#f1f0f5] cursor-pointer">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
           </div>
 
-          <div class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
-            <div v-if="settlingDebt" class="p-3.5 bg-[#0f0f15] border border-[#29293a] rounded-xl space-y-1">
+          <div class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
+            <div v-if="settlingDebt" class="p-3.5 bg-[#0f1019] border border-[#1f202e] rounded-xl space-y-1">
               <p class="text-xs text-[#9e9cae]">Settling debt with <strong class="text-[#f1f0f5]">{{ settlingDebt.person_name }}</strong></p>
               <p class="text-xl font-bold text-[#B3F5E1] tabular-nums">₹{{ formatAmount(settlingDebt.amount) }}</p>
               <p class="text-[11px] text-[#9e9cae] leading-tight">
@@ -289,28 +278,19 @@
             </div>
 
             <form @submit.prevent="submitSettleDebt" class="space-y-4">
-              <div class="space-y-1">
+              <div class="space-y-1.5">
                 <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Target Account *</label>
-                <select 
-                  v-model="settleAccountId"
-                  required
-                  class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer"
-                >
-                  <option value="" disabled class="bg-[#14141d] text-slate-500">Select Account</option>
-                  <option v-for="acc in accounts" :key="acc.id" :value="acc.id" class="bg-[#14141d] text-[#f1f0f5]">
-                    {{ acc.name }} (₹{{ formatAmount(acc.balance) }})
-                  </option>
-                </select>
+                <AccountGrid :accounts="accounts" v-model="settleAccountId" />
               </div>
 
-              <div class="pt-2 border-t border-[#29293a]">
+              <div class="pt-2 border-t border-[#1f202e]">
                 <button 
                   type="submit" 
                   :disabled="submitting"
-                  class="w-full py-3.5 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-bold text-sm rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                  class="w-full py-3 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-bold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
-                  <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
+                  <span v-else class="material-symbols-outlined text-base">check</span>
                   <span>{{ submitting ? 'Settling...' : 'Confirm Settlement' }}</span>
                 </button>
               </div>
@@ -319,6 +299,7 @@
         </div>
       </div>
     </Transition>
+
     <!-- Debt Detail Modal -->
     <Transition name="modal-fade">
       <div v-if="selectedDebt" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="selectedDebt = null">
@@ -397,6 +378,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import BucketGrid from './BucketGrid.vue';
+import AccountGrid from './AccountGrid.vue';
 import { formatDateDDMMYYYY } from '../utils/dateUtils';
 
 const props = defineProps({

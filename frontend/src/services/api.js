@@ -32,27 +32,22 @@ function uint8ToBase64(uint8) {
   return btoa(binary);
 }
 
-async function handleNativeExportOrShare(filename, uint8Array, title, text) {
-  const base64Data = uint8ToBase64(uint8Array);
-  const written = await Filesystem.writeFile({
-    path: filename,
-    data: base64Data,
-    directory: Directory.Cache
-  });
-
-  const canShare = await Share.canShare().catch(() => ({ value: false }));
-  if (canShare.value) {
-    await Share.share({
-      title,
-      text,
-      url: written.uri
-    });
-  } else {
-    await Filesystem.writeFile({
-      path: filename,
-      data: base64Data,
-      directory: Directory.Documents
-    });
+async function normalizeHistoricalTransfers() {
+  try {
+    execRun(`
+      UPDATE transactions 
+      SET transaction_type = 'transfer' 
+      WHERE transaction_type != 'transfer'
+        AND (
+          description LIKE 'Transfer:%' 
+          OR description LIKE 'Transfer %'
+          OR description LIKE '%(split out)' 
+          OR description LIKE '%(split in)'
+          OR description LIKE 'Salary allocation:%'
+        )
+    `, [], false);
+  } catch (e) {
+    console.warn('Historical transfer normalization notice:', e);
   }
 }
 
@@ -62,13 +57,14 @@ async function ensureDB() {
   if (!isEngineInitialized) {
     await initDatabaseEngine();
     isEngineInitialized = true;
+    normalizeHistoricalTransfers();
   }
 }
 
 function transactionMultiplier(type, adjustmentDirection) {
   if (type === 'expense') return -1;
   if (type === 'income') return 1;
-  if (type === 'adjustment') return adjustmentDirection === 'subtract' ? -1 : 1;
+  if (type === 'adjustment' || type === 'transfer') return adjustmentDirection === 'subtract' ? -1 : 1;
   throw new Error('Invalid transaction type.');
 }
 
@@ -161,7 +157,7 @@ export const api = {
       created_at: r.created_at,
       updated_at: r.updated_at,
       account: r.account_name ? { id: r.account_id, name: r.account_name } : null,
-      category: r.category_name ? { id: r.category_id, name: r.category_name, color: r.category_color } : null,
+      category: r.category_name ? { id: r.category_id, name: r.category_id, color: r.category_color } : null,
       bucket: r.bucket_name ? { id: r.bucket_id, name: r.bucket_name, icon: r.bucket_icon, color: r.bucket_color } : null
     }));
   },
@@ -175,6 +171,9 @@ export const api = {
     const categoryTotalsMap = {};
 
     txs.forEach(t => {
+      // Internal account transfers must NEVER be included in income or expense totals
+      if (t.transaction_type === 'transfer') return;
+
       const amt = Number(t.amount) || 0;
       if (t.transaction_type === 'income') {
         totalIncome += amt;
@@ -206,8 +205,8 @@ export const api = {
     const type = payload.transaction_type;
 
     if (!amount || amount <= 0) throw new Error("Amount must be a positive number.");
-    if (!['income', 'expense', 'adjustment'].includes(type)) throw new Error('Invalid transaction type.');
-    if (type === 'adjustment' && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
+    if (!['income', 'expense', 'adjustment', 'transfer'].includes(type)) throw new Error('Invalid transaction type.');
+    if ((type === 'adjustment' || type === 'transfer') && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.date || '')) throw new Error('A valid transaction date is required.');
     if (!payload.account_id) throw new Error("Account is required.");
 
@@ -529,17 +528,17 @@ export const api = {
       execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Number(toAcc.balance) + transferAmt, now, to_account_id], false);
 
       // Bucket impact — the money stays allocated to the same bucket, just moves accounts
-      // We record two adjustment transactions for full ledger traceability
+      // We record two transfer transactions for full ledger traceability
       const outId = generateUUID();
       const inId = generateUUID();
       execRun(
         `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-         VALUES (?, ?, 'adjustment', 'subtract', ?, ?, ?, ?, NULL, ?, ?)`,
+         VALUES (?, ?, 'transfer', 'subtract', ?, ?, ?, ?, NULL, ?, ?)`,
         [outId, transferAmt, desc, today, from_account_id, bucket_id || null, now, now], false
       );
       execRun(
         `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-         VALUES (?, ?, 'adjustment', 'add', ?, ?, ?, ?, NULL, ?, ?)`,
+         VALUES (?, ?, 'transfer', 'add', ?, ?, ?, ?, NULL, ?, ?)`,
         [inId, transferAmt, desc, today, to_account_id, bucket_id || null, now, now], false
       );
 
@@ -696,21 +695,21 @@ export const api = {
           execRun('UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE id = ?', [rounded, now, rule.account_id], false);
         }
 
-        // 3. Log matching debit/credit ledger adjustments
+        // 3. Log matching debit/credit ledger adjustments as transfer type
         const outId = generateUUID();
         const inId = generateUUID();
         
         // Deduct from source (allocated to source_bucket_id/unassigned)
         execRun(
           `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-           VALUES (?, ?, 'adjustment', 'subtract', ?, ?, ?, ?, ?, ?, ?)`,
+           VALUES (?, ?, 'transfer', 'subtract', ?, ?, ?, ?, ?, ?, ?)`,
           [outId, rounded, `${desc} (split out)`, today, actualSourceAccountId, source_bucket_id || null, rule.category_id || null, now, now],
           false
         );
         // Add to target (allocated to target bucket/unassigned)
         execRun(
           `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-           VALUES (?, ?, 'adjustment', 'add', ?, ?, ?, ?, ?, ?, ?)`,
+           VALUES (?, ?, 'transfer', 'add', ?, ?, ?, ?, ?, ?, ?)`,
           [inId, rounded, `${desc} (split in)`, today, rule.account_id, rule.bucket_id || null, rule.category_id || null, now, now],
           false
         );

@@ -1,9 +1,9 @@
 <template>
-  <div class="space-y-3 bg-[#14141d] border border-[#29293a] rounded-xl p-3.5">
-    <div class="flex items-center justify-between gap-2 border-b border-[#29293a] pb-2">
+  <div class="space-y-3 bg-[#0f1019] border border-[#1f202e] rounded-xl p-3.5">
+    <div class="flex items-center justify-between gap-2 border-b border-[#1f202e] pb-2">
       <span class="text-xs font-bold text-[#D4BFFF] uppercase tracking-wider">Select Icon</span>
       <!-- Currently Selected Icon Preview -->
-      <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#191924] border border-[#29293a]">
+      <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#141520] border border-[#1f202e]">
         <span class="material-symbols-outlined text-base text-[#D4BFFF]">{{ resolveIcon(modelValue) }}</span>
         <span class="text-[10px] font-mono text-[#9e9cae]">{{ resolveIcon(modelValue) }}</span>
       </div>
@@ -15,20 +15,20 @@
         v-model="searchQuery"
         type="text"
         placeholder="Search icons (e.g. car, food, rent, card)..."
-        class="w-full bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg px-3 py-1.5 text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none"
+        class="w-full bg-[#141520] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg px-3 py-1.5 text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none"
       />
       <span v-if="searchQuery" @click="searchQuery = ''" class="absolute right-2.5 top-1.5 text-xs text-[#9e9cae] cursor-pointer hover:text-[#f1f0f5]">✕</span>
     </div>
 
     <!-- Category Tabs (Shown when not searching) -->
-    <div v-if="!searchQuery" class="flex gap-1 overflow-x-auto scrollbar-none pb-1 border-b border-[#29293a]/60">
+    <div v-if="!searchQuery" class="flex gap-1 overflow-x-auto scrollbar-none pb-1 border-b border-[#1f202e]">
       <button
         v-for="(cat, idx) in ICON_CATALOG"
         :key="cat.category"
         @click="activeCategoryIndex = idx"
         type="button"
         class="px-2.5 py-1 text-[10px] font-bold rounded-md whitespace-nowrap transition cursor-pointer shrink-0"
-        :class="activeCategoryIndex === idx ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#0f0f15] text-[#9e9cae] hover:text-[#f1f0f5] border border-[#29293a]'"
+        :class="activeCategoryIndex === idx ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#141520] text-[#9e9cae] hover:text-[#f1f0f5] border border-[#1f202e]'"
       >
         {{ cat.category }}
       </button>
@@ -47,7 +47,7 @@
           type="button"
           :title="iconObj.label"
           class="h-10 min-h-[40px] rounded-lg flex flex-col items-center justify-center transition cursor-pointer border"
-          :class="modelValue === iconObj.id || resolveIcon(modelValue) === iconObj.id ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#f1f0f5] hover:bg-[#191924] hover:border-[#9e9cae]'"
+          :class="modelValue === iconObj.id || resolveIcon(modelValue) === iconObj.id ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF]' : 'bg-[#141520] border-[#1f202e] text-[#f1f0f5] hover:bg-[#191924] hover:border-[#D4BFFF]/40'"
         >
           <span class="material-symbols-outlined text-xl">{{ iconObj.id }}</span>
         </button>

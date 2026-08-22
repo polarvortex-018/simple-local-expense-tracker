@@ -2,11 +2,12 @@
 
 :root {
   font-family: 'Sora', 'Inter', system-ui, -apple-system, sans-serif;
-  --bg-surface: #0f0f15;
-  --bg-container-low: #14141d;
-  --bg-container: #191924;
-  --bg-container-high: #232332;
-  --color-border: #29293a;
+  --bg-surface: #0c0d14;
+  --bg-container-low: #0f1019;
+  --bg-container: #141520;
+  --bg-container-high: #1a1b28;
+  --color-border: #1f202e;
+  --color-border-subtle: #171824;
   --color-primary: #D4BFFF;
   --color-primary-container: #8b5cf6;
   --color-secondary: #FFD1B3;
@@ -15,11 +16,11 @@
   --color-on-surface: #f1f0f5;
   --color-on-surface-variant: #9e9cae;
 
-  /* Motion Tokens (Emil Kowalski design engineering standard) */
+  /* Motion Tokens */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --duration-micro: 130ms;
+  --duration-micro: 120ms;
   --duration-fast: 180ms;
   --duration-modal: 220ms;
 }
@@ -28,6 +29,8 @@ html, body {
   min-height: 100%;
   margin: 0;
   padding: 0;
+  background-color: #0c0d14;
+  color: #f1f0f5;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -37,11 +40,12 @@ html, body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #0c0d14;
 }
 
 body {
   font-family: 'Sora', 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #0f0f15;
+  background-color: #0c0d14;
   color: #f1f0f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

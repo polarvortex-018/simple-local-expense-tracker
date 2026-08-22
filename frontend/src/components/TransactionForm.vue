@@ -1,173 +1,182 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-[#0f0f15]/85 backdrop-blur-sm">
-    <div class="relative w-full max-w-md bg-[#14141d] border border-[#29293a] rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
+  <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 safe-area-modal-pt bg-[#0c0d14]/90 backdrop-blur-sm pb-16 sm:pb-0">
+    <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[85vh] sm:max-h-[90vh] flex flex-col my-0 sm:my-auto">
       
       <!-- Header -->
-      <div class="px-5 py-3.5 border-b border-[#29293a] flex justify-between items-center bg-[#14141d] shrink-0">
-        <div class="flex items-center gap-3">
+      <div class="px-5 py-3.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
+        <div class="flex items-center gap-2">
           <button 
             v-if="currentStep === 2 && !isEdit"
             type="button" 
             @click="currentStep = 1"
-            class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-sm font-bold cursor-pointer p-1"
+            class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-sm font-semibold cursor-pointer p-1"
             title="Back to Step 1"
           >
             ←
           </button>
           <button 
             @click="$emit('close')" 
-            class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-base font-bold cursor-pointer p-1"
+            class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-base font-semibold cursor-pointer p-1"
             title="Close"
           >
             ✕
           </button>
         </div>
         <div class="text-center">
-          <h3 class="text-base font-bold text-[#D4BFFF] tracking-tight">
+          <h3 class="text-sm font-bold text-[#D4BFFF] tracking-tight">
             {{ isEdit ? 'Edit Transaction' : 'Add Transaction' }}
           </h3>
-          <p v-if="!isEdit" class="text-[11px] font-semibold text-[#9e9cae]">
+          <p v-if="!isEdit" class="text-[10px] font-semibold text-[#9e9cae]">
             Step {{ currentStep }} of 2
           </p>
         </div>
-        <div class="w-10"></div> <!-- Centering layout placeholder -->
+        <div class="w-8"></div> <!-- Centering layout placeholder -->
       </div>
 
       <!-- Form Body (Scrollable container) -->
-      <form id="transaction-entry-form" @submit.prevent="handleSubmit" class="p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
+      <form id="transaction-entry-form" @submit.prevent="handleSubmit" class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
         <!-- Error Alerts -->
-        <div v-if="error" class="p-3 bg-rose-950/40 border border-rose-900/50 rounded-xl text-[#ffb4ab] text-xs font-semibold">
+        <div v-if="error" class="p-3 bg-rose-950/30 border border-rose-900/40 rounded-xl text-[#ffb4ab] text-xs font-semibold">
           {{ error }}
         </div>
 
-        <!-- STEP 1: Bucket & Account Selection (Matching Image 1) -->
-        <div v-if="currentStep === 1" class="space-y-5">
+        <!-- STEP 1: Bucket & Account Selection -->
+        <div v-if="currentStep === 1" class="space-y-4">
           
-          <!-- 1. Select Bucket Section -->
+          <!-- 1. Select Bucket Section (2-Column Mobile Grid) -->
           <div class="space-y-2">
-            <h4 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Select Bucket</h4>
-            <div class="bg-[#0f0f15] border border-[#29293a] rounded-xl overflow-hidden divide-y divide-[#29293a] shadow-sm">
-              
-              <!-- Unassigned Row -->
-              <div 
+            <h4 class="text-xs font-bold text-[#9e9cae] uppercase tracking-wider">Select Bucket</h4>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <!-- Unassigned Option -->
+              <button
+                type="button"
                 @click="form.bucket_id = ''"
-                class="p-3.5 flex items-center justify-between transition cursor-pointer min-h-[48px]"
-                :class="!form.bucket_id ? 'bg-[#D4BFFF]/20 text-[#D4BFFF] font-bold' : 'hover:bg-[#191924] text-[#f1f0f5]'"
+                class="flex items-center gap-2.5 p-3 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[50px]"
+                :class="!form.bucket_id
+                  ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
+                  : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
               >
-                <div class="flex items-center gap-3">
-                  <span class="w-1 h-5 rounded-full bg-[#FFD1B3] shrink-0"></span>
-                  <span class="material-symbols-outlined text-xl text-[#FFD1B3] shrink-0">savings</span>
-                  <span class="text-xs font-semibold">Unassigned (Account Only)</span>
+                <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base leading-none text-[#FFD1B3]">savings</span>
                 </div>
-                <span class="text-xs font-bold tabular-nums text-[#FFD1B3]">₹{{ formatAmount(unassignedAmount) }}</span>
-              </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-bold text-[#f1f0f5] truncate">Unassigned</p>
+                  <p class="text-[10px] text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+                </div>
+              </button>
 
-              <!-- Active Buckets Rows -->
-              <div 
-                v-for="b in activeBuckets" 
+              <!-- Active Buckets -->
+              <button
+                v-for="b in activeBuckets"
                 :key="b.id"
+                type="button"
                 @click="form.bucket_id = b.id"
-                class="p-3.5 flex items-center justify-between transition cursor-pointer min-h-[48px]"
-                :class="form.bucket_id === b.id ? 'bg-[#D4BFFF]/20 text-[#D4BFFF] font-bold' : 'hover:bg-[#191924] text-[#f1f0f5]'"
+                class="flex items-center gap-2.5 p-3 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[50px]"
+                :class="form.bucket_id === b.id
+                  ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
+                  : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
               >
-                <div class="flex items-center gap-3 overflow-hidden">
-                  <span class="w-1 h-5 rounded-full shrink-0" :style="{ backgroundColor: b.color || '#D4BFFF' }"></span>
-                  <span class="material-symbols-outlined text-xl shrink-0" :style="{ color: b.color || '#D4BFFF' }">{{ resolveIcon(b.icon, 'savings') }}</span>
-                  <span class="text-xs font-semibold truncate">{{ b.name }}</span>
+                <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base leading-none" :style="{ color: b.color || '#D4BFFF' }">{{ resolveIcon(b.icon, 'savings') }}</span>
                 </div>
-                <span class="text-xs font-bold tabular-nums shrink-0" :class="b.allocated_balance >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
-                  ₹{{ formatAmount(b.allocated_balance) }}
-                </span>
-              </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ b.name }}</p>
+                  <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(b.allocated_balance) }}</p>
+                </div>
+              </button>
             </div>
           </div>
 
-          <!-- 2. From Account Section -->
+          <!-- 2. From Account Section (2-Column Mobile Grid) -->
           <div v-if="form.bucket_id !== ''" class="space-y-2">
-            <h4 class="text-sm font-bold text-[#f1f0f5] tracking-tight">From Account</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <div 
+            <h4 class="text-xs font-bold text-[#9e9cae] uppercase tracking-wider">From Account</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button
                 v-for="acc in userAccounts" 
                 :key="acc.id"
+                type="button"
                 @click="form.account_id = acc.id"
-                class="p-3 rounded-xl border text-xs cursor-pointer transition flex flex-col justify-between space-y-2 relative min-h-[64px]"
-                :class="form.account_id === acc.id ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#f1f0f5] ring-1 ring-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#29293a]'"
+                class="flex items-center gap-2.5 p-3 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[50px]"
+                :class="form.account_id === acc.id
+                  ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
+                  : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
               >
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-[11px] uppercase tracking-wider truncate pr-1 text-[#f1f0f5]">{{ acc.name }}</span>
-                  <span v-if="form.account_id === acc.id" class="w-4 h-4 rounded-full bg-[#D4BFFF] text-[#0f0f15] flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base leading-none text-[#D4BFFF]">account_balance</span>
                 </div>
-                <span class="text-xs font-bold tabular-nums tracking-tight" :class="acc.balance >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
-                  ₹{{ formatAmount(acc.balance) }}
-                </span>
-              </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ acc.name }}</p>
+                  <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(acc.balance) }}</p>
+                </div>
+              </button>
             </div>
           </div>
-          <div v-else class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
+          <div v-else class="p-3 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
             <span>Account Assignment:</span>
             <span class="font-bold text-[#FFD1B3]">Unassigned General Pool</span>
           </div>
         </div>
 
-        <!-- STEP 2: Details, Hero Amount, Type Switcher & Category Grid (Matching Image 2) -->
+        <!-- STEP 2: Details, Hero Amount, Type Switcher & Category Grid -->
         <div v-else class="space-y-4">
           
-          <!-- Selected Allocation Badges Bar (Fully Visible, No Truncation) -->
-          <div v-if="!isEdit" class="flex items-center justify-between gap-2 p-2.5 bg-[#0f0f15] border border-[#29293a] rounded-lg text-xs">
+          <!-- Selected Allocation Badges Bar -->
+          <div v-if="!isEdit" class="flex items-center justify-between gap-2 p-2.5 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs">
             <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-              <span class="px-2 py-0.5 rounded bg-[#D4BFFF]/15 text-[#D4BFFF] font-bold uppercase text-[10px] tracking-wider break-words">{{ selectedBucketName }}</span>
+              <span class="px-2 py-0.5 rounded bg-[#D4BFFF]/15 text-[#D4BFFF] font-semibold text-[11px] truncate">{{ selectedBucketName }}</span>
               <span class="text-[#9e9cae] shrink-0">•</span>
-              <span class="px-2 py-0.5 rounded bg-[#14141d] border border-[#29293a] text-[#f1f0f5] font-bold uppercase text-[10px] tracking-wider break-words">{{ selectedAccountName }}</span>
+              <span class="px-2 py-0.5 rounded bg-[#141520] border border-[#1f202e] text-[#f1f0f5] font-semibold text-[11px] truncate">{{ selectedAccountName }}</span>
             </div>
             <button type="button" @click="currentStep = 1" class="text-xs text-[#D4BFFF] hover:underline font-semibold cursor-pointer shrink-0 ml-auto">Edit</button>
           </div>
 
           <!-- Transaction Type Switcher -->
-          <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#0f0f15] rounded-full border border-[#29293a]">
+          <div class="grid grid-cols-3 gap-1 p-1 bg-[#0f1019] rounded-xl border border-[#1f202e]">
             <button 
               type="button"
               @click="form.transaction_type = 'expense'"
-              class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
-              :class="form.transaction_type === 'expense' ? 'bg-[#ef4444] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+              class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1"
+              :class="form.transaction_type === 'expense' ? 'bg-[#FFD1B3] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
             >
-              <span class="material-symbols-outlined text-sm">trending_down</span>
+              <span class="material-symbols-outlined text-base">trending_down</span>
               <span>Expense</span>
             </button>
             <button 
               type="button"
               @click="form.transaction_type = 'income'"
-              class="py-2 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
-              :class="form.transaction_type === 'income' ? 'bg-[#10b981] text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+              class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1"
+              :class="form.transaction_type === 'income' ? 'bg-[#B3F5E1] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
             >
-              <span class="material-symbols-outlined text-sm">trending_up</span>
+              <span class="material-symbols-outlined text-base">trending_up</span>
               <span>Income</span>
             </button>
-            <button
+            <button 
               type="button"
               @click="form.transaction_type = 'adjustment'"
-              class="py-2 px-1 text-xs font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1"
-              :class="form.transaction_type === 'adjustment' ? 'bg-amber-600 text-white shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+              class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1"
+              :class="form.transaction_type === 'adjustment' ? 'bg-[#D4BFFF] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
             >
-              <span class="material-symbols-outlined text-sm">tune</span>
+              <span class="material-symbols-outlined text-base">tune</span>
               <span>Adjust</span>
             </button>
           </div>
 
-          <!-- Adjustment direction logic if adjustment type selected -->
-          <div v-if="form.transaction_type === 'adjustment'" class="rounded-lg border border-amber-900/50 bg-[#0f0f15] p-2.5 space-y-2">
+          <!-- Adjustment direction logic -->
+          <div v-if="form.transaction_type === 'adjustment'" class="rounded-xl border border-amber-900/40 bg-[#0f1019] p-2.5 space-y-2">
             <p class="text-[11px] text-amber-200">Reconcile account balance to match reality. Enter reason in Description.</p>
             <div class="grid grid-cols-2 gap-2">
-              <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-full border py-1.5 text-xs font-bold cursor-pointer" :class="form.adjustment_direction === 'add' ? 'border-[#10b981] bg-[#10b981]/20 text-[#4edea3]' : 'border-[#29293a] text-[#9e9cae]'">+ Add amount</button>
-              <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-full border py-1.5 text-xs font-bold cursor-pointer" :class="form.adjustment_direction === 'subtract' ? 'border-[#ef4444] bg-[#ef4444]/20 text-[#ffb4ab]' : 'border-[#29293a] text-[#9e9cae]'">− Subtract amount</button>
+              <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'add' ? 'border-[#B3F5E1] bg-[#B3F5E1]/20 text-[#B3F5E1]' : 'border-[#1f202e] text-[#9e9cae]'">+ Add amount</button>
+              <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'subtract' ? 'border-[#FFD1B3] bg-[#FFD1B3]/20 text-[#FFD1B3]' : 'border-[#1f202e] text-[#9e9cae]'">− Subtract amount</button>
             </div>
           </div>
 
-          <!-- Amount and Date Side-by-Side in 2 Columns (Matching Screenshot Exactly) -->
-          <div class="grid grid-cols-2 gap-4 items-end">
+          <!-- Amount and Date Side-by-Side in 2 Columns -->
+          <div class="grid grid-cols-2 gap-3 items-end">
             <!-- Amount Input (Left) -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT</label>
-              <div class="flex items-center gap-1 border-b border-[#29293a] focus-within:border-[#D4BFFF] pb-1">
+              <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">AMOUNT</label>
+              <div class="flex items-center gap-1 border-b border-[#1f202e] focus-within:border-[#D4BFFF] pb-1">
                 <span class="text-base font-bold text-[#9e9cae]">₹</span>
                 <input 
                   v-model="form.amount"
@@ -175,7 +184,7 @@
                   inputmode="decimal"
                   pattern="[0-9]*[.,]?[0-9]*"
                   autocomplete="off"
-                  placeholder="124.50"
+                  placeholder="0.00"
                   required
                   class="w-full text-base sm:text-lg font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none transition"
                 />
@@ -184,13 +193,13 @@
 
             <!-- Date Selector (Right) -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DATE</label>
+              <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">DATE</label>
               <input 
                 v-model="form.date"
                 @click="$event.target.showPicker?.()"
                 type="date" 
                 required
-                class="w-full px-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer [color-scheme:dark]"
+                class="w-full px-3 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer [color-scheme:dark]"
               />
             </div>
           </div>
@@ -198,55 +207,55 @@
           <!-- Category Selection Section -->
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">CATEGORY *</label>
+              <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">CATEGORY *</label>
             </div>
 
-            <!-- 3-Column Quick Category Grid (with Material Symbol icons + saved colors) -->
+            <!-- 3-Column Quick Category Grid -->
             <div v-if="form.bucket_id !== ''" class="grid grid-cols-3 gap-2">
               <button 
                 type="button"
                 v-for="cat in displayedQuickCategories" 
                 :key="cat.id"
                 @click="form.category_id = cat.id"
-                class="p-2.5 rounded-xl border text-xs font-semibold transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[72px]"
-                :class="form.category_id === cat.id ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#f1f0f5] ring-1 ring-[#D4BFFF]' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#D4BFFF]/40'"
+                class="p-2.5 rounded-xl border text-xs transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[68px] active:scale-[0.98]"
+                :class="form.category_id === cat.id ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] text-[#f1f0f5] ring-1 ring-[#D4BFFF]/40' : 'bg-[#0f1019] border-[#1f202e] text-[#9e9cae] hover:border-[#D4BFFF]/30'"
               >
-                <span class="w-8 h-8 rounded-lg bg-[#14141d] border border-[#29293a] flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-lg shrink-0" :style="{ color: cat.color || '#D4BFFF' }">{{ resolveIcon(cat.icon, 'category') }}</span>
-                </span>
-                <span class="text-xs font-bold truncate max-w-full leading-tight text-[#f1f0f5]">{{ cat.name }}</span>
+                <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base shrink-0" :style="{ color: cat.color || '#D4BFFF' }">{{ resolveIcon(cat.icon, 'category') }}</span>
+                </div>
+                <span class="text-[11px] font-semibold truncate max-w-full leading-tight text-[#f1f0f5]">{{ cat.name }}</span>
               </button>
 
               <!-- More Categories Picker Trigger Card -->
               <button
                 type="button"
                 @click="categoryPickerRef?.open()"
-                class="p-2.5 rounded-xl border text-xs font-semibold transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[72px] w-full"
-                :class="selectedCategoryIsNonQuick ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] text-[#D4BFFF] ring-1 ring-[#D4BFFF]/40' : 'bg-[#0f0f15] border-[#29293a] text-[#9e9cae] hover:border-[#D4BFFF]/40'"
+                class="p-2.5 rounded-xl border text-xs transition flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer min-h-[68px] w-full active:scale-[0.98]"
+                :class="selectedCategoryIsNonQuick ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] text-[#D4BFFF] ring-1 ring-[#D4BFFF]/40' : 'bg-[#0f1019] border-[#1f202e] text-[#9e9cae] hover:border-[#D4BFFF]/30'"
               >
-                <span class="w-8 h-8 rounded-lg bg-[#14141d] border border-[#29293a] flex items-center justify-center shrink-0">
+                <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
                   <span 
                     v-if="selectedCategoryIsNonQuick"
-                    class="material-symbols-outlined text-lg shrink-0"
+                    class="material-symbols-outlined text-base shrink-0"
                     :style="{ color: categories.find(c => c.id === form.category_id)?.color || '#D4BFFF' }"
                   >
                     {{ resolveIcon(categories.find(c => c.id === form.category_id)?.icon, 'category') }}
                   </span>
-                  <span v-else class="text-xs font-bold text-[#D4BFFF]">•••</span>
-                </span>
-                <span class="text-xs font-bold truncate max-w-full leading-tight">
+                  <span v-else class="material-symbols-outlined text-base text-[#D4BFFF]">more_horiz</span>
+                </div>
+                <span class="text-[11px] font-semibold truncate max-w-full leading-tight">
                   {{ selectedCategoryIsNonQuick ? categories.find(c => c.id === form.category_id)?.name : 'More' }}
                 </span>
               </button>
             </div>
 
             <!-- Unassigned Category Banner -->
-            <div v-else class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
+            <div v-else class="p-3 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
               <span>Category Assignment:</span>
-              <span class="font-bold text-[#FFD1B3]">Unassigned (No Category)</span>
+              <span class="font-semibold text-[#FFD1B3]">Unassigned (No Category)</span>
             </div>
 
-            <!-- Reusable Category Picker Modal (Opened via Ref) -->
+            <!-- Reusable Category Picker Modal -->
             <CategoryPicker 
               ref="categoryPickerRef"
               :categories="categories" 
@@ -258,41 +267,35 @@
 
           <!-- Description Field -->
           <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION (OPTIONAL)</label>
-            <div class="relative">
-              <span class="absolute left-3 top-2.5 text-[#9e9cae] text-xs">≡</span>
-              <input 
-                v-model="form.description"
-                type="text" 
-                placeholder="e.g. Lunch with friends"
-                class="w-full pl-8 pr-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition"
-              />
-            </div>
+            <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION (OPTIONAL)</label>
+            <input 
+              v-model="form.description"
+              type="text" 
+              placeholder="e.g. Lunch with friends"
+              class="w-full px-3 py-2 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition"
+            />
           </div>
 
           <!-- Note Field -->
           <div class="space-y-1">
-            <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">NOTE</label>
-            <div class="relative">
-              <span class="absolute left-3 top-2.5 text-[#9e9cae] text-xs">≡</span>
-              <textarea 
-                v-model="form.notes"
-                rows="2"
-                placeholder="Optional note"
-                class="w-full pl-8 pr-3 py-2 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition resize-none"
-              ></textarea>
-            </div>
+            <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">NOTE</label>
+            <textarea 
+              v-model="form.notes"
+              rows="2"
+              placeholder="Optional note"
+              class="w-full px-3 py-2 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-slate-600 focus:outline-none transition resize-none"
+            ></textarea>
           </div>
         </div>
       </form>
 
-      <!-- Fixed Modal Footer (Outside scroll container so content is never cut off) -->
-      <div class="px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
+      <!-- Fixed Modal Footer -->
+      <div class="px-5 py-3.5 border-t border-[#1f202e] bg-[#0c0d14] shrink-0">
         <button
           v-if="currentStep === 1 && !isEdit"
           type="button"
           @click="goToStep2"
-          class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+          class="w-full py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer flex items-center justify-center gap-1.5"
         >
           <span>Next</span>
           <span>→</span>
@@ -302,10 +305,9 @@
           form="transaction-entry-form"
           type="submit"
           :disabled="submitting"
-          class="w-full py-3 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-full shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+          class="w-full py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
         >
-          <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
-          <span v-else class="w-4 h-4 rounded-full border border-[#0f0f15] flex items-center justify-center text-[10px] font-bold">✓</span>
+          <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
           <span>{{ isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
         </button>
       </div>

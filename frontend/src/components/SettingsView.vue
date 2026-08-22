@@ -1,63 +1,69 @@
 <template>
   <div class="space-y-4">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
       <div>
-        <h2 class="text-xl font-black text-[#f1f0f5] tracking-tight">Settings</h2>
-        <p class="text-xs text-[#9e9cae]">Manage storage accounts, categories, and savings buckets.</p>
+        <h2 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Settings</h2>
+        <p class="text-xs text-[#9e9cae]">Manage storage accounts, categories, savings buckets, and data backups</p>
       </div>
     </div>
 
-    <!-- Quick Actions Section -->
-    <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm space-y-3">
+    <!-- Quick Actions Section (Hairline Divide) -->
+    <div class="border-b border-[#1f202e] pb-4 space-y-3">
       <div>
-        <h3 class="text-[10px] font-extrabold text-[#D4BFFF] uppercase tracking-wider">Quick Actions</h3>
+        <h3 class="text-xs font-bold text-[#D4BFFF] uppercase tracking-wider">Quick Actions</h3>
         <p class="text-[11px] text-[#9e9cae]">Rapid balance operations and allocation presets</p>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <!-- Bucket Transfer Button -->
         <button
           @click="showTransferModal = true"
-          class="flex items-center justify-between p-3.5 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group"
+          class="flex items-center justify-between p-3 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group active:scale-[0.98]"
         >
           <div class="flex items-center gap-3 min-w-0">
-            <span class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center text-sm shrink-0 font-bold">⇄</span>
+            <div class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-base">swap_horiz</span>
+            </div>
             <div class="min-w-0">
               <p class="text-xs font-bold text-[#f1f0f5]">Bucket Transfer</p>
               <p class="text-[10px] text-[#9e9cae] mt-0.5 truncate">Move allocation between savings buckets</p>
             </div>
           </div>
-          <span class="text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">➔</span>
+          <span class="material-symbols-outlined text-sm text-[#9e9cae] group-hover:text-[#D4BFFF] transition">chevron_right</span>
         </button>
 
         <!-- Account Transfer Button -->
         <button
           @click="showAccountTransferModal = true"
-          class="flex items-center justify-between p-3.5 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group"
+          class="flex items-center justify-between p-3 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group active:scale-[0.98]"
         >
           <div class="flex items-center gap-3 min-w-0">
-            <span class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center text-sm shrink-0 font-bold">⇆</span>
+            <div class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-base">sync_alt</span>
+            </div>
             <div class="min-w-0">
               <p class="text-xs font-bold text-[#f1f0f5]">Account Transfer</p>
-              <p class="text-[10px] text-[#9e9cae] mt-0.5 truncate">Transfer funds between physical accounts</p>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 truncate">Transfer funds between storage accounts</p>
             </div>
           </div>
-          <span class="text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">➔</span>
+          <span class="material-symbols-outlined text-sm text-[#9e9cae] group-hover:text-[#D4BFFF] transition">chevron_right</span>
         </button>
 
         <!-- Salary Allocation Preset Button -->
         <button
           @click="showPresetsModal = true"
-          class="flex items-center justify-between p-3.5 bg-[#0f0f15] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group"
+          class="flex items-center justify-between p-3 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-xl transition cursor-pointer text-left group active:scale-[0.98]"
         >
           <div class="flex items-center gap-3 min-w-0">
-            <span class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center text-sm shrink-0 font-bold">✦</span>
+            <div class="w-8 h-8 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-base">auto_awesome</span>
+            </div>
             <div class="min-w-0">
               <p class="text-xs font-bold text-[#f1f0f5]">Salary Allocation</p>
               <p class="text-[10px] text-[#9e9cae] mt-0.5 truncate">Auto-split deposits into savings buckets</p>
             </div>
           </div>
-          <span class="text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition font-bold">➔</span>
+          <span class="material-symbols-outlined text-sm text-[#9e9cae] group-hover:text-[#D4BFFF] transition">chevron_right</span>
         </button>
       </div>
     </div>
@@ -65,11 +71,11 @@
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       
-      <!-- 1. Savings Buckets Management Card -->
-      <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
+      <!-- 1. Savings Buckets Management Section (Hairline Divide) -->
+      <div class="border-b border-[#1f202e] pb-6 flex flex-col space-y-4">
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Savings Buckets</h3>
+            <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Savings Buckets</h3>
             <p class="text-xs text-[#9e9cae]">Allocate purposes for your money</p>
           </div>
           <div class="flex items-center gap-2">
@@ -81,7 +87,7 @@
             </button>
             <button 
               @click="openCreateBucketModal"
-              class="px-3.5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer flex items-center gap-1 shrink-0 min-h-[38px]"
+              class="px-3 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-1 shrink-0"
             >
               <span>+ Create Bucket</span>
             </button>
@@ -89,23 +95,23 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2">
-          <div class="rounded-xl border border-[#29293a] bg-[#0f0f15] p-2.5">
+          <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-2.5">
             <p class="text-[9px] font-bold uppercase tracking-wider text-[#D4BFFF]">Total allocated</p>
-            <p class="mt-0.5 text-xs font-black text-[#f1f0f5] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
+            <p class="mt-0.5 text-xs font-bold text-[#f1f0f5] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
           </div>
-          <div class="rounded-xl border border-[#29293a] bg-[#0f0f15] p-2.5">
+          <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-2.5">
             <p class="text-[9px] font-bold uppercase tracking-wider text-[#FFD1B3]">Unassigned</p>
-            <p class="mt-0.5 text-xs font-black text-[#FFD1B3] tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+            <p class="mt-0.5 text-xs font-bold text-[#FFD1B3] tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
           </div>
         </div>
 
-        <!-- Bucket List -->
+        <!-- Bucket List (Hairline Divide) -->
         <div class="flex-grow">
-          <div v-if="displayedBuckets.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
+          <div v-if="displayedBuckets.length > 0" class="divide-y divide-[#1f202e] border-y border-[#1f202e]">
             <div 
               v-for="(bucket, idx) in displayedBuckets" 
               :key="bucket.id"
-              class="p-3 hover:bg-[#0f0f15]/30 transition duration-150 flex items-center justify-between"
+              class="py-3 px-1 hover:bg-[#141520] transition duration-150 flex items-center justify-between"
             >
               <div class="flex items-center gap-2.5 min-w-0 flex-grow">
                 <!-- Up/Down Priority Buttons -->
@@ -126,14 +132,16 @@
                   >▼</button>
                 </div>
 
-                <span class="material-symbols-outlined text-base shrink-0" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
+                <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base leading-none" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
+                </div>
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-1.5">
-                    <p class="text-xs font-semibold text-[#dae2fd] truncate">{{ bucket.name }}</p>
+                    <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ bucket.name }}</p>
                     <span v-if="bucket.is_archived" class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-amber-950/60 text-amber-400 border border-amber-800/40 shrink-0">Archived</span>
                   </div>
                   <p class="text-[10px] text-[#9e9cae] font-medium mt-0.5">
-                    Allocated: <span class="text-[#D4BFFF] font-semibold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
+                    Allocated: <span class="text-[#D4BFFF] font-bold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
                   </p>
                 </div>
               </div>
@@ -147,33 +155,37 @@
                 >Allocate</button>
                 <button 
                   @click="openEditBucketModal(bucket)"
-                  class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-1.5 rounded-lg transition cursor-pointer text-xs"
+                  class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#141520] p-1.5 rounded-lg transition cursor-pointer text-xs"
                   title="Edit Bucket"
-                >✏️</button>
+                >
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
                 <button 
                   @click="confirmDeleteBucket(bucket)"
                   class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer text-xs"
                   title="Delete / Archive Bucket"
-                >🗑️</button>
+                >
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-12 border border-dashed border-[#29293a] rounded-xl text-xs text-[#6b6a7d]">
+          <div v-else class="text-center py-8 border-y border-[#1f202e] text-xs text-[#9e9cae]">
             No savings buckets found.
           </div>
         </div>
       </div>
 
-      <!-- 2. Account Management Card -->
-      <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
+      <!-- 2. Account Management Section (Hairline Divide) -->
+      <div class="border-b border-[#1f202e] pb-6 flex flex-col space-y-4">
         <div>
-          <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Manage Accounts</h3>
+          <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Manage Accounts</h3>
           <p class="text-xs text-[#9e9cae]">Create accounts (where money is stored)</p>
         </div>
 
         <!-- Add Account Form -->
-        <form @submit.prevent="submitAccount" class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl space-y-3">
-          <p class="text-[10px] font-bold text-[#ccc3d8] uppercase tracking-wider">Add New Account</p>
+        <form @submit.prevent="submitAccount" class="p-3 bg-[#0f1019] border border-[#1f202e] rounded-xl space-y-3">
+          <p class="text-[10px] font-bold text-[#f1f0f5] uppercase tracking-wider">Add New Account</p>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <input 
@@ -181,35 +193,35 @@
               type="text"
               placeholder="Account Name (e.g. SBI)"
               required
-              class="w-full px-3 py-1.5 bg-[#131b2e] border border-[#31394d] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs placeholder-slate-500 focus:outline-none transition"
+              class="w-full px-3 py-1.5 bg-[#141520] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-[#9e9cae] focus:outline-none transition"
             />
             <select 
               v-model="newAccount.type"
-              class="w-full px-3 py-1.5 bg-[#131b2e] border border-[#31394d] hover:bg-[#1f2940] focus:border-[#7c3aed] rounded-md text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
+              class="w-full px-3 py-1.5 bg-[#141520] border border-[#1f202e] hover:bg-[#191924] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
             >
-              <option value="Checking">Checking</option>
-              <option value="Savings">Savings</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="Cash">Cash</option>
-              <option value="Wallet">Wallet</option>
+              <option value="Checking" class="bg-[#0c0d14]">Checking</option>
+              <option value="Savings" class="bg-[#0c0d14]">Savings</option>
+              <option value="Credit Card" class="bg-[#0c0d14]">Credit Card</option>
+              <option value="Cash" class="bg-[#0c0d14]">Cash</option>
+              <option value="Wallet" class="bg-[#0c0d14]">Wallet</option>
             </select>
           </div>
           <button 
             type="submit"
             :disabled="submittingAccount"
-            class="w-full py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer disabled:opacity-50 min-h-[40px]"
+            class="w-full py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 min-h-[38px]"
           >
             {{ submittingAccount ? 'Creating...' : '+ Create Account' }}
           </button>
         </form>
 
-        <!-- Account List -->
+        <!-- Account List (Hairline Divide) -->
         <div class="flex-grow">
-          <div v-if="userAccounts.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
+          <div v-if="userAccounts.length > 0" class="divide-y divide-[#1f202e] border-y border-[#1f202e]">
             <div 
               v-for="account in userAccounts" 
               :key="account.id"
-              class="p-3.5 hover:bg-[#0f0f15]/30 transition duration-150"
+              class="py-3 px-1 hover:bg-[#141520] transition duration-150"
             >
               <!-- Editing Mode -->
               <div v-if="editingAccountId === account.id" class="space-y-3">
@@ -218,31 +230,31 @@
                     v-model="editAccountName"
                     type="text"
                     required
-                    class="w-full px-3 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
+                    class="w-full px-3 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
                   />
                   <select 
                     v-model="editAccountType"
-                    class="w-full px-2.5 py-1.5 bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-lg text-[#dae2fd] text-xs focus:outline-none transition cursor-pointer"
+                    class="w-full px-2.5 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
                   >
-                    <option value="Checking">Checking</option>
-                    <option value="Savings">Savings</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Wallet">Wallet</option>
+                    <option value="Checking" class="bg-[#0c0d14]">Checking</option>
+                    <option value="Savings" class="bg-[#0c0d14]">Savings</option>
+                    <option value="Credit Card" class="bg-[#0c0d14]">Credit Card</option>
+                    <option value="Cash" class="bg-[#0c0d14]">Cash</option>
+                    <option value="Wallet" class="bg-[#0c0d14]">Wallet</option>
                   </select>
                 </div>
                 <div class="flex justify-end gap-2">
                   <button 
                     type="button"
                     @click="cancelEditAccount"
-                    class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#dae2fd] transition cursor-pointer"
+                    class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button 
                     type="button"
                     @click="saveAccountEdit(account)"
-                    class="px-2.5 py-1 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-semibold text-[10px] rounded-lg transition cursor-pointer"
+                    class="px-2.5 py-1 bg-[#D4BFFF] text-[#0f0f15] font-bold text-[10px] rounded-lg transition cursor-pointer"
                   >
                     Save
                   </button>
@@ -252,63 +264,59 @@
               <!-- Normal Mode -->
               <div v-else class="flex items-center justify-between">
                 <div>
-                  <p class="text-xs font-semibold text-[#dae2fd]">{{ account.name }}</p>
+                  <p class="text-xs font-bold text-[#f1f0f5]">{{ account.name }}</p>
                   <p class="text-[10px] text-[#9e9cae] mt-0.5">
-                    <span class="px-1.5 py-0.5 rounded bg-[#14141d] border border-[#29293a] text-[#9e9cae]">{{ account.type }}</span>
-                    <span class="ml-2 font-medium text-[#ccc3d8]">Balance: ₹{{ formatAmount(account.balance) }}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-[#0f1019] border border-[#1f202e] text-[#9e9cae]">{{ account.type }}</span>
+                    <span class="ml-2 font-medium text-[#f1f0f5]">Balance: <span class="font-bold text-[#B3F5E1]">₹{{ formatAmount(account.balance) }}</span></span>
                   </p>
                 </div>
-                <div class="flex gap-1.5">
+                <div class="flex gap-1">
                   <button 
                     @click="startEditAccount(account)"
-                    class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#141520] p-1.5 rounded-lg transition cursor-pointer"
                     title="Edit Account"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
+                    <span class="material-symbols-outlined text-sm">edit</span>
                   </button>
                   <button 
                     @click="confirmDeleteAccount(account)"
-                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-2 rounded-lg transition cursor-pointer"
+                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer"
                     title="Delete Account"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    <span class="material-symbols-outlined text-sm">delete</span>
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-12 border border-dashed border-[#29293a] rounded-xl text-xs text-[#6b6a7d]">
+          <div v-else class="text-center py-8 border-y border-[#1f202e] text-xs text-[#9e9cae]">
             No accounts configured.
           </div>
         </div>
       </div>
 
-      <!-- 3. Category Management Card -->
-      <div class="bg-[#14141d] border border-[#29293a] rounded-xl p-4 shadow-sm flex flex-col space-y-4">
+      <!-- 3. Category Management Section (Hairline Divide) -->
+      <div class="border-b border-[#1f202e] pb-6 flex flex-col space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-sm font-extrabold text-[#f1f0f5] tracking-tight">Manage Categories</h3>
+            <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Manage Categories</h3>
             <p class="text-xs text-[#9e9cae]">Create and organize spending categories</p>
           </div>
           <button 
             @click="openCreateCategoryModal"
-            class="px-3.5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer flex items-center gap-1 shrink-0"
+            class="px-3 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-1 shrink-0"
           >
-            <span>+ Create New Category</span>
+            <span>+ Create Category</span>
           </button>
         </div>
 
-        <!-- Category List -->
+        <!-- Category List (Hairline Divide) -->
         <div class="flex-grow">
-          <div v-if="categories.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20">
+          <div v-if="categories.length > 0" class="divide-y divide-[#1f202e] border-y border-[#1f202e]">
             <div 
               v-for="(category, idx) in categories" 
               :key="category.id"
-              class="py-2 px-3 flex items-center justify-between gap-2 hover:bg-[#0f0f15]/30 transition duration-150"
+              class="py-2.5 px-1 flex items-center justify-between gap-2 hover:bg-[#141520] transition duration-150"
             >
               <!-- Left: Identity & Reorder -->
               <div class="flex items-center gap-2.5 min-w-0 flex-grow">
@@ -329,25 +337,31 @@
                     title="Move Priority Down"
                   >▼</button>
                 </div>
-                <!-- Material Symbol Icon -->
-                <span class="material-symbols-outlined text-base shrink-0" :style="{ color: category.color || '#D4BFFF' }">{{ resolveIcon(category.icon, 'category') }}</span>
+                <!-- Material Symbol Icon Tile -->
+                <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base leading-none" :style="{ color: category.color || '#D4BFFF' }">{{ resolveIcon(category.icon, 'category') }}</span>
+                </div>
                 <!-- Category Name -->
-                <p class="text-xs font-semibold text-[#dae2fd] truncate" :title="category.name">{{ category.name }}</p>
-                <span v-if="category.is_quick_select" class="text-[10px] font-bold text-[#D4BFFF] bg-[#D4BFFF]/10 px-1.5 py-0.2 rounded-md border border-[#D4BFFF]/20 shrink-0">⭐ Pinned</span>
+                <p class="text-xs font-bold text-[#f1f0f5] truncate" :title="category.name">{{ category.name }}</p>
+                <span v-if="category.is_quick_select" class="text-[9px] font-bold text-[#D4BFFF] bg-[#D4BFFF]/10 px-1.5 py-0.2 rounded border border-[#D4BFFF]/20 shrink-0">Pinned</span>
               </div>
 
-              <!-- Right: Actions & States -->
-              <div class="flex items-center gap-1.5 shrink-0">
+              <!-- Right: Actions -->
+              <div class="flex items-center gap-1 shrink-0">
                 <button 
                   @click="openEditCategoryModal(category)"
-                  class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#D4BFFF]/8 p-1.5 rounded-lg transition cursor-pointer text-xs"
+                  class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#141520] p-1.5 rounded-lg transition cursor-pointer text-xs"
                   title="Edit Category"
-                >✏️</button>
+                >
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
                 <button 
                   @click="confirmDeleteCategory(category)"
                   class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer text-xs"
                   title="Delete Category"
-                >🗑️</button>
+                >
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
               </div>
             </div>
           </div>
@@ -361,12 +375,13 @@
 
 
 
-    <!-- 5. Data Management & Database Backups Card -->
-    <div class="bg-[#14141d] border border-[#29293a] rounded-2xl p-6 shadow-xl space-y-5">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#29293a] pb-4">
+    <!-- 5. Data Management & Database Backups Section (Hairline Divide) -->
+    <div class="border-t border-[#1f202e] pt-6 space-y-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#1f202e] pb-4">
         <div>
           <h3 class="text-base font-bold text-[#f1f0f5] flex items-center gap-2">
-            <span>💾</span> Data Backup & Export Controls
+            <span class="material-symbols-outlined text-base text-[#D4BFFF]">database</span>
+            <span>Data Backup & Export Controls</span>
           </h3>
           <p class="text-xs text-[#9e9cae] mt-0.5">Export active database file, create local snapshots, or restore backups.</p>
         </div>
@@ -374,20 +389,23 @@
           <a 
             :href="exportUrl"
             download
-            class="px-4 py-2 bg-[#B3F5E1] hover:bg-[#92edd0] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm min-h-[36px]"
+            class="px-3.5 py-2 bg-[#B3F5E1] hover:bg-[#92edd0] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm min-h-[36px]"
           >
-            <span>⬇️ Export Database</span>
+            <span class="material-symbols-outlined text-sm">download</span>
+            <span>Export Database</span>
           </a>
-          <label class="px-4 py-2 bg-[#191924] hover:bg-[#232332] text-[#f1f0f5] border border-[#29293a] hover:border-[#D4BFFF]/40 font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[36px]">
-            <span>📥 Import Backup File</span>
+          <label class="px-3.5 py-2 bg-[#0f1019] hover:bg-[#141520] text-[#f1f0f5] border border-[#1f202e] hover:border-[#D4BFFF]/40 font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[36px]">
+            <span class="material-symbols-outlined text-sm">upload</span>
+            <span>Import Backup</span>
             <input type="file" accept=".db,.sqlite,.cbbak,*/*" class="hidden" @change="handleImportBackupFile" />
           </label>
           <button 
             @click="handleCreateSnapshot"
             :disabled="creatingBackup"
-            class="px-4 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm min-h-[36px]"
+            class="px-3.5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm min-h-[36px]"
           >
-            <span>{{ creatingBackup ? 'Creating...' : '📸 Create Local Snapshot' }}</span>
+            <span class="material-symbols-outlined text-sm">photo_camera</span>
+            <span>{{ creatingBackup ? 'Creating...' : 'Create Snapshot' }}</span>
           </button>
         </div>
       </div>
@@ -399,45 +417,45 @@
           <button @click="loadBackupsList" class="text-xs text-[#D4BFFF] hover:underline cursor-pointer">Refresh List</button>
         </div>
 
-        <div v-if="backupsList.length > 0" class="divide-y divide-[#29293a]/80 border border-[#29293a] rounded-xl overflow-hidden bg-[#0f0f15]/20 max-h-60 overflow-y-auto">
+        <div v-if="backupsList.length > 0" class="divide-y divide-[#1f202e] border-y border-[#1f202e] max-h-60 overflow-y-auto">
           <div 
             v-for="b in backupsList" 
             :key="b.filename"
-            class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-[#191924]/40 transition gap-3.5 border-b border-[#29293a]/80"
+            class="py-3 px-1 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-[#141520] transition gap-3"
           >
             <div class="flex items-center gap-2.5 min-w-0 flex-grow">
-              <span class="text-base shrink-0">📦</span>
+              <span class="material-symbols-outlined text-base text-[#D4BFFF] shrink-0">inventory_2</span>
               <div class="min-w-0 flex-grow">
-                <p class="text-xs font-semibold text-[#dae2fd] font-mono break-all sm:truncate" :title="b.filename">{{ b.filename }}</p>
+                <p class="text-xs font-bold text-[#f1f0f5] font-mono break-all sm:truncate" :title="b.filename">{{ b.filename }}</p>
                 <p class="text-[10px] text-[#9e9cae] mt-0.5">{{ formatSize(b.size_bytes) }}</p>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap justify-end w-full sm:w-auto">
               <button
                 @click="handleDownloadBackup(b.filename)"
-                class="px-2.5 py-1.5 bg-[#191924] hover:bg-[#232332] text-[#B3F5E1] border border-[#29293a] hover:border-[#B3F5E1]/40 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1 min-h-[28px]"
-                title="Download backup file to phone Downloads / Files folder"
+                class="px-2.5 py-1.5 bg-[#0f1019] hover:bg-[#141520] text-[#B3F5E1] border border-[#1f202e] hover:border-[#B3F5E1]/40 font-bold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1 min-h-[28px]"
+                title="Download backup file"
               >
-                <span>⬇️ Save</span>
+                <span>Save</span>
               </button>
               <button 
                 @click="handleShareBackup(b.filename)"
-                class="px-2.5 py-1.5 bg-[#191924] hover:bg-[#232332] text-[#D4BFFF] border border-[#29293a] hover:border-[#D4BFFF]/40 font-semibold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1 min-h-[28px]"
-                title="Share or Save to Google Drive / iCloud / Files app"
+                class="px-2.5 py-1.5 bg-[#0f1019] hover:bg-[#141520] text-[#D4BFFF] border border-[#1f202e] hover:border-[#D4BFFF]/40 font-bold text-[10px] rounded-lg transition cursor-pointer flex items-center gap-1 min-h-[28px]"
+                title="Share file"
               >
-                <span>📤 Share</span>
+                <span>Share</span>
               </button>
               <button 
                 @click="handleRestoreBackup(b.filename)"
-                class="px-3 py-1.5 bg-amber-950/60 hover:bg-amber-900 text-amber-400 border border-amber-800/40 font-bold text-[10px] rounded-lg transition cursor-pointer min-h-[28px]"
+                class="px-3 py-1.5 bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800/40 font-bold text-[10px] rounded-lg transition cursor-pointer min-h-[28px]"
               >
                 Restore
               </button>
             </div>
           </div>
         </div>
-        <div v-else class="text-center py-6 border border-dashed border-[#29293a] rounded-xl text-xs text-[#6b6a7d]">
-          No snapshot backups saved in <code class="text-[#9e9cae] font-mono">backups/</code> folder yet. Click "Create Local Snapshot" above to save a backup.
+        <div v-else class="text-center py-6 border-y border-[#1f202e] text-xs text-[#9e9cae]">
+          No snapshot backups saved in <code class="text-[#9e9cae] font-mono">backups/</code> folder yet.
         </div>
       </div>
     </div>

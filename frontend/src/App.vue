@@ -422,7 +422,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-[#0b1326] text-slate-100">
+  <div class="min-h-screen flex flex-col bg-[#0c0d14] text-[#f1f0f5]">
     <Transition
       enter-active-class="transition duration-150 ease-out"
       enter-from-class="opacity-0 -translate-y-2"
@@ -431,81 +431,66 @@ onMounted(() => {
     >
       <div
         v-if="successMessage"
-        class="pointer-events-none fixed top-[max(2.5rem,calc(env(safe-area-inset-top)+1rem))] left-1/2 z-[80] -translate-x-1/2 rounded-full border border-emerald-500/40 bg-emerald-950/95 px-4 py-2.5 text-xs font-bold text-emerald-200 shadow-2xl backdrop-blur-lg"
+        class="pointer-events-none fixed top-[max(2.5rem,calc(env(safe-area-inset-top)+1rem))] left-1/2 z-[80] -translate-x-1/2 rounded-full border border-[#B3F5E1]/30 bg-[#0c0d14]/95 px-4 py-2 text-xs font-semibold text-[#B3F5E1] shadow-xl backdrop-blur-md flex items-center gap-1.5"
         role="status"
         aria-live="polite"
       >
-        ✓ {{ successMessage }}
+        <span class="w-1.5 h-1.5 rounded-full bg-[#B3F5E1]"></span>
+        <span>{{ successMessage }}</span>
       </div>
-    </Transition>    <!-- Navbar / TopAppBar -->
-    <header class="bg-[#0f0f15] border-b border-[#29293a] sticky top-0 z-40 safe-area-pt">
-      <div class="max-w-6xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
+    </Transition>
+
+    <!-- Navbar / TopAppBar -->
+    <header class="bg-[#0c0d14]/95 backdrop-blur-md border-b border-[#1f202e] sticky top-0 z-40 safe-area-pt">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-13 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <img src="/cashbuddy-logo.svg" alt="Cash Buddy Logo" class="w-8 h-8 object-contain" />
-          <div class="flex flex-col">
-            <span class="font-extrabold text-[#D4BFFF] tracking-tight text-lg leading-tight">Cash Buddy</span>
-          </div>
+          <img src="/cashbuddy-logo.svg" alt="Cash Buddy Logo" class="w-7 h-7 object-contain" />
+          <span class="font-bold text-[#D4BFFF] tracking-tight text-base leading-none">Cash Buddy</span>
           
-          <!-- Vault Switcher Icon-Only Trigger (Option C) -->
+          <!-- Vault Switcher Trigger -->
           <button 
             @click="showVaultModal = true"
-            class="ml-1 px-2 py-1 bg-[#14141d] hover:bg-[#191924] border border-[#29293a] hover:border-[#D4BFFF] rounded-full text-xs font-semibold text-[#f1f0f5] flex items-center gap-1 transition cursor-pointer shadow-sm"
+            class="ml-1.5 px-2.5 py-1 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/50 rounded-full text-[11px] font-medium text-[#f1f0f5] flex items-center gap-1.5 transition cursor-pointer"
             :title="`Active Vault: ${activeVaultName}. Click to switch database.`"
           >
             <span class="w-1.5 h-1.5 rounded-full bg-[#B3F5E1]"></span>
-            <span>🏦</span>
+            <span class="text-[#9e9cae] truncate max-w-[90px]">{{ activeVaultName }}</span>
             <span class="text-[9px] text-[#9e9cae]">▾</span>
           </button>
         </div>
 
         <!-- Desktop Navigation Tabs -->
-        <nav class="hidden sm:flex gap-1 bg-[#14141d] p-1 rounded-xl border border-[#29293a]">
+        <nav class="hidden sm:flex gap-1 bg-[#0f1019] p-1 rounded-xl border border-[#1f202e]">
           <button 
             @click="currentTab = 'dashboard'"
-            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'dashboard' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <rect width="7" height="9" x="3" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-              <rect width="7" height="5" x="14" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-              <rect width="7" height="9" x="14" y="12" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-              <rect width="7" height="5" x="3" y="16" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-            </svg>
+            <span class="material-symbols-outlined text-base">dashboard</span>
             <span>Dashboard</span>
           </button>
           <button 
             @click="currentTab = 'transactions'"
-            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'transactions' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
-              <path d="M16 8H8" />
-              <path d="M16 12H8" />
-              <path d="M13 16H8" />
-            </svg>
-            <span>Transactions</span>
+            <span class="material-symbols-outlined text-base">receipt_long</span>
+            <span>History</span>
           </button>
           <button 
             @click="currentTab = 'debts'"
-            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'debts' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9" :fill="currentTab === 'debts' ? 'currentColor' : 'none'" />
-              <path d="M16 14h.01" />
-            </svg>
-            <span>Debt List</span>
+            <span class="material-symbols-outlined text-base">account_balance_wallet</span>
+            <span>Debts</span>
           </button>
           <button 
             @click="currentTab = 'settings'"
-            class="px-3.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5"
+            class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-              <circle cx="12" cy="12" r="3" :fill="currentTab === 'settings' ? 'currentColor' : 'none'" />
-            </svg>
+            <span class="material-symbols-outlined text-base">settings</span>
             <span>Settings</span>
           </button>
         </nav>
@@ -515,27 +500,27 @@ onMounted(() => {
           @click="openAddTransaction()"
           class="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer shadow-sm ml-2"
         >
-          <span class="text-sm font-black leading-none">+</span>
+          <span class="material-symbols-outlined text-base leading-none">add</span>
           <span>New Transaction</span>
         </button>
       </div>
     </header>
 
-    <!-- Main Content Container with Bottom Padding for Mobile Nav Bar -->
-    <main class="flex-grow max-w-6xl w-full mx-auto px-3 md:px-6 py-4 pb-28 sm:pb-8">
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-3.5 sm:px-6 py-4 pb-24 sm:pb-8">
       <!-- Error Banner -->
-      <div v-if="error" class="mb-4 p-3 bg-rose-950/40 border border-rose-900/50 rounded-lg flex justify-between items-center">
+      <div v-if="error" class="mb-4 p-3 bg-rose-950/30 border border-rose-900/40 rounded-xl flex justify-between items-center">
         <div class="flex gap-2.5 items-center">
-          <span class="text-rose-400 text-base">⚠️</span>
+          <span class="material-symbols-outlined text-rose-400 text-base">warning</span>
           <p class="text-xs text-rose-300 font-medium">{{ error }}</p>
         </div>
-        <button @click="error = ''" class="text-[#ccc3d8] hover:text-[#dae2fd] text-xs">Dismiss</button>
+        <button @click="error = ''" class="text-[#9e9cae] hover:text-[#f1f0f5] text-xs font-semibold cursor-pointer">Dismiss</button>
       </div>
 
       <!-- Non-blocking Loading Indicator -->
-      <div v-if="loading && transactions.length === 0" class="fixed top-16 right-4 z-50 bg-[#131b2e] border border-[#7c3aed]/50 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-md">
-        <div class="w-3 h-3 border-2 border-[#7c3aed] border-t-transparent rounded-full animate-spin"></div>
-        <span class="text-[11px] font-semibold text-[#d2bbff]">Initializing...</span>
+      <div v-if="loading && transactions.length === 0" class="fixed top-16 right-4 z-50 bg-[#0f1019] border border-[#1f202e] px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-md">
+        <div class="w-3 h-3 border-2 border-[#D4BFFF] border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-[11px] font-semibold text-[#D4BFFF]">Syncing...</span>
       </div>
 
       <div>
@@ -595,70 +580,51 @@ onMounted(() => {
       </div>
     </main>
 
-    <!-- BottomNavBar (Material 3 Dark Pastel Theme) -->
-    <nav class="bg-[#14141d] border-t border-[#29293a] fixed bottom-0 w-full z-40 flex justify-around items-center min-h-[64px] px-4 md:hidden safe-area-pb">
+    <!-- BottomNavBar -->
+    <nav class="bg-[#0c0d14]/95 backdrop-blur-md border-t border-[#1f202e] fixed bottom-0 w-full z-40 flex justify-around items-center h-15 px-2 sm:hidden safe-area-pb">
       <button 
         @click="currentTab = 'dashboard'"
-        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'dashboard' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
+        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
+        :class="currentTab === 'dashboard' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
-          <rect width="7" height="9" x="3" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-          <rect width="7" height="5" x="14" y="3" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-          <rect width="7" height="9" x="14" y="12" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-          <rect width="7" height="5" x="3" y="16" rx="1" :fill="currentTab === 'dashboard' ? 'currentColor' : 'none'" />
-        </svg>
-        <span>Home</span>
+        <span class="material-symbols-outlined text-xl mb-0.5">dashboard</span>
+        <span class="text-[10px] font-semibold leading-none">Home</span>
       </button>
 
       <button 
         @click="currentTab = 'transactions'"
-        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'transactions' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
+        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
+        :class="currentTab === 'transactions' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
-          <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
-          <path d="M16 8H8" />
-          <path d="M16 12H8" />
-          <path d="M13 16H8" />
-        </svg>
-        <span>History</span>
+        <span class="material-symbols-outlined text-xl mb-0.5">receipt_long</span>
+        <span class="text-[10px] font-semibold leading-none">History</span>
       </button>
 
-      <!-- Quick Log Action Button -->
+      <!-- Center Quick Log Action Button -->
       <button 
         @click="openAddTransaction()"
-        class="w-11 h-11 -mt-4 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center font-black text-lg shadow-lg border-2 border-[#0f0f15] transition active:scale-95 cursor-pointer shrink-0"
+        class="w-11 h-11 -mt-5 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center shadow-lg transition active:scale-95 cursor-pointer shrink-0 border-2 border-[#0f0f15]"
         title="Add Transaction"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-          <path d="M5 12h14" />
-          <path d="M12 5v14" />
-        </svg>
+        <span class="material-symbols-outlined text-2xl leading-none font-bold">add</span>
       </button>
 
       <button 
         @click="currentTab = 'debts'"
-        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'debts' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
+        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
+        :class="currentTab === 'debts' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
-          <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9" :fill="currentTab === 'debts' ? 'currentColor' : 'none'" />
-          <path d="M16 14h.01" />
-        </svg>
-        <span>Debt</span>
+        <span class="material-symbols-outlined text-xl mb-0.5">account_balance_wallet</span>
+        <span class="text-[10px] font-semibold leading-none">Debts</span>
       </button>
 
       <button 
         @click="currentTab = 'settings'"
-        class="flex flex-col items-center justify-center font-bold text-xs active:scale-95 transition-transform duration-150 cursor-pointer"
-        :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15] rounded-xl px-3.5 py-1 shadow-sm' : 'text-[#9e9cae] hover:text-[#D4BFFF]'"
+        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
+        :class="currentTab === 'settings' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mb-0.5">
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-          <circle cx="12" cy="12" r="3" :fill="currentTab === 'settings' ? 'currentColor' : 'none'" />
-        </svg>
-        <span>Settings</span>
+        <span class="material-symbols-outlined text-xl mb-0.5">settings</span>
+        <span class="text-[10px] font-semibold leading-none">Settings</span>
       </button>
     </nav>
 

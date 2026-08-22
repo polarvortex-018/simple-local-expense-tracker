@@ -4,22 +4,22 @@
     <Transition name="fade-slide">
       <div 
         v-if="isOpen" 
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-md pb-16 sm:pb-0"
+        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md pb-16 sm:pb-0"
         @click.self="$emit('close')"
       >
-        <div class="relative w-full max-w-md bg-[#14141d] border-t sm:border border-[#29293a] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[78vh] sm:max-h-[85vh] my-0 sm:my-auto">
+        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[78vh] sm:max-h-[85vh] my-0 sm:my-auto">
           
           <!-- Header -->
-          <div class="flex justify-between items-center px-4 py-3.5 border-b border-[#29293a] bg-[#14141d] shrink-0">
+          <div class="flex justify-between items-center px-4 py-3.5 border-b border-[#1f202e] bg-[#0c0d14] shrink-0">
             <h3 class="text-base font-bold text-[#f1f0f5] tracking-tight">
               {{ form.id ? 'Edit Savings Bucket' : 'Create Savings Bucket' }}
             </h3>
             <button 
               type="button" 
               @click="$emit('close')" 
-              class="w-8 h-8 flex items-center justify-center rounded-lg text-[#9e9cae] hover:text-[#f1f0f5] hover:bg-[#191924] transition text-sm cursor-pointer"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-[#9e9cae] hover:text-[#f1f0f5] hover:bg-[#141520] transition text-sm cursor-pointer"
             >
-              ✕
+              <span class="material-symbols-outlined text-base">close</span>
             </button>
           </div>
 
@@ -35,7 +35,7 @@
                   type="text"
                   placeholder="e.g. Emergency Fund, New Laptop, Trip"
                   required
-                  class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-semibold focus:outline-none transition"
+                  class="w-full px-3.5 py-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-bold focus:outline-none transition"
                 />
               </div>
 
@@ -44,10 +44,10 @@
                 <label class="block text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">Appearance</label>
                 <div 
                   @click="showAppearanceModal = true"
-                  class="flex items-center justify-between p-3 bg-[#0f0f15] border border-[#29293a] hover:border-[#D4BFFF]/60 rounded-xl cursor-pointer transition min-h-[48px]"
+                  class="flex items-center justify-between p-3 bg-[#0f1019] border border-[#1f202e] hover:border-[#D4BFFF]/60 rounded-xl cursor-pointer transition min-h-[48px]"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-[#191924] border border-[#29293a] flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-xl bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
                       <span class="material-symbols-outlined text-xl" :style="{ color: form.color || '#D4BFFF' }">{{ resolveIcon(form.icon, 'savings') }}</span>
                     </div>
                     <div>
@@ -60,18 +60,18 @@
               </div>
 
               <!-- Archive Checkbox (Only in Edit mode) -->
-              <label v-if="form.id" class="flex items-center gap-2.5 p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl text-xs text-[#f1f0f5] cursor-pointer">
+              <label v-if="form.id" class="flex items-center gap-2.5 p-3 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs text-[#f1f0f5] cursor-pointer">
                 <input 
                   type="checkbox" 
                   v-model="form.is_archived" 
-                  class="w-4 h-4 rounded border-[#29293a] text-[#D4BFFF] bg-[#14141d] cursor-pointer"
+                  class="w-4 h-4 rounded border-[#1f202e] text-[#D4BFFF] bg-[#0c0d14] cursor-pointer"
                 />
                 <span class="font-semibold">Archive Bucket</span>
               </label>
             </div>
 
             <!-- Sticky Footer Actions -->
-            <div class="px-4 py-3 border-t border-[#29293a] bg-[#14141d] shrink-0 flex items-center justify-end gap-2.5">
+            <div class="px-4 py-3 border-t border-[#1f202e] bg-[#0c0d14] shrink-0 flex items-center justify-end gap-2.5">
               <button 
                 type="button" 
                 @click="$emit('close')" 
@@ -82,7 +82,7 @@
               <button 
                 type="submit"
                 :disabled="submitting"
-                class="px-6 py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer disabled:opacity-50 min-h-[40px]"
+                class="px-6 py-2.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl shadow-sm transition cursor-pointer disabled:opacity-50 min-h-[38px]"
               >
                 {{ submitting ? 'Saving...' : (form.id ? 'Save Changes' : '+ Create Savings Bucket') }}
               </button>
