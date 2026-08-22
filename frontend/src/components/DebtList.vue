@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#1f202e] pb-3">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#1f202e] pb-3 animate-cascade-1">
       <div>
         <h2 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Debt Tracker</h2>
         <p class="text-xs text-[#9e9cae]">Track money lent to people and money borrowed from others</p>
@@ -16,7 +16,7 @@
     </div>
 
     <!-- Summary Metrics Section (Flush, Hairline Dividers) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-4 border-b border-[#1f202e]">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-4 border-b border-[#1f202e] animate-cascade-2">
       <!-- Owed to You -->
       <div>
         <div class="flex items-center justify-between">
@@ -56,7 +56,7 @@
     </div>
 
     <!-- Debt Controls & Hairline List -->
-    <div class="space-y-3">
+    <div class="space-y-3 animate-cascade-3">
       <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5">
         <!-- Tabs -->
         <div class="flex gap-1 bg-[#0f1019] p-1 rounded-xl border border-[#1f202e]">

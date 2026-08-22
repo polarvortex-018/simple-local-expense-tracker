@@ -1,46 +1,44 @@
 <template>
   <div class="space-y-6">
     <!-- 1. Header & Net Worth Overview Section (Flush, Hairline Dividers) -->
-    <section class="space-y-3 pb-4 border-b border-[#1f202e]">
+    <section class="space-y-3 pb-4 border-b border-[#1f202e] animate-cascade-1">
       <div>
         <h2 class="text-base font-bold text-[#f1f0f5] tracking-tight">Financial Overview</h2>
         <p class="text-xs text-[#9e9cae]">Real-time summary of your accounts, income, expenses, and savings buckets.</p>
       </div>
 
-      <!-- Hero Net Worth Readout -->
+      <!-- Hero Net Worth Readout with Count-Up Ticker -->
       <div class="pt-1">
         <span class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">NET WORTH</span>
         <div class="text-3xl font-bold tabular-nums tracking-tight mt-0.5" :class="netWorth >= 0 ? 'text-[#f1f0f5]' : 'text-[#FFD1B3]'">
-          ₹{{ formatAmount(netWorth) }}
+          ₹{{ formatAmount(animatedNetWorth) }}
         </div>
       </div>
 
-      <!-- Side-by-Side Income & Expense Metrics Split 50/50 Down the Middle -->
+      <!-- Side-by-Side Income & Expense Metrics with Pulsating Arrow Icons Only -->
       <div class="grid grid-cols-2 divide-x divide-[#1f202e] pt-3 mt-3 border-t border-[#1f202e]/60">
-        <div class="flex items-center gap-2.5 pr-2.5 min-w-0">
-          <div class="w-7 h-7 rounded-lg bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-sm text-[#B3F5E1]">north_east</span>
-          </div>
+        <!-- Income Metric -->
+        <div class="flex items-center gap-2 pr-2.5 min-w-0">
+          <span class="material-symbols-outlined text-lg text-[#B3F5E1] animate-bounce-gentle shrink-0">north_east</span>
           <div class="min-w-0 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-[#B3F5E1] block truncate">INCOME ({{ currentMonthLabel }})</span>
-            <span class="text-sm font-bold text-[#B3F5E1] tabular-nums tracking-tight block truncate">₹{{ formatAmount(totalIncome) }}</span>
+            <span class="text-sm font-bold text-[#B3F5E1] tabular-nums tracking-tight block truncate">₹{{ formatAmount(animatedIncome) }}</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-2.5 pl-3 min-w-0">
-          <div class="w-7 h-7 rounded-lg bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-sm text-[#FFD1B3]">south_east</span>
-          </div>
+        <!-- Expense Metric -->
+        <div class="flex items-center gap-2 pl-3 min-w-0">
+          <span class="material-symbols-outlined text-lg text-[#FFD1B3] animate-pulse-slow shrink-0">south_east</span>
           <div class="min-w-0 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-[#FFD1B3] block truncate">EXPENSE ({{ currentMonthLabel }})</span>
-            <span class="text-sm font-bold text-[#FFD1B3] tabular-nums tracking-tight block truncate">₹{{ formatAmount(totalExpenses) }}</span>
+            <span class="text-sm font-bold text-[#FFD1B3] tabular-nums tracking-tight block truncate">₹{{ formatAmount(animatedExpenses) }}</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 2. SAVINGS ALLOCATIONS (Hairline Dividers List / 2-Col Grid) -->
-    <section class="space-y-2">
+    <!-- 2. SAVINGS ALLOCATIONS (Hairline Grid Layout) -->
+    <section class="space-y-2 animate-cascade-2">
       <div class="px-0.5">
         <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Savings Allocations</h3>
       </div>
@@ -49,21 +47,25 @@
         No active savings buckets configured. Go to Settings → Savings Buckets to add buckets.
       </div>
 
-      <!-- 2-Column Mobile-First Responsive Grid -->
-      <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <!-- Clean Hairline Grid Layout (No Heavy Cards) -->
+      <div v-else class="grid grid-cols-2 sm:grid-cols-3 border-y border-[#1f202e] divide-y sm:divide-y-0 divide-[#1f202e]">
         <div 
-          v-for="bucket in activeBuckets" 
+          v-for="(bucket, idx) in activeBuckets" 
           :key="bucket.id"
           @click="$emit('add-transaction', { bucketId: bucket.id, type: 'expense' })"
-          class="flex items-center gap-2.5 p-3 rounded-xl border border-[#1f202e] bg-[#0f1019] hover:bg-[#141520] hover:border-[#D4BFFF]/40 text-left transition cursor-pointer active:scale-[0.98] min-h-[52px]"
+          class="flex items-center gap-2.5 p-3 hover:bg-[#141520] transition cursor-pointer active:bg-[#141520]"
+          :class="[
+            idx % 2 !== 0 ? 'border-l border-[#1f202e]' : '',
+            idx >= 2 ? 'border-t border-[#1f202e]' : ''
+          ]"
           title="Click to add transaction for this bucket"
         >
-          <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-base leading-none" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
+          <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-sm leading-none" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ bucket.name }}</p>
-            <p class="text-[10px] font-bold tabular-nums truncate mt-0.5" :class="Number(bucket.allocated_balance) >= 0 ? 'text-[#D4BFFF]' : 'text-[#FFD1B3]'">
+            <p class="text-xs font-semibold text-[#f1f0f5] truncate leading-tight">{{ bucket.name }}</p>
+            <p class="text-[11px] font-bold tabular-nums truncate mt-0.5 leading-tight" :class="Number(bucket.allocated_balance) >= 0 ? 'text-[#D4BFFF]' : 'text-[#FFD1B3]'">
               ₹{{ formatAmount(bucket.allocated_balance) }}
             </p>
           </div>
@@ -71,8 +73,8 @@
       </div>
     </section>
 
-    <!-- 3. Current Month Expenses Breakdown (Hairline Divided Section) -->
-    <section class="space-y-3 pt-2">
+    <!-- 3. Current Month Expenses Breakdown (Staggered Entrance) -->
+    <section class="space-y-3 pt-2 animate-cascade-3">
       <div class="border-b border-[#1f202e] pb-2 px-0.5">
         <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Expenses Breakdown ({{ currentMonthLabel }})</h3>
       </div>
@@ -233,8 +235,8 @@
       </div>
     </section>
 
-    <!-- 4. STORAGE ACCOUNTS BREAKDOWN (Hairline Divider Section) -->
-    <section class="space-y-2 pt-2">
+    <!-- 4. STORAGE ACCOUNTS BREAKDOWN (Staggered Entrance) -->
+    <section class="space-y-2 pt-2 animate-cascade-4">
       <div class="flex justify-between items-center border-b border-[#1f202e] pb-2 px-0.5">
         <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Storage Accounts</h3>
         <span class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider">Real-time Balances</span>
@@ -269,6 +271,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
+import BlackHoleCanvas from './BlackHoleCanvas.vue';
 
 const props = defineProps({
   transactions: {
@@ -291,7 +294,45 @@ const props = defineProps({
 
 defineEmits(['add-transaction']);
 
-// Metrics
+// Time-of-Day Sky Glow Tint & Black Hole Particle Color Palettes
+const timeOfDayGlow = computed(() => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) {
+    // Morning: Warm golden-rose
+    return {
+      primary: '#3b1c2b',
+      secondary: '#2a1520'
+    };
+  } else if (hour >= 12 && hour < 18) {
+    // Afternoon: Deep indigo-cyan
+    return {
+      primary: '#0e2438',
+      secondary: '#0b1626'
+    };
+  } else {
+    // Night: Deep obsidian lavender
+    return {
+      primary: '#241638',
+      secondary: '#160d26'
+    };
+  }
+});
+
+const blackHoleColors = computed(() => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) {
+    // Morning: Warm Golden Rose & Champagne
+    return ['#FFD1B3', '#f472b6', '#fbbf24'];
+  } else if (hour >= 12 && hour < 18) {
+    // Afternoon: Crisp Sky Cyan & Electric Mint
+    return ['#B3F5E1', '#38bdf8', '#818cf8'];
+  } else {
+    // Evening / Night: Deep Lavender & Cosmic Violet
+    return ['#D4BFFF', '#c084fc', '#a78bfa'];
+  }
+});
+
+// Metrics & Number Ticker Animations
 const physicalAccounts = computed(() => {
   return props.accounts.filter(acc => acc.type !== 'Unassigned' && acc.id !== 'acc_unassigned_pool');
 });
@@ -302,6 +343,46 @@ const currentMonthLabel = computed(() => {
 
 const netWorth = computed(() => {
   return physicalAccounts.value.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
+});
+
+// Animated Ticker Values
+const animatedNetWorth = ref(0);
+const animatedIncome = ref(0);
+const animatedExpenses = ref(0);
+
+const animateNumberTicker = () => {
+  const start = performance.now();
+  const duration = 800;
+  const targetNW = netWorth.value;
+  const targetInc = totalIncome.value;
+  const targetExp = totalExpenses.value;
+  const initialNW = animatedNetWorth.value;
+  const initialInc = animatedIncome.value;
+  const initialExp = animatedExpenses.value;
+
+  const step = (now) => {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    
+    animatedNetWorth.value = initialNW + (targetNW - initialNW) * ease;
+    animatedIncome.value = initialInc + (targetInc - initialInc) * ease;
+    animatedExpenses.value = initialExp + (targetExp - initialExp) * ease;
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  };
+
+  requestAnimationFrame(step);
+};
+
+onMounted(() => {
+  animateNumberTicker();
+});
+
+watch([netWorth, () => totalIncome.value, () => totalExpenses.value], () => {
+  animateNumberTicker();
 });
 
 const currentMonthTransactions = computed(() => {
@@ -555,5 +636,57 @@ const formatAmount = (val) => {
 .particle-dot {
   animation: particlePulse 3s ease-in-out infinite;
   transform-origin: center;
+}
+
+@keyframes cascadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-cascade-1 { animation: cascadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0s both; }
+.animate-cascade-2 { animation: cascadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.07s both; }
+.animate-cascade-3 { animation: cascadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both; }
+.animate-cascade-4 { animation: cascadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.21s both; }
+
+@keyframes arrowPulse {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.15) translate(1px, -1px); }
+}
+
+.animate-arrow-pulse {
+  animation: arrowPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%); }
+  100% { transform: translateX(100%) translateY(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 3.5s infinite;
+}
+
+@keyframes bounceGentle {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.18) translate(1px, -1px); }
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+@keyframes pulseSlow {
+  0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.9; }
+  50% { transform: scale(1.14) translate(-0.5px, 1px); opacity: 1; }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 2.8s ease-in-out infinite;
 }
 </style>

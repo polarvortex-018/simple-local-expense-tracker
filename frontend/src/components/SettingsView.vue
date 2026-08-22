@@ -4,7 +4,7 @@
     <!-- MAIN "MORE" HUB GRID (Visible when no sheet/page is open) -->
     <div v-if="!activeSheet" class="space-y-6">
       <!-- Header -->
-      <div class="flex justify-between items-center border-b border-[#1f202e] pb-4">
+      <div class="flex justify-between items-center border-b border-[#1f202e] pb-4 animate-cascade-1">
         <div>
           <h2 class="text-xl font-bold text-[#f1f0f5] tracking-tight">More</h2>
           <p class="text-xs text-[#9e9cae] mt-0.5">Preferences, savings buckets, accounts, data backup, and app guide</p>
@@ -12,7 +12,7 @@
       </div>
 
       <!-- 2-3 Column Grid of Feature Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4 animate-cascade-2">
         
         <!-- 1. Quick Actions Tile -->
         <button 

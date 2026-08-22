@@ -23,6 +23,18 @@ const vaults = ref([]);
 const activeVault = ref('finance.db');
 const showVaultModal = ref(false);
 
+// Toast Notification State
+const toastMessage = ref('');
+let toastTimer = null;
+
+const showToast = (msg) => {
+  if (toastTimer) clearTimeout(toastTimer);
+  toastMessage.value = msg;
+  toastTimer = setTimeout(() => {
+    toastMessage.value = '';
+  }, 2800);
+};
+
 const activeVaultName = computed(() => {
   const v = vaults.value.find(item => item.is_active);
   return v ? v.name : 'Personal';
@@ -508,6 +520,17 @@ onMounted(() => {
 
     <!-- Main Content Container -->
     <main class="flex-grow max-w-5xl w-full mx-auto px-3.5 sm:px-6 py-4 pb-24 sm:pb-8">
+      <!-- Spring Float Toast Notification Banner -->
+      <Transition name="toast">
+        <div 
+          v-if="toastMessage"
+          class="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-[#141520] border border-[#D4BFFF]/40 text-[#f1f0f5] text-xs font-bold rounded-2xl shadow-2xl flex items-center gap-2 max-w-xs sm:max-w-sm pointer-events-none"
+        >
+          <span class="material-symbols-outlined text-base text-[#D4BFFF]">check_circle</span>
+          <span>{{ toastMessage }}</span>
+        </div>
+      </Transition>
+
       <!-- Error Banner -->
       <div v-if="error" class="mb-4 p-3 bg-rose-950/30 border border-rose-900/40 rounded-xl flex justify-between items-center">
         <div class="flex gap-2.5 items-center">
@@ -584,20 +607,22 @@ onMounted(() => {
     <nav class="bg-[#0c0d14]/95 backdrop-blur-md border-t border-[#1f202e] fixed bottom-0 w-full z-40 flex justify-around items-center h-15 px-2 sm:hidden safe-area-pb">
       <button 
         @click="currentTab = 'dashboard'"
-        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
-        :class="currentTab === 'dashboard' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
+        :class="currentTab === 'dashboard' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <span class="material-symbols-outlined text-xl mb-0.5">dashboard</span>
-        <span class="text-[10px] font-semibold leading-none">Home</span>
+        <span v-if="currentTab === 'dashboard'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
+        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">dashboard</span>
+        <span class="text-[10px] leading-none relative z-10">Home</span>
       </button>
 
       <button 
         @click="currentTab = 'transactions'"
-        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
-        :class="currentTab === 'transactions' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
+        :class="currentTab === 'transactions' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <span class="material-symbols-outlined text-xl mb-0.5">receipt_long</span>
-        <span class="text-[10px] font-semibold leading-none">History</span>
+        <span v-if="currentTab === 'transactions'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
+        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">receipt_long</span>
+        <span class="text-[10px] leading-none relative z-10">History</span>
       </button>
 
       <!-- Center Quick Log Action Button -->
@@ -611,20 +636,22 @@ onMounted(() => {
 
       <button 
         @click="currentTab = 'debts'"
-        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
-        :class="currentTab === 'debts' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
+        :class="currentTab === 'debts' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <span class="material-symbols-outlined text-xl mb-0.5">account_balance_wallet</span>
-        <span class="text-[10px] font-semibold leading-none">Debts</span>
+        <span v-if="currentTab === 'debts'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
+        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">account_balance_wallet</span>
+        <span class="text-[10px] leading-none relative z-10">Debts</span>
       </button>
 
       <button 
         @click="currentTab = 'settings'"
-        class="flex flex-col items-center justify-center py-1 px-3 rounded-xl transition cursor-pointer min-w-[56px]"
-        :class="currentTab === 'settings' ? 'text-[#D4BFFF]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
+        :class="currentTab === 'settings' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
       >
-        <span class="material-symbols-outlined text-xl mb-0.5">widgets</span>
-        <span class="text-[10px] font-semibold leading-none">More</span>
+        <span v-if="currentTab === 'settings'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
+        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">widgets</span>
+        <span class="text-[10px] leading-none relative z-10">More</span>
       </button>
     </nav>
 

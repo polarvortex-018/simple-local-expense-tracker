@@ -10,7 +10,7 @@
     @mouseleave="onTouchEnd"
   >
     <!-- Top Header & Controls Strip (Flush, Hairline Divider) -->
-    <div class="border-b border-[#1f202e] pb-3 space-y-3">
+    <div class="border-b border-[#1f202e] pb-3 space-y-3 animate-cascade-1">
       <!-- Centered Header: < Month Year > (Moves synchronously with touch swipe) -->
       <div class="flex items-center justify-between px-1">
         <button 
@@ -39,81 +39,81 @@
         </button>
       </div>
 
-      <!-- Compact Controls Row -->
-      <div class="flex items-center justify-between gap-1.5 flex-nowrap overflow-x-auto scrollbar-none py-0.5 px-1">
-        <!-- Segmented Mode Toggle [ Monthly | Custom ▾ ] -->
-        <div class="inline-flex p-0.5 bg-[#0f1019] border border-[#1f202e] rounded-lg text-[10px] font-semibold shrink-0">
+      <!-- Ultra-Compact Single-Line Controls Strip -->
+      <div class="flex items-center justify-between gap-1.5 pt-1 px-0.5">
+        <!-- Left: Time Mode Segmented Pill [ Monthly | Custom ▾ ] -->
+        <div class="inline-flex p-0.5 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs font-semibold shrink-0">
           <button 
             @click="timeMode = 'monthly'"
-            class="px-2.5 py-1 rounded-md transition cursor-pointer"
-            :class="timeMode === 'monthly' ? 'bg-[#141520] text-[#f1f0f5] border border-[#D4BFFF]/40 shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+            class="px-2.5 py-1 rounded-lg transition cursor-pointer"
+            :class="timeMode === 'monthly' ? 'bg-[#141520] text-[#f1f0f5] border border-[#D4BFFF]/40 shadow-sm font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             Monthly
           </button>
           <button 
             @click="openCustomRangeModal"
-            class="px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1"
-            :class="timeMode === 'range' ? 'bg-[#141520] text-[#D4BFFF] border border-[#D4BFFF]/40 shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+            class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1"
+            :class="timeMode === 'range' ? 'bg-[#141520] text-[#D4BFFF] border border-[#D4BFFF]/40 shadow-sm font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
             <span>Custom</span>
-            <span class="text-[9px] text-[#D4BFFF]">▾</span>
+            <span class="text-[10px] text-[#D4BFFF]">▾</span>
           </button>
         </div>
 
-        <!-- Filter, Sort & Chart View Mode Action Strip -->
-        <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-          <!-- Choose Filters Button -->
-          <button 
-            @click="showFilterDrawer = !showFilterDrawer"
-            class="h-7 px-2.5 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/60 rounded-lg text-[10px] font-semibold text-[#D4BFFF] flex items-center justify-center gap-1 transition cursor-pointer"
-            title="Toggle Filter Options"
-          >
-            <span class="material-symbols-outlined text-xs">filter_list</span>
-            <span v-if="activeFilterCount > 0" class="px-1 py-0.1 rounded-full text-[8px] bg-[#D4BFFF] text-[#0f0f15] font-bold">
-              {{ activeFilterCount }}
-            </span>
-          </button>
-
-          <!-- Sort Selector Dropdown -->
-          <div class="flex items-center gap-0.5 bg-[#0f1019] border border-[#1f202e] focus-within:border-[#D4BFFF] rounded-lg px-2 h-7 transition">
-            <span class="material-symbols-outlined text-xs text-[#D4BFFF]">swap_vert</span>
-            <select 
-              v-model="sortBy"
-              class="bg-transparent text-[#f1f0f5] text-[10px] font-semibold focus:outline-none cursor-pointer pr-0"
-            >
-              <option value="date_desc" class="bg-[#0c0d14] text-[#f1f0f5]">Newest</option>
-              <option value="date_asc" class="bg-[#0c0d14] text-[#f1f0f5]">Oldest</option>
-              <option value="amount_desc" class="bg-[#0c0d14] text-[#f1f0f5]">Highest</option>
-              <option value="amount_asc" class="bg-[#0c0d14] text-[#f1f0f5]">Lowest</option>
-            </select>
-          </div>
-
-          <!-- Chart View Mode -->
-          <div class="inline-flex p-0.5 bg-[#0f1019] border border-[#1f202e] rounded-lg text-[9px] font-semibold shrink-0">
+        <!-- Right: Action Strip (Chart View Toggle, Filter Icon, Sort Dropdown) -->
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- Chart Breakdown View Mode Pill -->
+          <div class="inline-flex p-0.5 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs font-semibold shrink-0">
             <button 
               @click="chartViewMode = 'both'"
-              class="px-2 py-0.5 rounded transition cursor-pointer"
+              class="px-2 py-0.5 rounded-lg transition cursor-pointer text-[11px]"
               :class="chartViewMode === 'both' ? 'bg-[#D4BFFF] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-              title="Show Both Expenses & Income Charts"
+              title="Show Both Charts"
             >
               All
             </button>
             <button 
               @click="chartViewMode = 'expense'"
-              class="px-2 py-0.5 rounded transition cursor-pointer"
+              class="px-2 py-0.5 rounded-lg transition cursor-pointer text-[11px]"
               :class="chartViewMode === 'expense' ? 'bg-[#FFD1B3] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-              title="Show Expenses Breakdown Chart Only"
+              title="Expenses Chart Only"
             >
               Exp
             </button>
             <button 
               @click="chartViewMode = 'income'"
-              class="px-2 py-0.5 rounded transition cursor-pointer"
+              class="px-2 py-0.5 rounded-lg transition cursor-pointer text-[11px]"
               :class="chartViewMode === 'income' ? 'bg-[#B3F5E1] text-[#0f0f15] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-              title="Show Income Breakdown Chart Only"
+              title="Income Chart Only"
             >
               Inc
             </button>
+          </div>
+
+          <!-- Filter Button Icon -->
+          <button 
+            @click="showFilterDrawer = !showFilterDrawer"
+            class="w-7 h-7 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/60 rounded-xl text-[#D4BFFF] flex items-center justify-center transition cursor-pointer relative shrink-0"
+            title="Toggle Filter Options"
+          >
+            <span class="material-symbols-outlined text-sm">filter_list</span>
+            <span v-if="activeFilterCount > 0" class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[8px] bg-[#D4BFFF] text-[#0f0f15] font-bold flex items-center justify-center">
+              {{ activeFilterCount }}
+            </span>
+          </button>
+
+          <!-- Sort Dropdown Icon -->
+          <div class="relative flex items-center justify-center w-7 h-7 bg-[#0f1019] border border-[#1f202e] focus-within:border-[#D4BFFF] rounded-xl transition shrink-0" title="Sort Order">
+            <span class="material-symbols-outlined text-sm text-[#D4BFFF] pointer-events-none">swap_vert</span>
+            <select 
+              v-model="sortBy"
+              class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+            >
+              <option value="date_desc" class="bg-[#0c0d14] text-[#f1f0f5]">Newest First</option>
+              <option value="date_asc" class="bg-[#0c0d14] text-[#f1f0f5]">Oldest First</option>
+              <option value="amount_desc" class="bg-[#0c0d14] text-[#f1f0f5]">Highest Amount</option>
+              <option value="amount_asc" class="bg-[#0c0d14] text-[#f1f0f5]">Lowest Amount</option>
+            </select>
           </div>
         </div>
       </div>
@@ -486,7 +486,7 @@
         </Transition>
 
     <!-- Dual Expenses & Income Donut Charts Container with Continuous Spring Gesture Physics -->
-    <div class="overflow-hidden relative min-h-[220px]">
+    <div class="overflow-hidden relative min-h-[220px] animate-cascade-2">
       <div 
         :style="swipeTransformStyle"
         class="space-y-4 touch-pan-y will-change-transform w-full"
@@ -777,7 +777,7 @@
 
 
     <!-- 4. Grouped Transaction Records List (Flush, Hairline Dividers) -->
-    <div id="history-records-section" v-if="displayedTransactions.length > 0" class="space-y-4">
+    <div id="history-records-section" v-if="displayedTransactions.length > 0" class="space-y-4 animate-cascade-3">
       <div 
         v-for="group in groupedTransactionsByDate" 
         :key="group.dateStr" 

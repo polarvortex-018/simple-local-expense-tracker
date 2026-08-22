@@ -175,6 +175,41 @@ select {
   padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
 }
 
+/* Universal Staggered Cascade Slide-Up Entrance Animation */
+@keyframes cascadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-cascade-1 { animation: cascadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0s both; }
+.animate-cascade-2 { animation: cascadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both; }
+.animate-cascade-3 { animation: cascadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+.animate-cascade-4 { animation: cascadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both; }
+.animate-cascade-5 { animation: cascadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both; }
+.animate-cascade-6 { animation: cascadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.30s both; }
+
+/* Spring Float Toast Notification Animation */
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translate(-50%, -20px) scale(0.9);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -15px) scale(0.95);
+}
+
 /* Accessibility: Respect user's motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
