@@ -11,23 +11,28 @@
   >
     <!-- Top Header & Controls Strip (Flush, Hairline Divider) -->
     <div class="border-b border-[#1f202e] pb-3 space-y-3">
-      <!-- Centered Header: < Month Year > -->
+      <!-- Centered Header: < Month Year > (Moves synchronously with touch swipe) -->
       <div class="flex items-center justify-between px-1">
         <button 
           @click="prevMonth"
-          class="w-7 h-7 rounded-lg bg-[#0f1019] hover:bg-[#141520] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold transition cursor-pointer active:scale-95 border border-[#1f202e]"
+          class="w-7 h-7 rounded-lg bg-[#0f1019] hover:bg-[#141520] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold transition cursor-pointer active:scale-95 border border-[#1f202e] z-10 shrink-0"
           title="Previous Month"
         >
           ❮
         </button>
 
-        <h2 class="text-base sm:text-lg font-bold text-[#f1f0f5] tracking-tight select-none">
-          {{ formattedMonthYear }}
-        </h2>
+        <div class="overflow-hidden relative flex-1 mx-2 flex justify-center">
+          <h2 
+            :style="swipeTransformStyle"
+            class="text-base sm:text-lg font-bold text-[#f1f0f5] tracking-tight select-none will-change-transform text-center whitespace-nowrap"
+          >
+            {{ formattedMonthYear }}
+          </h2>
+        </div>
 
         <button 
           @click="nextMonth"
-          class="w-7 h-7 rounded-lg bg-[#0f1019] hover:bg-[#141520] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold transition cursor-pointer active:scale-95 border border-[#1f202e]"
+          class="w-7 h-7 rounded-lg bg-[#0f1019] hover:bg-[#141520] text-[#f1f0f5] flex items-center justify-center text-xs font-semibold transition cursor-pointer active:scale-95 border border-[#1f202e] z-10 shrink-0"
           title="Next Month"
         >
           ❯
@@ -480,38 +485,57 @@
           </div>
         </Transition>
 
-    <!-- Dual Expenses & Income Donut Charts Container with Full Slide Transition -->
-    <div class="overflow-hidden">
-      <Transition :name="slideDirection === 'next' ? 'slide-next' : 'slide-prev'" mode="out-in">
-        <div 
-          :key="timeMode === 'monthly' ? formattedMonthYear : rangeTimeChoice"
-          class="space-y-4 touch-pan-y"
-          @touchstart="onTouchStart"
-          @touchmove="onTouchMove"
-          @touchend="onTouchEnd"
-          @mousedown="onTouchStart"
-          @mousemove="onTouchMove"
-          @mouseup="onTouchEnd"
-          @mouseleave="onTouchEnd"
+    <!-- Dual Expenses & Income Donut Charts Container with Continuous Spring Gesture Physics -->
+    <div class="overflow-hidden relative min-h-[220px]">
+      <div 
+        :style="swipeTransformStyle"
+        class="space-y-4 touch-pan-y will-change-transform w-full"
+        @touchstart="onTouchStart"
+        @touchmove="onTouchMove"
+        @touchend="onTouchEnd"
+        @mousedown="onTouchStart"
+        @mousemove="onTouchMove"
+        @mouseup="onTouchEnd"
+        @mouseleave="onTouchEnd"
+      >
+        <!-- Expenses Breakdown Donut Chart Section (Flat Seamless Surface) -->
+        <section 
+          v-if="chartViewMode === 'both' || chartViewMode === 'expense'"
+          class="p-1 space-y-3"
         >
-          <!-- Expenses Breakdown Donut Chart Card -->
-          <section 
-            v-if="chartViewMode === 'both' || chartViewMode === 'expense'"
-            class="bg-[#0f1019] border border-[#1f202e] rounded-xl p-4 space-y-4"
-          >
-            <div class="border-b border-[#1f202e] pb-2">
-              <h2 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Expenses Breakdown</h2>
-            </div>
+          <div class="border-b border-[#1f202e] pb-2">
+            <h2 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Expenses Breakdown</h2>
+          </div>
 
-            <div v-if="expensePiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#9e9cae]">
-              No expense records found for this period.
-            </div>
+          <div v-if="expensePiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#9e9cae]">
+            No expense records found for this period.
+          </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
-              <!-- SVG Donut Ring -->
-              <div class="md:col-span-6 flex items-center justify-center">
-                <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
-                  <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
+          <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
+            <!-- SVG Donut Ring -->
+            <div class="md:col-span-6 flex items-center justify-center">
+              <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
+                  <defs>
+                    <!-- Option A Clockwise Radial Sweep Mask -->
+                    <mask id="expense-donut-mask">
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="96"
+                        fill="none"
+                        stroke="#ffffff"
+                        stroke-width="38"
+                        stroke-linecap="butt"
+                        :stroke-dasharray="603.18"
+                        :stroke-dashoffset="603.18 * (1 - expSweepProgress)"
+                        style="transform-origin: 100px 100px; transform: rotate(-90deg);"
+                      />
+                    </mask>
+                  </defs>
+
+                  <!-- Segmented Category Donut Paths (Option A Clockwise Radial Sweep, Starts from 0%) -->
+                  <g mask="url(#expense-donut-mask)" :style="{ opacity: expSweepProgress > 0.01 ? 1 : 0, transition: 'opacity 0.15s ease-out' }">
                     <g
                       v-for="segment in expensePiePaths"
                       :key="segment.name"
@@ -533,82 +557,103 @@
                         }"
                       />
                     </g>
-                  </svg>
+                  </g>
+                </svg>
 
-                  <!-- Center Readout -->
-                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-3">
-                    <span class="text-xs font-semibold text-[#9e9cae] truncate max-w-[130px]">
-                      {{ activeHoveredExpenseInfo ? activeHoveredExpenseInfo.name : 'Total Spent' }}
-                    </span>
-                    <div class="text-xl sm:text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight mt-0.5">
-                      <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredExpenseInfo ? activeHoveredExpenseInfo.amount : totalFilteredCategoryExpense) }}
-                    </div>
-                    <span v-if="activeHoveredExpenseInfo" class="text-xs font-bold text-[#FFD1B3] mt-0.5 px-2 py-0.5 rounded-full bg-[#FFD1B3]/10 border border-[#FFD1B3]/20">
-                      {{ activeHoveredExpenseInfo.percentage }}% of total
-                    </span>
+                <!-- Center Readout (Count-up on month switch) -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-3">
+                  <span class="text-xs font-semibold text-[#9e9cae] truncate max-w-[130px]">
+                    {{ activeHoveredExpenseInfo ? activeHoveredExpenseInfo.name : 'Total Spent' }}
+                  </span>
+                  <div class="text-xl sm:text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight mt-0.5">
+                    <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredExpenseInfo ? activeHoveredExpenseInfo.amount : (isChartLoading ? animatedExpenseAmount : totalFilteredCategoryExpense)) }}
                   </div>
+                  <span v-if="activeHoveredExpenseInfo" class="text-xs font-bold text-[#FFD1B3] mt-0.5 px-2 py-0.5 rounded-full bg-[#FFD1B3]/10 border border-[#FFD1B3]/20">
+                    {{ activeHoveredExpenseInfo.percentage }}% of total
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <!-- Interactive Borderless Legend List -->
-              <TransitionGroup 
-                name="flip-list" 
-                tag="div" 
-                class="md:col-span-6 space-y-1.5 max-h-56 overflow-y-auto p-1"
+            <!-- Interactive Borderless Legend List (Natural Page Flow, No Scroll Hijack) -->
+            <TransitionGroup 
+              name="flip-list" 
+              tag="div" 
+              class="md:col-span-6 space-y-1.5 p-1"
+            >
+              <div 
+                v-for="item in activeExpenseLegendItems"
+                :key="item.name"
+                @mouseenter="hoveredExpenseIndex = item.originalIndex"
+                @mouseleave="hoveredExpenseIndex = null"
+                @click="toggleSelectExpenseCategory(item.originalIndex)"
+                class="flex items-center justify-between py-2 px-2.5 rounded-xl border border-transparent transition-all duration-200 cursor-pointer hover:bg-[#141520] hover:border-[#1f202e]"
+                :class="activeExpenseIndex === item.originalIndex ? 'bg-[#141520] border-[#D4BFFF]/50 ring-1 ring-[#D4BFFF]/40' : ''"
               >
-                <div 
-                  v-for="item in activeExpenseLegendItems"
-                  :key="item.name"
-                  @mouseenter="hoveredExpenseIndex = item.originalIndex"
-                  @mouseleave="hoveredExpenseIndex = null"
-                  @click="toggleSelectExpenseCategory(item.originalIndex)"
-                  class="flex items-center justify-between py-2 px-2.5 rounded-xl border border-transparent transition-all duration-200 cursor-pointer hover:bg-[#141520] hover:border-[#1f202e]"
-                  :class="activeExpenseIndex === item.originalIndex ? 'bg-[#141520] border-[#D4BFFF]/50 ring-1 ring-[#D4BFFF]/40' : ''"
-                >
-                  <!-- Left: Material Symbol Icon + Category Name -->
-                  <div class="flex items-center gap-2.5 min-w-0">
-                    <span 
-                      class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
-                      :style="{ 
-                        color: item.color,
-                        filter: activeExpenseIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
-                      }"
-                    >
-                      {{ resolveIcon(item.icon, 'category') }}
-                    </span>
-                    <span class="text-xs font-bold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
-                  </div>
-
-                  <!-- Right: Percentage Badge + Amount -->
-                  <div class="flex items-center gap-2.5 shrink-0 tabular-nums">
-                    <span class="text-[10px] font-bold text-[#9e9cae] bg-[#141520] px-2 py-0.5 rounded-md border border-[#1f202e]">{{ item.percentage }}%</span>
-                    <span class="text-xs sm:text-sm font-bold text-[#f1f0f5]">
-                      ₹{{ formatAmount(item.amount) }}
-                    </span>
-                  </div>
+                <!-- Left: Material Symbol Icon + Category Name -->
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span 
+                    class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
+                    :style="{ 
+                      color: item.color,
+                      filter: activeExpenseIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
+                    }"
+                  >
+                    {{ resolveIcon(item.icon, 'category') }}
+                  </span>
+                  <span class="text-xs font-bold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
                 </div>
-              </TransitionGroup>
-            </div>
-          </section>
 
-          <!-- Income Breakdown Donut Chart Card -->
-          <section 
-            v-if="chartViewMode === 'both' || chartViewMode === 'income'"
-            class="bg-[#0f1019] border border-[#1f202e] rounded-xl p-4 space-y-4"
-          >
-            <div class="border-b border-[#1f202e] pb-2">
-              <h2 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Income Breakdown</h2>
-            </div>
+                <!-- Right: Percentage Badge + Amount -->
+                <div class="flex items-center gap-2.5 shrink-0 tabular-nums">
+                  <span class="text-[10px] font-bold text-[#9e9cae] bg-[#141520] px-2 py-0.5 rounded-md border border-[#1f202e]">{{ item.percentage }}%</span>
+                  <span class="text-xs sm:text-sm font-bold text-[#f1f0f5]">
+                    ₹{{ formatAmount(item.amount) }}
+                  </span>
+                </div>
+              </div>
+            </TransitionGroup>
+          </div>
+        </section>
 
-            <div v-if="incomePiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#9e9cae]">
-              No income records found for this period.
-            </div>
+        <!-- Income Breakdown Donut Chart Section (Flat Seamless Surface) -->
+        <section 
+          v-if="chartViewMode === 'both' || chartViewMode === 'income'"
+          class="p-1 space-y-3"
+        >
+          <div class="border-b border-[#1f202e] pb-2">
+            <h2 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Income Breakdown</h2>
+          </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
-              <!-- SVG Donut Ring -->
-              <div class="md:col-span-6 flex items-center justify-center">
-                <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
-                  <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
+          <div v-if="incomePiePaths.length === 0" class="p-8 text-center text-xs font-semibold text-[#9e9cae]">
+            No income records found for this period.
+          </div>
+
+          <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
+            <!-- SVG Donut Ring -->
+            <div class="md:col-span-6 flex items-center justify-center">
+              <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
+                  <defs>
+                    <!-- Option A Clockwise Radial Sweep Mask -->
+                    <mask id="income-donut-mask">
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="96"
+                        fill="none"
+                        stroke="#ffffff"
+                        stroke-width="38"
+                        stroke-linecap="butt"
+                        :stroke-dasharray="603.18"
+                        :stroke-dashoffset="603.18 * (1 - incSweepProgress)"
+                        style="transform-origin: 100px 100px; transform: rotate(-90deg);"
+                      />
+                    </mask>
+                  </defs>
+
+                  <!-- Segmented Category Donut Paths (Option A Clockwise Radial Sweep, Starts from 0%) -->
+                  <g mask="url(#income-donut-mask)" :style="{ opacity: incSweepProgress > 0.01 ? 1 : 0, transition: 'opacity 0.15s ease-out' }">
                     <g
                       v-for="segment in incomePiePaths"
                       :key="segment.name"
@@ -630,65 +675,65 @@
                         }"
                       />
                     </g>
-                  </svg>
+                  </g>
+                </svg>
 
-                  <!-- Center Readout -->
-                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-3">
-                    <span class="text-xs font-semibold text-[#9e9cae] truncate max-w-[130px]">
-                      {{ activeHoveredIncomeInfo ? activeHoveredIncomeInfo.name : 'Income' }}
-                    </span>
-                    <div class="text-xl sm:text-2xl font-bold text-[#B3F5E1] tabular-nums tracking-tight mt-0.5">
-                      <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredIncomeInfo ? activeHoveredIncomeInfo.amount : totalFilteredCategoryIncome) }}
-                    </div>
-                    <span v-if="activeHoveredIncomeInfo" class="text-xs font-bold text-[#B3F5E1] mt-0.5 px-2 py-0.5 rounded-full bg-[#B3F5E1]/10 border border-[#B3F5E1]/20">
-                      {{ activeHoveredIncomeInfo.percentage }}% of total
-                    </span>
+                <!-- Center Readout (Count-up on month switch) -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-3">
+                  <span class="text-xs font-semibold text-[#9e9cae] truncate max-w-[130px]">
+                    {{ activeHoveredIncomeInfo ? activeHoveredIncomeInfo.name : 'Income' }}
+                  </span>
+                  <div class="text-xl sm:text-2xl font-bold text-[#B3F5E1] tabular-nums tracking-tight mt-0.5">
+                    <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredIncomeInfo ? activeHoveredIncomeInfo.amount : (isChartLoading ? animatedIncomeAmount : totalFilteredCategoryIncome)) }}
                   </div>
+                  <span v-if="activeHoveredIncomeInfo" class="text-xs font-bold text-[#B3F5E1] mt-0.5 px-2 py-0.5 rounded-full bg-[#B3F5E1]/10 border border-[#B3F5E1]/20">
+                    {{ activeHoveredIncomeInfo.percentage }}% of total
+                  </span>
                 </div>
               </div>
-
-              <!-- Interactive Borderless Legend List -->
-              <TransitionGroup 
-                name="flip-list" 
-                tag="div" 
-                class="md:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 max-h-56 overflow-y-auto p-1"
-              >
-                <div 
-                  v-for="item in activeIncomeLegendItems"
-                  :key="item.name"
-                  @mouseenter="hoveredIncomeIndex = item.originalIndex"
-                  @mouseleave="hoveredIncomeIndex = null"
-                  @click="toggleSelectIncomeCategory(item.originalIndex)"
-                  class="flex items-center justify-between py-1.5 px-2 rounded-xl border border-transparent transition-all duration-200 cursor-pointer hover:bg-[#141520] hover:border-[#1f202e]"
-                  :class="activeIncomeIndex === item.originalIndex ? 'bg-[#141520] border-[#B3F5E1]/50 ring-1 ring-[#B3F5E1]/40' : ''"
-                >
-                  <!-- Left: Material Symbol Icon + Category Name -->
-                  <div class="flex items-center gap-2 min-w-0">
-                    <span 
-                      class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
-                      :style="{ 
-                        color: item.color,
-                        filter: activeIncomeIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
-                      }"
-                    >
-                      {{ resolveIcon(item.icon, 'category') }}
-                    </span>
-                    <span class="text-xs font-bold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
-                  </div>
-
-                  <!-- Right: Percentage + Amount -->
-                  <div class="flex items-center gap-2 shrink-0 tabular-nums">
-                    <span class="text-[10px] font-semibold text-[#9e9cae] bg-[#141520] px-1.5 py-0.2 rounded-md border border-[#1f202e]">{{ item.percentage }}%</span>
-                    <span class="text-xs font-bold text-[#B3F5E1]">
-                      ₹{{ formatAmount(item.amount) }}
-                    </span>
-                  </div>
-                </div>
-              </TransitionGroup>
             </div>
-          </section>
-        </div>
-      </Transition>
+
+            <!-- Interactive Borderless Legend List (Natural Page Flow, No Scroll Hijack) -->
+            <TransitionGroup 
+              name="flip-list" 
+              tag="div" 
+              class="md:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 p-1"
+            >
+              <div 
+                v-for="item in activeIncomeLegendItems"
+                :key="item.name"
+                @mouseenter="hoveredIncomeIndex = item.originalIndex"
+                @mouseleave="hoveredIncomeIndex = null"
+                @click="toggleSelectIncomeCategory(item.originalIndex)"
+                class="flex items-center justify-between py-1.5 px-2 rounded-xl border border-transparent transition-all duration-200 cursor-pointer hover:bg-[#141520] hover:border-[#1f202e]"
+                :class="activeIncomeIndex === item.originalIndex ? 'bg-[#141520] border-[#B3F5E1]/50 ring-1 ring-[#B3F5E1]/40' : ''"
+              >
+                <!-- Left: Material Symbol Icon + Category Name -->
+                <div class="flex items-center gap-2 min-w-0">
+                  <span 
+                    class="material-symbols-outlined text-xs leading-none shrink-0 transition-transform duration-200"
+                    :style="{ 
+                      color: item.color,
+                      filter: activeIncomeIndex === item.originalIndex ? `drop-shadow(0 0 4px ${item.color})` : 'none' 
+                    }"
+                  >
+                    {{ resolveIcon(item.icon, 'category') }}
+                  </span>
+                  <span class="text-xs font-bold text-[#f1f0f5] truncate leading-none">{{ item.name }}</span>
+                </div>
+
+                <!-- Right: Percentage + Amount -->
+                <div class="flex items-center gap-2 shrink-0 tabular-nums">
+                  <span class="text-[10px] font-semibold text-[#9e9cae] bg-[#141520] px-1.5 py-0.2 rounded-md border border-[#1f202e]">{{ item.percentage }}%</span>
+                  <span class="text-xs font-bold text-[#B3F5E1]">
+                    ₹{{ formatAmount(item.amount) }}
+                  </span>
+                </div>
+              </div>
+            </TransitionGroup>
+          </div>
+        </section>
+      </div>
     </div>
 
 
@@ -1087,7 +1132,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import CategoryPicker from './CategoryPicker.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 
@@ -1123,6 +1168,9 @@ const emit = defineEmits([
 // Time Mode & Navigation
 const timeMode = ref('monthly'); // 'monthly' or 'range'
 const currentMonthDate = ref(new Date());
+const formattedMonthYear = computed(() => {
+  return currentMonthDate.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+});
 const rangeTimeChoice = ref('this_month');
 const startDateInput = ref('');
 const endDateInput = ref('');
@@ -1185,11 +1233,54 @@ const chartViewMode = ref('expense'); // 'expense', 'both', 'income'
 // Full Slide Transition State
 const slideDirection = ref('next'); // 'next' or 'prev'
 
-// Touch Drag Tracking
+// Touch Drag & Gesture Spring Physics Tracking
 const touchStartX = ref(0);
 const touchStartY = ref(0);
 const dragOffset = ref(0);
 const isDragging = ref(false);
+const isAnimating = ref(false);
+
+const swipeTransformStyle = computed(() => {
+  if (isDragging.value) {
+    return {
+      transform: `translateX(${dragOffset.value}px)`,
+      transition: 'none'
+    };
+  }
+  if (isAnimating.value) {
+    return {
+      transform: `translateX(${dragOffset.value}px)`,
+      transition: 'transform 0.26s cubic-bezier(0.16, 1, 0.3, 1)'
+    };
+  }
+  return {
+    transform: 'translateX(0px)',
+    transition: 'transform 0.26s cubic-bezier(0.16, 1, 0.3, 1)'
+  };
+});
+
+const changeMonthByOffset = (offset) => {
+  expSweepProgress.value = 0;
+  incSweepProgress.value = 0;
+  animatedExpenseAmount.value = 0;
+  animatedIncomeAmount.value = 0;
+  isChartLoading.value = true;
+
+  const d = new Date(currentMonthDate.value);
+  d.setDate(1);
+  d.setMonth(d.getMonth() + offset);
+  currentMonthDate.value = d;
+};
+
+const prevMonth = () => {
+  slideDirection.value = 'prev';
+  changeMonthByOffset(-1);
+};
+
+const nextMonth = () => {
+  slideDirection.value = 'next';
+  changeMonthByOffset(1);
+};
 
 const onTouchStart = (e) => {
   const target = e.target;
@@ -1201,6 +1292,7 @@ const onTouchStart = (e) => {
   touchStartY.value = touch.clientY;
   dragOffset.value = 0;
   isDragging.value = true;
+  isAnimating.value = false;
 };
 
 const onTouchMove = (e) => {
@@ -1209,7 +1301,7 @@ const onTouchMove = (e) => {
   const deltaX = touch.clientX - touchStartX.value;
   const deltaY = touch.clientY - touchStartY.value;
 
-  if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+  if (Math.abs(deltaX) > Math.abs(deltaY) * 1.1) {
     dragOffset.value = deltaX;
   }
 };
@@ -1222,36 +1314,43 @@ const onTouchEnd = (e) => {
 
   isDragging.value = false;
 
-  if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
-    if (deltaX < 0) {
-      nextMonth();
-    } else {
-      prevMonth();
-    }
+  const threshold = 45;
+  if (Math.abs(deltaX) > threshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) {
+    const isNext = deltaX < 0;
+    slideDirection.value = isNext ? 'next' : 'prev';
+
+    isAnimating.value = true;
+    // Step 1: Smoothly slide current month container off-screen in swipe direction with spring physics
+    dragOffset.value = isNext ? -360 : 360;
+
+    setTimeout(() => {
+      // Step 2: Swap month date
+      changeMonthByOffset(isNext ? 1 : -1);
+
+      // Step 3: Teleport container off-screen to opposite side without transition
+      isAnimating.value = false;
+      dragOffset.value = isNext ? 360 : -360;
+
+      nextTick(() => {
+        // Step 4: Spring animate in from opposite side to 0
+        requestAnimationFrame(() => {
+          isAnimating.value = true;
+          dragOffset.value = 0;
+
+          setTimeout(() => {
+            isAnimating.value = false;
+          }, 280);
+        });
+      });
+    }, 180);
+  } else {
+    // Snap back smoothly to 0 if drag was small
+    isAnimating.value = true;
+    dragOffset.value = 0;
+    setTimeout(() => {
+      isAnimating.value = false;
+    }, 240);
   }
-
-  dragOffset.value = 0;
-};
-
-// Monthly Navigation Helpers
-const formattedMonthYear = computed(() => {
-  return currentMonthDate.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-});
-
-const prevMonth = () => {
-  slideDirection.value = 'prev';
-  const d = new Date(currentMonthDate.value);
-  d.setDate(1);
-  d.setMonth(d.getMonth() - 1);
-  currentMonthDate.value = d;
-};
-
-const nextMonth = () => {
-  slideDirection.value = 'next';
-  const d = new Date(currentMonthDate.value);
-  d.setDate(1);
-  d.setMonth(d.getMonth() + 1);
-  currentMonthDate.value = d;
 };
 
 const activeFilterCount = computed(() => {
@@ -1540,6 +1639,62 @@ const totalFilteredCategoryIncome = computed(() => {
   return filteredCategoryIncome.value.reduce((sum, c) => sum + c.total, 0);
 });
 
+// Option A: Clockwise Radial Sweep & Count-Up State (750ms Slower & Smoother)
+const isChartLoading = ref(false);
+const expSweepProgress = ref(1);
+const incSweepProgress = ref(1);
+const animatedExpenseAmount = ref(0);
+const animatedIncomeAmount = ref(0);
+
+const triggerChartLoaderAndCountUp = () => {
+  // Step 1: Immediately reset sweep progress & amount to 0%
+  isChartLoading.value = true;
+  expSweepProgress.value = 0;
+  incSweepProgress.value = 0;
+  animatedExpenseAmount.value = 0;
+  animatedIncomeAmount.value = 0;
+
+  // Step 2: Allow browser to paint the 0% hidden state first before starting the sweep
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const startTime = performance.now();
+      const duration = 750; // Ultra smooth 750ms draw
+
+      const step = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease-out quartic for silky smooth deceleration
+        const eased = 1 - Math.pow(1 - progress, 4);
+
+        expSweepProgress.value = eased;
+        incSweepProgress.value = eased;
+
+        const targetExp = totalFilteredCategoryExpense.value;
+        const targetInc = totalFilteredCategoryIncome.value;
+
+        animatedExpenseAmount.value = Math.round((targetExp * eased) * 100) / 100;
+        animatedIncomeAmount.value = Math.round((targetInc * eased) * 100) / 100;
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          expSweepProgress.value = 1;
+          incSweepProgress.value = 1;
+          animatedExpenseAmount.value = targetExp;
+          animatedIncomeAmount.value = targetInc;
+          isChartLoading.value = false;
+        }
+      };
+
+      requestAnimationFrame(step);
+    });
+  });
+};
+
+watch(currentMonthDate, () => {
+  triggerChartLoaderAndCountUp();
+}, { immediate: true });
+
 // Expense Donut Reactive Logic
 const hoveredExpenseIndex = ref(null);
 const selectedExpenseIndex = ref(null);
@@ -1569,7 +1724,6 @@ const toggleSelectExpenseCategory = (idx) => {
     if (item) {
       selectedChartCategoryRecordId.value = item.id;
     }
-    scrollToHistoryRecords();
   }
 };
 
@@ -1601,7 +1755,6 @@ const toggleSelectIncomeCategory = (idx) => {
     if (item) {
       selectedChartCategoryRecordId.value = item.id;
     }
-    scrollToHistoryRecords();
   }
 };
 
@@ -1859,32 +2012,58 @@ const transactionLabel = (tx) => {
   transform: translateY(20px) scale(0.96);
 }
 
-/* Full Month Slide Out & Slide In Animations */
+/* Full Month Slide Out & Slide In Animations (Parallel Smooth Motion) */
 .slide-next-enter-active,
 .slide-next-leave-active,
 .slide-prev-enter-active,
 .slide-prev-leave-active {
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
 }
 
-/* Going Next: Old slide moves LEFT (-24px), new slide enters from RIGHT (24px) */
+.slide-next-leave-active,
+.slide-prev-leave-active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+/* Going Next: Old slide exits LEFT (-100%), new slide enters from RIGHT (100%) */
 .slide-next-enter-from {
-  transform: translateX(24px);
+  transform: translateX(100%);
   opacity: 0;
 }
 .slide-next-leave-to {
-  transform: translateX(-24px);
+  transform: translateX(-100%);
   opacity: 0;
 }
 
-/* Going Prev: Old slide moves RIGHT (24px), new slide enters from LEFT (-24px) */
+/* Going Prev: Old slide exits RIGHT (100%), new slide enters from LEFT (-100%) */
 .slide-prev-enter-from {
-  transform: translateX(-24px);
+  transform: translateX(-100%);
   opacity: 0;
 }
 .slide-prev-leave-to {
-  transform: translateX(24px);
+  transform: translateX(100%);
   opacity: 0;
+}
+/* Option B Spinning Loader Ring Animation */
+@keyframes spinRing {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-group {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spinRing 0.55s linear infinite;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(212, 191, 255, 0.6));
 }
 </style>
