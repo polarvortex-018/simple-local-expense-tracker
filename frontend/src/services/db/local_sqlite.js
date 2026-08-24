@@ -340,13 +340,82 @@ function runSchemaAndSeeds() {
   if (execQuery('SELECT COUNT(*) count FROM savings_buckets')[0]?.count === 0) {
     db.run('INSERT INTO savings_buckets (id,name,allocated_balance,icon,color,is_archived,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)', [generateUUID(), DEFAULT_BUCKET.name, DEFAULT_BUCKET.allocated_balance, DEFAULT_BUCKET.icon, DEFAULT_BUCKET.color, DEFAULT_BUCKET.is_archived, now, now]);
   }
-  if (execQuery("SELECT COUNT(*) count FROM accounts WHERE id = 'acc_unassigned_pool'")[0]?.count === 0) {
-    db.run("INSERT INTO accounts (id, name, type, balance, created_at, updated_at) VALUES ('acc_unassigned_pool', 'Unassigned Cash Pool', 'Unassigned', 0.0, ?, ?)", [now, now]);
+
+  // Ensure system account 'Unallocated Funds' exists
+  if (execQuery("SELECT COUNT(*) count FROM accounts WHERE id = 'acc_unallocated_funds'")[0]?.count === 0) {
+    db.run("INSERT INTO accounts (id, name, type, balance, created_at, updated_at) VALUES ('acc_unallocated_funds', 'Unallocated Funds', 'Unallocated', 0.0, ?, ?)", [now, now]);
   }
-  db.run("INSERT OR REPLACE INTO app_metadata(key,value) VALUES ('schema_version','2')");
+
+  // Ensure system category 'Adjustments' exists
+  if (execQuery("SELECT COUNT(*) count FROM categories WHERE name = 'Adjustments' OR id = 'cat_adjustments'")[0]?.count === 0) {
+    db.run("INSERT INTO categories (id, name, color, icon, is_quick_select, sort_order, created_at, updated_at) VALUES ('cat_adjustments', 'Adjustments', '#a855f7', 'tune', 0, 999, ?, ?)", [now, now]);
+  }
+
+  ensureTransactionsAccountIdNullable();
+
+  try {
+    const cols = execQuery("PRAGMA table_info(transactions)");
+    if (!cols.some(c => c.name === 'include_in_chart')) {
+      db.run("ALTER TABLE transactions ADD COLUMN include_in_chart INTEGER NOT NULL DEFAULT 0");
+    }
+  } catch (e) {
+    console.warn('transactions include_in_chart migration:', e);
+  }
+
+  // Cleanup all legacy system entity rows from database and re-link transactions
+  try {
+    db.exec(`
+      PRAGMA foreign_keys = OFF;
+      UPDATE transactions SET account_id = NULL WHERE account_id = 'acc_unassigned_pool';
+      UPDATE transactions SET bucket_id = NULL WHERE bucket_id = 'bucket_unassigned';
+      UPDATE transactions SET category_id = NULL WHERE category_id IN ('cat_unassigned', 'cat_adjustment');
+      UPDATE debts SET account_id = NULL WHERE account_id = 'acc_unassigned_pool';
+      UPDATE debts SET bucket_id = NULL WHERE bucket_id = 'bucket_unassigned';
+      UPDATE allocation_preset_rules SET account_id = NULL WHERE account_id = 'acc_unassigned_pool';
+      UPDATE allocation_preset_rules SET bucket_id = NULL WHERE bucket_id = 'bucket_unassigned';
+      DELETE FROM accounts WHERE id = 'acc_unassigned_pool' OR type = 'Unassigned' OR name LIKE '%Unassigned%';
+      DELETE FROM savings_buckets WHERE id = 'bucket_unassigned' OR name LIKE '%Unassigned%';
+      DELETE FROM categories WHERE id IN ('cat_unassigned', 'cat_adjustment') OR name LIKE '%Unassigned%' OR name LIKE '%Adjustments%';
+      PRAGMA foreign_keys = ON;
+    `);
+  } catch (e) {
+    console.warn('Unassigned system entity migration cleanup:', e);
+  }
+
+  db.run("INSERT OR REPLACE INTO app_metadata(key,value) VALUES ('schema_version','3')");
 }
 
-export const SYSTEM_UNASSIGNED_ACCOUNT_ID = 'acc_unassigned_pool';
+export function ensureTransactionsAccountIdNullable() {
+  if (!db) return;
+  try {
+    const cols = execQuery("PRAGMA table_info(transactions)");
+    const accCol = cols.find(c => c.name === 'account_id');
+    if (accCol && accCol.notnull === 1) {
+      db.exec(`
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE transactions_new (
+          id TEXT PRIMARY KEY, amount REAL NOT NULL, transaction_type TEXT NOT NULL, adjustment_direction TEXT NULL,
+          description TEXT NULL, date TEXT NOT NULL, account_id TEXT NULL, bucket_id TEXT NULL, category_id TEXT NULL,
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+          FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL,
+          FOREIGN KEY (bucket_id) REFERENCES savings_buckets (id) ON DELETE SET NULL,
+          FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
+        );
+        INSERT INTO transactions_new (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
+          SELECT id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at FROM transactions;
+        DROP TABLE transactions;
+        ALTER TABLE transactions_new RENAME TO transactions;
+        CREATE INDEX IF NOT EXISTS ix_transactions_account ON transactions(account_id);
+        CREATE INDEX IF NOT EXISTS ix_transactions_category ON transactions(category_id);
+        CREATE INDEX IF NOT EXISTS ix_transactions_bucket ON transactions(bucket_id);
+        CREATE INDEX IF NOT EXISTS ix_transactions_date_created ON transactions(date DESC, created_at DESC);
+        PRAGMA foreign_keys = ON;
+      `);
+    }
+  } catch (e) {
+    console.warn('Transactions NULL account_id schema upgrade error:', e);
+  }
+}
 
 export function execQuery(sql, params = []) {
   if (!db) return [];

@@ -18,7 +18,8 @@ import {
   restoreBackupSnapshot,
   getBackupSnapshotBytes,
   exportBackupBytes,
-  checkDatabaseIntegrity
+  checkDatabaseIntegrity,
+  ensureTransactionsAccountIdNullable
 } from './db/local_sqlite.js';
 
 import { Capacitor } from '@capacitor/core';
@@ -111,7 +112,7 @@ export const api = {
     let sql = `
       SELECT 
         t.id, t.amount, t.transaction_type, t.adjustment_direction, t.description, t.date,
-        t.account_id, t.bucket_id, t.category_id, t.created_at, t.updated_at,
+        t.account_id, t.bucket_id, t.category_id, t.created_at, t.updated_at, t.include_in_chart,
         a.name as account_name,
         c.name as category_name, c.color as category_color,
         b.name as bucket_name, b.icon as bucket_icon, b.color as bucket_color
@@ -185,6 +186,7 @@ export const api = {
       category_id: r.category_id,
       created_at: r.created_at,
       updated_at: r.updated_at,
+      include_in_chart: r.include_in_chart ?? 0,
       account: r.account_name ? { id: r.account_id, name: r.account_name } : null,
       category: r.category_name ? { id: r.category_id, name: r.category_id, color: r.category_color } : null,
       bucket: r.bucket_name ? { id: r.bucket_id, name: r.bucket_name, icon: r.bucket_icon, color: r.bucket_color } : null
@@ -200,16 +202,19 @@ export const api = {
     const categoryTotalsMap = {};
 
     txs.forEach(t => {
-      // Internal account transfers must NEVER be included in income or expense totals
-      if (t.transaction_type === 'transfer') return;
+      // Internal account transfers & Unallocated Funds transactions must NEVER be included in income or expense totals
+      if (t.transaction_type === 'transfer' || t.account_id === 'acc_unallocated_funds') return;
+
+      const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments' || t.category?.name === 'Adjustments';
+      if (isAdjustment && Number(t.include_in_chart) !== 1) return;
 
       const amt = Number(t.amount) || 0;
-      if (t.transaction_type === 'income') {
+      if (t.transaction_type === 'income' || (isAdjustment && t.adjustment_direction === 'add')) {
         totalIncome += amt;
-      } else if (t.transaction_type === 'expense') {
+      } else if (t.transaction_type === 'expense' || (isAdjustment && t.adjustment_direction === 'subtract')) {
         totalExpense += amt;
-        const catName = t.category?.name || 'Uncategorized';
-        const catColor = t.category?.color || '#64748b';
+        const catName = t.category?.name || (isAdjustment ? 'Adjustments' : 'Uncategorized');
+        const catColor = t.category?.color || (isAdjustment ? '#a855f7' : '#64748b');
         if (!categoryTotalsMap[catName]) {
           categoryTotalsMap[catName] = { name: catName, color: catColor, total: 0 };
         }
@@ -238,12 +243,12 @@ export const api = {
     if ((type === 'adjustment' || type === 'transfer') && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.date || '')) throw new Error('A valid transaction date is required.');
     
-    const accountId = payload.account_id || 'acc_unassigned_pool';
+    const accountId = payload.account_id || null;
     const target = payload.adjustment_target || 'both';
 
     return runInTransaction(async () => {
     // Update Account Balance (if account_id is valid and NOT bucket_only)
-    if (accountId && accountId !== 'acc_unassigned_pool' && target !== 'bucket_only') {
+    if (accountId && target !== 'bucket_only') {
       const accRows = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId]);
       if (accRows.length) {
         const currentAccBalance = Number(accRows[0].balance) || 0;
@@ -265,10 +270,14 @@ export const api = {
     }
 
     // Insert Transaction Record
+    const categoryId = accountId === 'acc_unallocated_funds' ? null : (payload.category_id || null);
+    const bucketId = accountId === 'acc_unallocated_funds' ? null : (payload.bucket_id || null);
+    const includeInChart = payload.include_in_chart ? 1 : 0;
+
     execRun(
-      `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, amount, type, type === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, accountId, payload.bucket_id || null, payload.category_id || null, now, now], false
+      `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at, include_in_chart)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, amount, type, type === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, accountId, bucketId, categoryId, now, now, includeInChart], false
     );
 
     const created = await this.getTransactions({ limit: 1 });
@@ -286,7 +295,7 @@ export const api = {
     if (!['income', 'expense', 'adjustment'].includes(payload.transaction_type)) throw new Error('Invalid transaction type.');
     if (payload.transaction_type === 'adjustment' && !['add', 'subtract'].includes(payload.adjustment_direction)) throw new Error('Choose whether the adjustment adds or subtracts money.');
     
-    const accountId = payload.account_id || 'acc_unassigned_pool';
+    const accountId = payload.account_id || null;
     const target = payload.adjustment_target || 'both';
 
     return runInTransaction(async () => {
@@ -296,7 +305,7 @@ export const api = {
     const oldType = oldTx.transaction_type;
     const oldTarget = oldTx.adjustment_target || 'both';
 
-    if (oldTx.account_id && oldTx.account_id !== 'acc_unassigned_pool' && oldTarget !== 'bucket_only') {
+    if (oldTx.account_id && oldTarget !== 'bucket_only') {
       const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
       if (oldAccRows.length) {
         const bal = Number(oldAccRows[0].balance);
@@ -318,7 +327,7 @@ export const api = {
     const now = new Date().toISOString();
     const newType = payload.transaction_type;
 
-    if (accountId && accountId !== 'acc_unassigned_pool' && target !== 'bucket_only') {
+    if (accountId && target !== 'bucket_only') {
       const newAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId]);
       if (newAccRows.length) {
         const bal = Number(newAccRows[0].balance);
@@ -336,11 +345,13 @@ export const api = {
       }
     }
 
+    const includeInChart = payload.include_in_chart ? 1 : 0;
+
     execRun(
       `UPDATE transactions 
-       SET amount = ?, transaction_type = ?, adjustment_direction = ?, description = ?, date = ?, account_id = ?, bucket_id = ?, category_id = ?, updated_at = ?
+       SET amount = ?, transaction_type = ?, adjustment_direction = ?, description = ?, date = ?, account_id = ?, bucket_id = ?, category_id = ?, updated_at = ?, include_in_chart = ?
        WHERE id = ?`,
-      [newAmount, newType, newType === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, accountId, payload.bucket_id || null, payload.category_id || null, now, id], false
+      [newAmount, newType, newType === 'adjustment' ? payload.adjustment_direction : null, payload.description || null, payload.date, accountId, payload.bucket_id || null, payload.category_id || null, now, includeInChart, id], false
     );
 
     return { id, ...payload };
@@ -408,8 +419,8 @@ export const api = {
     await ensureDB();
     const now = new Date().toISOString();
     execRun(
-      'UPDATE accounts SET name = ?, type = ?, updated_at = ? WHERE id = ?',
-      [payload.name.trim(), payload.type, now, id]
+      'UPDATE accounts SET name = ?, type = ?, balance = ?, updated_at = ? WHERE id = ?',
+      [payload.name.trim(), payload.type || 'Checking', payload.balance || 0.0, now, id]
     );
     const rows = execQuery('SELECT * FROM accounts WHERE id = ?', [id]);
     return rows[0];
@@ -417,10 +428,88 @@ export const api = {
 
   async deleteAccount(id) {
     await ensureDB();
-    const usage = execQuery('SELECT COUNT(*) count FROM transactions WHERE account_id = ?', [id])[0]?.count || 0;
-    if (usage > 0) throw new Error(`This account is used by ${usage} transaction(s) and cannot be deleted. Rename it or keep it for historical accuracy.`);
-    execRun('DELETE FROM accounts WHERE id = ?', [id]);
-    return { status: "deleted" };
+    ensureTransactionsAccountIdNullable();
+
+    return runInTransaction(async () => {
+      execRun('UPDATE transactions SET account_id = NULL WHERE account_id = ? OR account_id = "acc_unassigned_pool"', [id], false);
+      execRun('UPDATE debts SET account_id = NULL WHERE account_id = ? OR account_id = "acc_unassigned_pool"', [id], false);
+      execRun('UPDATE allocation_preset_rules SET account_id = NULL WHERE account_id = ? OR account_id = "acc_unassigned_pool"', [id], false);
+      execRun('DELETE FROM accounts WHERE id = ? OR id = "acc_unassigned_pool" OR type = "Unassigned" OR name LIKE "%Unassigned%"', [id], false);
+      return { status: 'deleted' };
+    });
+  },
+
+  async adjustAccountBalance(payload) {
+    await ensureDB();
+    const { account_id, real_balance, target_bucket_id, include_in_chart } = payload;
+    const targetReal = Math.round(Number(real_balance) * 100) / 100;
+    if (!Number.isFinite(targetReal)) throw new Error('Valid target balance is required.');
+    
+    const accRows = execQuery('SELECT * FROM accounts WHERE id = ?', [account_id]);
+    if (!accRows.length) throw new Error('Account not found.');
+    const acc = accRows[0];
+    const currentReal = Number(acc.balance) || 0;
+    const diff = targetReal - currentReal;
+
+    if (Math.abs(diff) < 0.005) throw new Error('Account balance already matches current value.');
+
+    const now = new Date().toISOString();
+    const today = now.slice(0, 10);
+    const direction = diff > 0 ? 'add' : 'subtract';
+    const absDiff = Math.round(Math.abs(diff) * 100) / 100;
+    const desc = `Balance Adjustment for ${acc.name} (${diff > 0 ? '+' : ''}₹${absDiff.toFixed(2)})`;
+    const includeInChart = include_in_chart ? 1 : 0;
+
+    return runInTransaction(async () => {
+      // 1. Update Account balance
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [targetReal, now, account_id], false);
+
+      // 2. Update Bucket balance if a target bucket was specified
+      if (target_bucket_id) {
+        const bRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [target_bucket_id]);
+        if (bRows.length) {
+          const currentBAlloc = Number(bRows[0].allocated_balance) || 0;
+          const newBAlloc = Math.round((currentBAlloc + diff) * 100) / 100;
+          execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [newBAlloc, now, target_bucket_id], false);
+        }
+      }
+
+      // 3. Create Transaction Record
+      const id = generateUUID();
+      execRun(
+        `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at, include_in_chart)
+         VALUES (?, ?, 'adjustment', ?, ?, ?, ?, ?, NULL, ?, ?, ?)`,
+        [id, absDiff, direction, desc, today, account_id, target_bucket_id || null, now, now, includeInChart],
+        false
+      );
+
+      return { status: 'adjusted', difference: diff, new_balance: targetReal };
+    });
+  },
+
+  async getAdjustmentAuditLogs() {
+    await ensureDB();
+    return execQuery(`
+      SELECT 
+        t.id, t.amount, t.transaction_type, t.adjustment_direction, t.description, t.date,
+        t.account_id, t.bucket_id, t.category_id, t.created_at,
+        COALESCE(a.name, CASE WHEN t.account_id = 'acc_unallocated_funds' THEN 'Unallocated Funds' ELSE 'General' END) as account_name,
+        c.name as category_name,
+        b.name as bucket_name
+      FROM transactions t
+      LEFT JOIN accounts a ON t.account_id = a.id
+      LEFT JOIN categories c ON t.category_id = c.id
+      LEFT JOIN savings_buckets b ON t.bucket_id = b.id
+      WHERE t.transaction_type = 'adjustment' 
+         OR t.account_id = 'acc_unallocated_funds' 
+         OR t.category_id = 'cat_adjustments' 
+         OR t.category_id IS NULL
+      ORDER BY t.date DESC, t.created_at DESC
+    `);
+  },
+
+  async getUnassignedAuditLogs() {
+    return this.getAdjustmentAuditLogs();
   },
 
   // ----------------------------------------------------
@@ -670,104 +759,84 @@ export const api = {
     return { status: 'deleted' };
   },
 
-  async applyPreset(id, payload) {
+  async applyPreset(idOrPayload, options = {}) {
     await ensureDB();
-    const { total_amount, source_account_id, source_bucket_id, description } = payload;
+    let id, payload;
+    if (typeof idOrPayload === 'object' && idOrPayload !== null) {
+      id = idOrPayload.preset_id || idOrPayload.id;
+      payload = idOrPayload;
+    } else {
+      id = idOrPayload;
+      payload = options || {};
+    }
+
+    if (!id) throw new Error('Preset ID is required.');
     
     const preset = execQuery('SELECT * FROM allocation_presets WHERE id = ?', [id])[0];
     if (!preset) throw new Error('Preset not found.');
     
-    const actualSourceAccountId = (!source_bucket_id || source_bucket_id === '') ? 'acc_unassigned_pool' : source_account_id;
-    const sourceAcc = execQuery('SELECT * FROM accounts WHERE id = ?', [actualSourceAccountId])[0];
-    if (!sourceAcc) throw new Error('Source account not found.');
-
-    const mode = preset.mode || 'percentage';
     const rules = execQuery('SELECT * FROM allocation_preset_rules WHERE preset_id = ?', [id]);
     if (!rules.length) throw new Error('This preset has no rules configured.');
 
+    const mode = preset.mode || 'percentage';
+    const totalAmount = Number(payload.base_amount || payload.total_amount || 0);
+
     let total = 0;
     if (mode === 'percentage') {
-      total = Number(total_amount);
-      if (!total || total <= 0) throw new Error('Total amount must be positive.');
+      total = totalAmount;
+      if (!total || total <= 0) throw new Error('Deposit amount must be a positive number.');
     } else {
       total = rules.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
     }
 
-    if (sourceAcc.balance < total) {
-      const srcName = sourceAcc.id === 'acc_unassigned_pool' ? 'Unassigned Cash Pool' : sourceAcc.name;
-      throw new Error(`Allocation amount (₹${total.toFixed(2)}) exceeds ${srcName} balance (₹${sourceAcc.balance.toFixed(2)}).`);
-    }
-
-    // Check source bucket balance if drawing from a specific bucket
-    let sourceBucket = null;
-    if (source_bucket_id) {
-      sourceBucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [source_bucket_id])[0];
-      if (!sourceBucket) throw new Error('Source bucket not found.');
-      if (sourceBucket.allocated_balance < total) {
-        throw new Error(`Allocation amount (₹${total.toFixed(2)}) exceeds source bucket balance (₹${sourceBucket.allocated_balance.toFixed(2)}).`);
-      }
-    }
-
+    const actualSourceAccountId = payload.source_account_id || 'acc_unallocated_funds';
     const now = new Date().toISOString();
     const today = now.slice(0, 10);
-    const desc = description?.trim() || `Salary allocation: ${preset.name}`;
+    const desc = payload.description?.trim() || `Salary Allocation: ${preset.name}`;
 
     return runInTransaction(async () => {
       const distributions = [];
 
-      // Deduct from source bucket if drawing from a specific bucket
-      if (source_bucket_id) {
-        execRun('UPDATE savings_buckets SET allocated_balance = allocated_balance - ?, updated_at = ? WHERE id = ?',
-          [total, now, source_bucket_id], false);
-      }
-
       for (const rule of rules) {
-        if (!rule.account_id) throw new Error('Each rule must have an account destination.');
-        const share = mode === 'percentage' ? (total * rule.value / 100) : rule.value;
+        const share = mode === 'percentage' ? (total * Number(rule.value) / 100) : Number(rule.value);
         const rounded = Math.round(share * 100) / 100;
         if (rounded <= 0) continue;
 
-        // 1. Allocate to target bucket (if any)
-        if (rule.bucket_id) {
-          execRun('UPDATE savings_buckets SET allocated_balance = allocated_balance + ?, updated_at = ? WHERE id = ?',
-            [rounded, now, rule.bucket_id], false);
-          distributions.push({ bucket_id: rule.bucket_id, amount: rounded });
+        const targetBucketId = rule.bucket_id || null;
+        const targetAccountId = rule.account_id || null;
+
+        // 1. Allocate to target bucket
+        if (targetBucketId) {
+          const bRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [targetBucketId]);
+          if (bRows.length) {
+            execRun('UPDATE savings_buckets SET allocated_balance = allocated_balance + ?, updated_at = ? WHERE id = ?',
+              [rounded, now, targetBucketId], false);
+          }
         }
 
-        // Skip if source and destination are identical
-        if (rule.account_id === actualSourceAccountId && (rule.bucket_id || null) === (source_bucket_id || null)) {
-          continue;
+        // 2. If target account is specified, update target account balance
+        if (targetAccountId) {
+          execRun('UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE id = ?', [rounded, now, targetAccountId], false);
         }
 
-        // 2. Physical transfer logic
-        if (rule.account_id !== actualSourceAccountId) {
-          // Deduct from source account
-          execRun('UPDATE accounts SET balance = balance - ?, updated_at = ? WHERE id = ?', [rounded, now, actualSourceAccountId], false);
-          // Add to target account
-          execRun('UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE id = ?', [rounded, now, rule.account_id], false);
-        }
-
-        // 3. Log matching debit/credit ledger adjustments as transfer type
-        const outId = generateUUID();
-        const inId = generateUUID();
-        
-        // Deduct from source (allocated to source_bucket_id/unassigned)
+        // 3. Log transaction
+        const txId = generateUUID();
         execRun(
           `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-           VALUES (?, ?, 'transfer', 'subtract', ?, ?, ?, ?, ?, ?, ?)`,
-          [outId, rounded, `${desc} (split out)`, today, actualSourceAccountId, source_bucket_id || null, rule.category_id || null, now, now],
+           VALUES (?, ?, 'income', NULL, ?, ?, ?, ?, ?, ?, ?)`,
+          [txId, rounded, `${desc} → ${rule.bucket_id ? 'Bucket' : 'Unallocated'}`, today, targetAccountId || actualSourceAccountId, targetBucketId, rule.category_id || null, now, now],
           false
         );
-        // Add to target (allocated to target bucket/unassigned)
-        execRun(
-          `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-           VALUES (?, ?, 'transfer', 'add', ?, ?, ?, ?, ?, ?, ?)`,
-          [inId, rounded, `${desc} (split in)`, today, rule.account_id, rule.bucket_id || null, rule.category_id || null, now, now],
-          false
-        );
+
+        distributions.push({ bucket_id: targetBucketId, amount: rounded });
       }
 
-      return { status: 'applied', total, distributions };
+      if (actualSourceAccountId === 'acc_unallocated_funds') {
+        const totalDistributed = distributions.reduce((sum, d) => sum + d.amount, 0);
+        execRun('UPDATE accounts SET balance = balance - ?, updated_at = ? WHERE id = "acc_unallocated_funds"', [totalDistributed, now], false);
+      }
+
+      return { status: 'applied', preset_name: preset.name, distributions };
     });
   },
 
@@ -812,19 +881,44 @@ export const api = {
     });
   },
 
-  async allocateUnassigned(bucketId, amount) {
+  async allocateUnassigned(payload, amountArg) {
     await ensureDB();
-    const allocation = Number(amount);
+    const isObject = typeof payload === 'object' && payload !== null;
+    const bucketId = isObject ? payload.bucket_id : payload;
+    const allocation = Math.round(Number(isObject ? payload.amount : amountArg) * 100) / 100;
+    const categoryId = isObject ? (payload.category_id || null) : null;
+    const description = isObject ? payload.description : null;
+
     if (!Number.isFinite(allocation) || allocation <= 0) throw new Error('Allocation amount must be positive.');
     const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [bucketId])[0];
     if (!bucket) throw new Error('Savings bucket not found.');
-    const accountTotal = Number(execQuery('SELECT COALESCE(SUM(balance), 0) total FROM accounts')[0]?.total) || 0;
-    const bucketTotal = Number(execQuery('SELECT COALESCE(SUM(allocated_balance), 0) total FROM savings_buckets')[0]?.total) || 0;
-    const available = Math.round((accountTotal - bucketTotal) * 100) / 100;
-    if (allocation > available) throw new Error(`Only ₹${available.toFixed(2)} is currently unassigned.`);
+
+    const unallocRows = execQuery("SELECT * FROM accounts WHERE id = 'acc_unallocated_funds'");
+    const unallocBal = unallocRows.length ? Number(unallocRows[0].balance) || 0 : 0;
+    
+    const now = new Date().toISOString();
+    const today = now.slice(0, 10);
+    const desc = description?.trim() || `Reallocated to ${bucket.name}`;
+
     return runInTransaction(async () => {
-      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [Number(bucket.allocated_balance) + allocation, new Date().toISOString(), bucketId], false);
-      return { status: 'allocated', amount: allocation, bucket_id: bucketId };
+      // 1. Deduct from Unallocated Funds secret account
+      if (unallocRows.length) {
+        execRun("UPDATE accounts SET balance = balance - ?, updated_at = ? WHERE id = 'acc_unallocated_funds'", [allocation, now], false);
+      }
+
+      // 2. Add to target bucket allocated balance
+      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [Number(bucket.allocated_balance) + allocation, now, bucketId], false);
+
+      // 3. Log real transaction so it counts in analytics & pie charts under categoryId
+      const txId = generateUUID();
+      execRun(
+        `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at, include_in_chart)
+         VALUES (?, ?, 'income', NULL, ?, ?, 'acc_unallocated_funds', ?, ?, ?, ?, 1)`,
+        [txId, allocation, desc, today, bucketId, categoryId, now, now],
+        false
+      );
+
+      return { status: 'allocated', amount: allocation, bucket_id: bucketId, transaction_id: txId };
     });
   },
 
@@ -1092,7 +1186,7 @@ export const api = {
     // If setup_complete key is missing in app_metadata
     if (map['setup_complete'] === undefined) {
       const txCount = execQuery('SELECT COUNT(*) count FROM transactions')[0]?.count || 0;
-      const accCount = execQuery("SELECT COUNT(*) count FROM accounts WHERE id != 'acc_unassigned_pool'")[0]?.count || 0;
+      const accCount = execQuery('SELECT COUNT(*) count FROM accounts')[0]?.count || 0;
       const catCount = execQuery('SELECT COUNT(*) count FROM categories')[0]?.count || 0;
 
       // Existing vaults with data or user customization are marked as complete
@@ -1119,5 +1213,18 @@ export const api = {
       }
       return this.getOnboardingState();
     });
+  },
+
+  async getAppSetting(key, defaultValue = 'false') {
+    await ensureDB();
+    const rows = execQuery("SELECT value FROM app_metadata WHERE key = ?", [key]);
+    return rows.length ? rows[0].value : defaultValue;
+  },
+
+  async updateAppSetting(key, value) {
+    await ensureDB();
+    const valStr = String(value);
+    execRun("INSERT OR REPLACE INTO app_metadata (key, value) VALUES (?, ?)", [key, valStr], true);
+    return { key, value: valStr };
   }
 };

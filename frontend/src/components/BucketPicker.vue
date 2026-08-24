@@ -81,8 +81,8 @@
                   <span class="material-symbols-outlined text-xl text-[#FFD1B3]">savings</span>
                 </div>
                 <div>
-                  <p class="text-xs font-bold text-[#f1f0f5] truncate">Unassigned (Account Only)</p>
-                  <p class="text-[10px] text-[#9e9cae]">No bucket allocation</p>
+                  <p class="text-xs font-bold text-[#f1f0f5] truncate">Unallocated Funds</p>
+                  <p class="text-[10px] text-[#9e9cae]">Pool (No bucket allocation)</p>
                 </div>
               </div>
               <span v-if="modelValue === null || modelValue === ''" class="text-xs font-bold text-[#D4BFFF] shrink-0 ml-2">✓</span>

@@ -1,7 +1,7 @@
 <template>
   <Transition name="modal">
-    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 safe-area-modal-pt sm:pt-10 bg-black/75 backdrop-blur-md" @click.self="$emit('close')">
-      <div class="bg-[#0c0d14] border border-[#1f202e] rounded-2xl w-full max-w-xl p-5 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto safe-area-pb flex flex-col">
+    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-start justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:pt-10 safe-area-modal-pt bg-black/75 backdrop-blur-md overflow-y-auto" @click.self="$emit('close')">
+      <div class="bg-[#0c0d14] border border-[#1f202e] rounded-2xl w-full max-w-xl p-5 shadow-2xl space-y-5 max-h-[calc(100dvh-1rem)] overflow-y-auto safe-area-pb flex flex-col my-auto pb-48 sm:pb-6">
       
       <!-- Header -->
       <div class="flex justify-between items-center border-b border-[#1f202e] pb-3 shrink-0">
@@ -25,6 +25,7 @@
             type="text"
             placeholder="Vault Name (e.g. Freelance, Family, Business)"
             required
+            @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })"
             class="flex-grow px-3 py-2 bg-[#141520] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs placeholder-[#9e9cae] focus:outline-none transition min-h-[36px]"
           />
           <button 

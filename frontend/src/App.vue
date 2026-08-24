@@ -373,11 +373,11 @@ const handleDataRefresh = async () => {
 
 const handleAllocateUnassigned = async ({ bucketId, amount }) => {
   try {
-    await api.allocateUnassigned(bucketId, amount);
+    await api.transferBucket({ to_bucket_id: bucketId, amount });
     await refreshAll();
-    showSuccess('Unassigned money allocated');
+    showSuccess('Money deposited into bucket');
   } catch (err) {
-    alert(err.message || 'Failed to allocate unassigned money.');
+    alert(err.message || 'Failed to deposit money into bucket.');
   }
 };
 
@@ -435,6 +435,15 @@ import { App as CapApp } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 onMounted(() => {
+  if (typeof window !== 'undefined' && window.visualViewport) {
+    const handleVVResize = () => {
+      document.documentElement.style.setProperty('--vv-height', `${window.visualViewport.height}px`);
+    };
+    window.visualViewport.addEventListener('resize', handleVVResize);
+    window.visualViewport.addEventListener('scroll', handleVVResize);
+    handleVVResize();
+  }
+
   window.addEventListener('cashbuddy-storage-error', event => {
     error.value = `Your latest change could not be saved securely: ${event.detail}`;
   });
@@ -585,6 +594,7 @@ onMounted(() => {
           :categories="categories"
           :buckets="buckets"
           @add-transaction="openAddTransaction"
+          @refresh="refreshAll"
         />
 
         <TransactionList 

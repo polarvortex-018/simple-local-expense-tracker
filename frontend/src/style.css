@@ -43,6 +43,13 @@ html, body {
   background-color: #0c0d14;
 }
 
+/* Mobile Keyboard Resizing Container Adjustments */
+@media (max-width: 640px) {
+  .fixed.inset-0 {
+    max-height: var(--vv-height, 100dvh) !important;
+  }
+}
+
 body {
   font-family: 'Sora', 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #0c0d14;

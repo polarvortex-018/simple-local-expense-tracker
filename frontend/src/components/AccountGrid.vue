@@ -5,7 +5,7 @@
       v-for="account in filteredAccounts"
       :key="account.id"
       type="button"
-      @click="$emit('update:modelValue', account.id)"
+      @click="handleAccountClick(account)"
       class="flex items-center gap-2.5 p-3 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[50px]"
       :class="modelValue === account.id
         ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
@@ -33,10 +33,15 @@ const props = defineProps({
 });
 
 const filteredAccounts = computed(() => {
-  return props.accounts.filter(a => a.type !== 'Unassigned' && a.id !== 'acc_unassigned_pool');
+  return props.accounts || [];
 });
 
-defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'accountClick']);
+
+const handleAccountClick = (acc) => {
+  emit('update:modelValue', acc.id);
+  emit('accountClick', acc);
+};
 
 const getAccountSymbol = (type) => {
   const t = (type || '').toLowerCase();

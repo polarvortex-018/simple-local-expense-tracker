@@ -241,10 +241,13 @@
 
       <!-- Hairline Divided Accounts List -->
       <div v-else class="border-y border-[#1f202e] divide-y divide-[#1f202e]">
-        <div 
+        <button 
           v-for="acc in physicalAccounts" 
           :key="acc.id"
-          class="py-3 px-1 flex items-center justify-between gap-2 hover:bg-[#141520] transition"
+          type="button"
+          @click="openAdjustModal(acc)"
+          class="w-full text-left py-3 px-1 flex items-center justify-between gap-2 hover:bg-[#141520] transition cursor-pointer active:bg-[#141520]"
+          title="Click to adjust balance for this account"
         >
           <div class="overflow-hidden min-w-0 flex-1">
             <p class="text-xs font-semibold text-[#f1f0f5] truncate leading-tight">{{ acc.name }}</p>
@@ -252,12 +255,24 @@
               ₹{{ formatAmount(acc.balance) }}
             </p>
           </div>
-          <span class="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border border-[#1f202e] text-[#9e9cae] shrink-0">
-            {{ acc.account_type || 'ACCOUNT' }}
-          </span>
-        </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border border-[#1f202e] text-[#9e9cae]">
+              {{ acc.account_type || acc.type || 'ACCOUNT' }}
+            </span>
+            <span class="material-symbols-outlined text-sm text-[#D4BFFF]">tune</span>
+          </div>
+        </button>
       </div>
     </section>
+
+    <!-- Account Adjustment Modal -->
+    <AccountAdjustmentModal
+      :is-open="isAdjustModalOpen"
+      :account="selectedAccountForAdjust"
+      :buckets="buckets"
+      @close="isAdjustModalOpen = false"
+      @save="handleAdjustmentSaved"
+    />
   </div>
 </template>
 
@@ -265,6 +280,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 import BlackHoleCanvas from './BlackHoleCanvas.vue';
+import AccountAdjustmentModal from './AccountAdjustmentModal.vue';
 
 const props = defineProps({
   transactions: {
@@ -285,7 +301,19 @@ const props = defineProps({
   }
 });
 
-defineEmits(['add-transaction']);
+const emit = defineEmits(['add-transaction', 'refresh']);
+
+const isAdjustModalOpen = ref(false);
+const selectedAccountForAdjust = ref(null);
+
+const openAdjustModal = (acc) => {
+  selectedAccountForAdjust.value = acc;
+  isAdjustModalOpen.value = true;
+};
+
+const handleAdjustmentSaved = () => {
+  emit('refresh');
+};
 
 // Time-of-Day Sky Glow Tint & Black Hole Particle Color Palettes
 const timeOfDayGlow = computed(() => {
@@ -327,7 +355,7 @@ const blackHoleColors = computed(() => {
 
 // Metrics & Number Ticker Animations
 const physicalAccounts = computed(() => {
-  return props.accounts.filter(acc => acc.type !== 'Unassigned' && acc.id !== 'acc_unassigned_pool');
+  return props.accounts || [];
 });
 
 const currentMonthLabel = computed(() => {
@@ -342,6 +370,23 @@ const netWorth = computed(() => {
 const animatedNetWorth = ref(0);
 const animatedIncome = ref(0);
 const animatedExpenses = ref(0);
+
+const currentMonthTransactions = computed(() => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  return props.transactions.filter(t => {
+    if (!t.date) return false;
+    const parts = String(t.date).split('-');
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      return y === year && m === month;
+    }
+    const d = new Date(t.date);
+    return d.getFullYear() === year && d.getMonth() === month;
+  });
+});
 
 const animateNumberTicker = () => {
   const start = performance.now();
@@ -378,31 +423,25 @@ watch([netWorth, () => totalIncome.value, () => totalExpenses.value], () => {
   animateNumberTicker();
 });
 
-const currentMonthTransactions = computed(() => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  return props.transactions.filter(t => {
-    if (!t.date) return false;
-    if (t.account_id === 'acc_unassigned_pool') return false;
-    const d = new Date(t.date);
-    return d.getFullYear() === year && d.getMonth() === month;
-  });
-});
-
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   currentMonthTransactions.value.forEach(t => {
-    if (t.transaction_type !== 'expense') return;
-    const category = props.categories.find(c => c.id === t.category_id) || t.category;
-    const catName = category ? category.name : 'Uncategorized';
-    const catColor = category?.color || '#ef4444';
-    const catIcon = category?.icon || 'category';
-    const amt = Number(t.amount) || 0;
-    if (!map[catName]) {
-      map[catName] = { id: category?.id || null, name: catName, color: catColor, icon: catIcon, total: 0 };
+    if (t.account_id === 'acc_unallocated_funds') return;
+    const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments' || t.category?.name === 'Adjustments';
+    if (isAdjustment && Number(t.include_in_chart) !== 1) return;
+
+    if (t.transaction_type === 'expense' || (isAdjustment && t.adjustment_direction === 'subtract')) {
+      const category = props.categories.find(c => c.id === t.category_id) || t.category;
+      const bucket = props.buckets.find(b => b.id === t.bucket_id) || t.bucket;
+      const catName = category ? category.name : (bucket ? bucket.name : (isAdjustment ? 'Adjustments' : 'Uncategorized'));
+      const catColor = category?.color || bucket?.color || (isAdjustment ? '#a855f7' : '#ef4444');
+      const catIcon = category?.icon || bucket?.icon || (isAdjustment ? 'tune' : 'category');
+      const amt = Number(t.amount) || 0;
+      if (!map[catName]) {
+        map[catName] = { id: category?.id || bucket?.id || null, name: catName, color: catColor, icon: catIcon, total: 0 };
+      }
+      map[catName].total += amt;
     }
-    map[catName].total += amt;
   });
 
   return Object.values(map).sort((a, b) => b.total - a.total);
@@ -417,16 +456,22 @@ const totalFilteredCategoryExpense = totalExpenses;
 const filteredCategoryIncome = computed(() => {
   const map = {};
   currentMonthTransactions.value.forEach(t => {
-    if (t.transaction_type !== 'income') return;
-    const category = props.categories.find(c => c.id === t.category_id) || t.category;
-    const catName = category ? category.name : 'Uncategorized';
-    const catColor = category?.color || '#10b981';
-    const catIcon = category?.icon || 'category';
-    const amt = Number(t.amount) || 0;
-    if (!map[catName]) {
-      map[catName] = { id: category?.id || null, name: catName, color: catColor, icon: catIcon, total: 0 };
+    if (t.account_id === 'acc_unallocated_funds') return;
+    const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments' || t.category?.name === 'Adjustments';
+    if (isAdjustment && Number(t.include_in_chart) !== 1) return;
+
+    if (t.transaction_type === 'income' || (isAdjustment && t.adjustment_direction === 'add')) {
+      const category = props.categories.find(c => c.id === t.category_id) || t.category;
+      const bucket = props.buckets.find(b => b.id === t.bucket_id) || t.bucket;
+      const catName = category ? category.name : (bucket ? bucket.name : (isAdjustment ? 'Adjustments' : 'Uncategorized'));
+      const catColor = category?.color || bucket?.color || (isAdjustment ? '#a855f7' : '#10b981');
+      const catIcon = category?.icon || bucket?.icon || (isAdjustment ? 'tune' : 'category');
+      const amt = Number(t.amount) || 0;
+      if (!map[catName]) {
+        map[catName] = { id: category?.id || bucket?.id || null, name: catName, color: catColor, icon: catIcon, total: 0 };
+      }
+      map[catName].total += amt;
     }
-    map[catName].total += amt;
   });
 
   return Object.values(map).sort((a, b) => b.total - a.total);
@@ -437,7 +482,7 @@ const totalIncome = computed(() => {
 });
 
 const activeBuckets = computed(() => props.buckets.filter(bucket => {
-  if (bucket.is_archived) return false;
+  if (bucket.is_archived || bucket.id === 'bucket_unassigned') return false;
   return Number.isFinite(Number(bucket.allocated_balance));
 }));
 

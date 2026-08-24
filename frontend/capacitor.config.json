@@ -6,6 +6,11 @@
     "androidScheme": "https"
   },
   "plugins": {
+    "Keyboard": {
+      "resize": "body",
+      "style": "DARK",
+      "resizeOnFullScreen": true
+    },
     "StatusBar": {
       "style": "DARK",
       "backgroundColor": "#0f0f15"

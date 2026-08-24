@@ -41,12 +41,13 @@ CREATE TABLE IF NOT EXISTS transactions (
     adjustment_direction TEXT NULL,
     description TEXT NULL,
     date TEXT NOT NULL,
-    account_id TEXT NOT NULL,
+    account_id TEXT NULL,
     bucket_id TEXT NULL,
     category_id TEXT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,
+    include_in_chart INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL,
     FOREIGN KEY (bucket_id) REFERENCES savings_buckets (id) ON DELETE SET NULL,
     FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
 );
@@ -100,6 +101,7 @@ export const DEFAULT_CATEGORIES = [
   { name: 'Shopping', color: '#8b5cf6', icon: 'shopping_bag', is_quick_select: 1 },
   { name: 'Entertainment', color: '#ec4899', icon: 'movie', is_quick_select: 0 },
   { name: 'Transportation', color: '#06b6d4', icon: 'directions_car', is_quick_select: 0 },
+  { name: 'Adjustments', color: '#a855f7', icon: 'tune', is_quick_select: 0 },
   { name: 'General', color: '#64748b', icon: 'category', is_quick_select: 0 }
 ];
 

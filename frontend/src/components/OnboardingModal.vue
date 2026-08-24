@@ -3,8 +3,8 @@
     <!-- ============================================================== -->
     <!-- MODE 1: QUICK SETUP MODAL DIALOG                               -->
     <!-- ============================================================== -->
-    <div v-if="isOpen && !isSpotlightTour" class="fixed inset-0 z-[100] bg-[#0c0d14]/95 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div class="relative w-full max-w-xl bg-[#0f1019] border border-[#1f202e] rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh]">
+    <div v-if="isOpen" class="fixed inset-0 z-[100] bg-[#0c0d14]/95 backdrop-blur-xl flex items-start sm:items-center justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:p-4 overflow-y-auto">
+      <div class="relative w-full max-w-xl bg-[#0f1019] border border-[#1f202e] rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[calc(100dvh-1rem)]">
         
         <!-- TOP HEADER BAR -->
         <div class="px-5 py-4 border-b border-[#1f202e] flex items-center justify-between bg-[#141520]/80 shrink-0">
@@ -29,7 +29,7 @@
         </div>
 
         <!-- MAIN SCROLLABLE CONTENT BODY -->
-        <div class="p-5 sm:p-6 overflow-y-auto flex-grow space-y-5">
+        <div class="p-5 sm:p-6 overflow-y-auto flex-grow space-y-5 pb-48 sm:pb-6">
           
           <!-- STEP 1: ACCOUNTS -->
           <div v-if="setupStep === 1" class="space-y-4">
@@ -40,32 +40,48 @@
             </div>
 
             <!-- Suggested Accounts Selection -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="grid grid-cols-1 gap-2.5">
               <div
                 v-for="(acc, idx) in accountOptions"
                 :key="acc.name"
-                @click="toggleAccountOption(idx)"
-                class="p-3 rounded-2xl border transition cursor-pointer flex items-center justify-between"
-                :class="acc.selected ? 'bg-[#D4BFFF]/10 border-[#D4BFFF] text-[#f1f0f5]' : 'bg-[#141520] border-[#1f202e] text-[#9e9cae] hover:border-[#1f202e]/80'"
+                class="p-3 rounded-2xl border transition flex flex-col gap-2"
+                :class="acc.selected ? 'bg-[#D4BFFF]/10 border-[#D4BFFF] text-[#f1f0f5]' : 'bg-[#141520] border-[#1f202e] text-[#9e9cae]'"
               >
-                <div class="flex items-center gap-2.5">
-                  <div 
-                    class="w-8 h-8 rounded-xl flex items-center justify-center text-base shrink-0"
-                    :class="acc.selected ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#191924] text-[#9e9cae]'"
-                  >
-                    <span class="material-symbols-outlined text-base">{{ acc.icon }}</span>
+                <div @click="toggleAccountOption(idx)" class="flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-2.5">
+                    <div 
+                      class="w-8 h-8 rounded-xl flex items-center justify-center text-base shrink-0"
+                      :class="acc.selected ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#191924] text-[#9e9cae]'"
+                    >
+                      <span class="material-symbols-outlined text-base">{{ acc.icon }}</span>
+                    </div>
+                    <div>
+                      <h4 class="text-xs font-bold leading-tight" :class="acc.selected ? 'text-[#f1f0f5]' : 'text-[#9e9cae]'">{{ acc.name }}</h4>
+                      <p class="text-[10px] text-[#9e9cae]">{{ acc.type }}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 class="text-xs font-bold leading-tight" :class="acc.selected ? 'text-[#f1f0f5]' : 'text-[#9e9cae]'">{{ acc.name }}</h4>
-                    <p class="text-[10px] text-[#9e9cae]">{{ acc.type }}</p>
+
+                  <div 
+                    class="w-5 h-5 rounded-full border flex items-center justify-center text-xs shrink-0"
+                    :class="acc.selected ? 'border-[#D4BFFF] bg-[#D4BFFF] text-[#0f0f15] font-bold' : 'border-[#1f202e]'"
+                  >
+                    <span v-if="acc.selected">✓</span>
                   </div>
                 </div>
 
-                <div 
-                  class="w-5 h-5 rounded-full border flex items-center justify-center text-xs shrink-0"
-                  :class="acc.selected ? 'border-[#D4BFFF] bg-[#D4BFFF] text-[#0f0f15] font-bold' : 'border-[#1f202e]'"
-                >
-                  <span v-if="acc.selected">✓</span>
+                <!-- Seed Starting Balance Input when Selected -->
+                <div v-if="acc.selected" class="pt-2 border-t border-[#1f202e]/60 flex items-center justify-between gap-3" @click.stop>
+                  <label class="text-[10px] font-bold text-[#D4BFFF] uppercase tracking-wider">Starting Seed Balance:</label>
+                  <div class="flex items-center gap-1 bg-[#0f1019] border border-[#1f202e] rounded-xl px-2.5 py-1 w-36">
+                    <span class="text-xs font-bold text-[#9e9cae]">₹</span>
+                    <input
+                      v-model="acc.seedBalance"
+                      type="text"
+                      inputmode="decimal"
+                      placeholder="0.00"
+                      class="w-full text-xs font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -314,7 +330,7 @@
                 <span class="text-xs text-[#9e9cae]">→</span>
                 <div class="p-2 rounded-xl bg-[#0f1019] border border-[#1f202e] flex-1">
                   <span class="material-symbols-outlined text-sm text-[#D4BFFF]">account_balance_wallet</span>
-                  <p class="text-[10px] font-bold text-[#f1f0f5] mt-1">Unassigned</p>
+                  <p class="text-[10px] font-bold text-[#f1f0f5] mt-1">Bank Pool</p>
                 </div>
                 <span class="text-xs text-[#9e9cae]">→</span>
                 <div class="p-2 rounded-xl bg-[#0f1019] border border-[#1f202e] flex-1">
@@ -657,7 +673,8 @@ async function applyQuickSetup() {
     // 1. Accounts
     for (const acc of accountOptions.value.filter(a => a.selected)) {
       if (!existingAccounts.includes(acc.name.toLowerCase())) {
-        await api.createAccount({ name: acc.name, type: acc.type, balance: 0.0 });
+        const seed = parseFloat(String(acc.seedBalance || '0').replace(',', '.')) || 0.0;
+        await api.createAccount({ name: acc.name, type: acc.type, balance: seed });
       }
     }
     // 2. Income Categories
@@ -750,7 +767,7 @@ const SPOTLIGHT_STEPS = [
     openFormStep: 1,
     title: 'Logging a Transaction (Step 1: Bucket & Account)',
     icon: 'post_add',
-    description: 'First, select which Savings Bucket (or Unassigned Cash) the transaction belongs to, then pick the Storage Account (e.g. Bank Account, Cash) used for the money.'
+    description: 'First, select which Savings Bucket (or General Account) the transaction belongs to, then pick the Storage Account (e.g. Bank Account, Cash) used for the money.'
   },
   {
     target: 'transaction-form',

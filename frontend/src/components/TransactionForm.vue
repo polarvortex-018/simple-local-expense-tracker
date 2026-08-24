@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-start justify-center p-3 pt-[max(2.5rem,env(safe-area-inset-top))] sm:pt-10 safe-area-modal-pt bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
-    <div data-tour="transaction-form" class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[86vh] my-0 sm:my-auto">
+  <div class="fixed inset-0 z-50 flex items-start justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:pt-10 safe-area-modal-pt bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
+    <div data-tour="transaction-form" class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] my-auto">
       
       <!-- Header -->
       <div class="px-4 py-2.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
@@ -43,7 +43,7 @@
         spellcheck="false" 
         data-form-type="other" 
         data-lpignore="true" 
-        class="p-3 sm:p-4 space-y-2.5 overflow-y-auto flex-1 overscroll-contain"
+        class="p-3.5 sm:p-4 space-y-3 overflow-y-auto flex-1 overscroll-contain pb-48 sm:pb-6"
       >
         <!-- Error Alerts -->
         <div v-if="error" class="p-2.5 bg-rose-950/30 border border-rose-900/40 rounded-xl text-[#ffb4ab] text-xs font-semibold">
@@ -60,24 +60,6 @@
               <h4 class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">1. Select Savings Bucket</h4>
               
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                <!-- Unassigned Option -->
-                <button
-                  type="button"
-                  @click="selectBucket('')"
-                  class="flex items-center gap-2 p-2.5 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[46px]"
-                  :class="!form.bucket_id
-                    ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
-                    : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
-                >
-                  <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-sm leading-none text-[#FFD1B3]">savings</span>
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="text-xs font-bold text-[#f1f0f5] truncate">Unassigned</p>
-                    <p class="text-[10px] text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
-                  </div>
-                </button>
-
                 <!-- Active Buckets -->
                 <button
                   v-for="b in activeBuckets"
@@ -100,25 +82,25 @@
               </div>
             </div>
 
-            <!-- 2. From Account Section (2-Column Mobile Grid) -->
+            <!-- 2. Account Section -->
             <div ref="accountSectionRef" class="space-y-1.5 pt-1 border-t border-[#1f202e]/60">
-              <h4 class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">2. Select Account (Optional)</h4>
+              <h4 class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">2. Select Storage Account</h4>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                <!-- No Account / Unassigned Option -->
+                <!-- Unallocated Funds Secret Account Option -->
                 <button
                   type="button"
-                  @click="selectAccountAndAutoAdvance('acc_unassigned_pool')"
+                  @click="selectAccount('acc_unallocated_funds')"
                   class="flex items-center gap-2 p-2.5 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[46px]"
-                  :class="form.account_id === 'acc_unassigned_pool' || (!form.account_id && currentStep === 2)
+                  :class="form.account_id === 'acc_unallocated_funds'
                     ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
                     : 'bg-[#0f1019] border-[#1f202e] hover:bg-[#141520] hover:border-[#D4BFFF]/40'"
                 >
                   <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-sm leading-none text-[#9e9cae]">credit_card_off</span>
+                    <span class="material-symbols-outlined text-sm leading-none text-[#FFD1B3]">account_balance_wallet</span>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="text-xs font-bold text-[#f1f0f5] truncate">No Account</p>
-                    <p class="text-[10px] text-[#9e9cae] truncate mt-0.5">Unassigned</p>
+                    <p class="text-xs font-bold text-[#f1f0f5] truncate">Unallocated Funds</p>
+                    <p class="text-[10px] text-[#9e9cae] truncate mt-0.5">Pool (No category needed)</p>
                   </div>
                 </button>
 
@@ -127,7 +109,7 @@
                   v-for="acc in userAccounts" 
                   :key="acc.id"
                   type="button"
-                  @click="selectAccountAndAutoAdvance(acc.id)"
+                  @click="selectAccount(acc.id)"
                   class="flex items-center gap-2 p-2.5 rounded-xl border text-left transition cursor-pointer active:scale-[0.98] min-h-[46px]"
                   :class="form.account_id === acc.id
                     ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40'
@@ -158,8 +140,8 @@
               <button type="button" @click="goToStep1" class="text-[10px] text-[#D4BFFF] hover:underline font-semibold cursor-pointer shrink-0 ml-auto">Change</button>
             </div>
 
-            <!-- Transaction Type Switcher -->
-            <div class="grid grid-cols-3 gap-1 p-1 bg-[#0f1019] rounded-xl border border-[#1f202e]">
+            <!-- Transaction Type Switcher (Expense & Income) -->
+            <div class="grid grid-cols-2 gap-1 p-1 bg-[#0f1019] rounded-xl border border-[#1f202e]">
               <button 
                 type="button"
                 @click="form.transaction_type = 'expense'"
@@ -178,58 +160,10 @@
                 <span class="material-symbols-outlined text-sm">trending_up</span>
                 <span>Income</span>
               </button>
-              <button 
-                type="button"
-                @click="form.transaction_type = 'adjustment'"
-                class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
-                :class="form.transaction_type === 'adjustment' ? 'bg-[#D4BFFF] text-[#0f0f15] font-bold shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-              >
-                <span class="material-symbols-outlined text-sm">tune</span>
-                <span>Adjust</span>
-              </button>
             </div>
 
-            <!-- Adjustment Target & Direction logic (Reconcile Just Account, Just Bucket, or Both) -->
-            <div v-if="form.transaction_type === 'adjustment'" class="rounded-xl border border-amber-900/40 bg-[#0f1019] p-3 space-y-2">
-              <p class="text-[10px] text-amber-200 font-semibold">Reconciliation Target (Correct mistakes in tallying):</p>
-              
-              <!-- 3-Way Target Selector -->
-              <div class="grid grid-cols-3 gap-1 p-0.5 bg-[#141520] rounded-lg border border-[#1f202e] text-[10px] font-bold">
-                <button 
-                  type="button" 
-                  @click="form.adjustment_target = 'both'" 
-                  class="py-1 px-1 rounded transition cursor-pointer text-center" 
-                  :class="form.adjustment_target === 'both' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-                >
-                  ⚖️ Both
-                </button>
-                <button 
-                  type="button" 
-                  @click="form.adjustment_target = 'account_only'" 
-                  class="py-1 px-1 rounded transition cursor-pointer text-center" 
-                  :class="form.adjustment_target === 'account_only' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-                >
-                  🏦 Account Only
-                </button>
-                <button 
-                  type="button" 
-                  @click="form.adjustment_target = 'bucket_only'" 
-                  class="py-1 px-1 rounded transition cursor-pointer text-center" 
-                  :class="form.adjustment_target === 'bucket_only' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-                >
-                  🪣 Bucket Only
-                </button>
-              </div>
-
-              <!-- Direction (+ Add / - Subtract) -->
-              <div class="grid grid-cols-2 gap-2 pt-0.5">
-                <button type="button" @click="form.adjustment_direction = 'add'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'add' ? 'border-[#B3F5E1] bg-[#B3F5E1]/20 text-[#B3F5E1]' : 'border-[#1f202e] text-[#9e9cae]'">+ Add amount</button>
-                <button type="button" @click="form.adjustment_direction = 'subtract'" class="rounded-lg border py-1.5 text-xs font-semibold cursor-pointer" :class="form.adjustment_direction === 'subtract' ? 'border-[#FFD1B3] bg-[#FFD1B3]/20 text-[#FFD1B3]' : 'border-[#1f202e] text-[#9e9cae]'">− Subtract amount</button>
-              </div>
-            </div>
-
-            <!-- 1. CATEGORY SELECTION FIRST (3-Column Grid) -->
-            <div class="space-y-1.5">
+            <!-- 1. CATEGORY SELECTION FIRST (Hidden for Unallocated Funds) -->
+            <div v-if="form.account_id !== 'acc_unallocated_funds'" class="space-y-1.5">
               <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">SELECT CATEGORY *</label>
 
               <!-- 3-Column Spacious Quick Category Grid -->
@@ -362,6 +296,25 @@
                 class="w-full h-8 px-3 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition resize-none"
               ></textarea>
             </div>
+
+            <!-- Include on Pie Chart Toggle (For Adjustments) -->
+            <div v-if="form.transaction_type === 'adjustment'" class="p-3 bg-[#0f1019] border border-[#1f202e] rounded-xl flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xs font-bold text-[#f1f0f5]">Include in Pie Charts & Analytics?</p>
+                <p class="text-[10px] text-[#9e9cae]">If enabled, this adjustment adds to pie chart spending/income breakdown.</p>
+              </div>
+              <button
+                type="button"
+                @click="form.include_in_chart = !form.include_in_chart"
+                class="w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer p-0.5"
+                :class="form.include_in_chart ? 'bg-[#a855f7]' : 'bg-[#191924] border border-[#1f202e]'"
+              >
+                <span
+                  class="block w-5 h-5 rounded-full transition-transform"
+                  :class="form.include_in_chart ? 'translate-x-5 bg-white' : 'translate-x-0 bg-[#9e9cae]'"
+                ></span>
+              </button>
+            </div>
           </div>
         </Transition>
       </form>
@@ -441,7 +394,7 @@ watch(() => props.initialStep, (val) => {
 }, { immediate: true });
 
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
-const userAccounts = computed(() => props.accounts.filter(a => a.type !== 'Unassigned' && a.id !== 'acc_unassigned_pool'));
+const userAccounts = computed(() => props.accounts.filter(a => a.id !== 'acc_unallocated_funds'));
 const quickSelectCategories = computed(() => props.categories.filter(c => c.is_quick_select == 1));
 const displayedQuickCategories = computed(() => {
   const pinned = quickSelectCategories.value;
@@ -461,9 +414,6 @@ const goToStep1 = () => {
 
 const goToStep2 = () => {
   error.value = '';
-  if (!form.value.account_id) {
-    form.value.account_id = 'acc_unassigned_pool';
-  }
   slideDirection.value = 'next';
   currentStep.value = 2;
   focusAmountInput();
@@ -476,9 +426,11 @@ const selectBucket = (bId) => {
   });
 };
 
-const selectAccountAndAutoAdvance = (accId) => {
-  form.value.account_id = accId || 'acc_unassigned_pool';
-  goToStep2();
+const selectAccount = (accId) => {
+  form.value.account_id = accId || '';
+  if (accId === 'acc_unallocated_funds') {
+    form.value.bucket_id = '';
+  }
 };
 
 const selectCategoryAndFocusAmount = (catId) => {
@@ -517,6 +469,8 @@ const totalAllocated = computed(() => {
 });
 
 const unassignedAmount = computed(() => {
+  const unallocAcc = props.accounts.find(a => a.id === 'acc_unallocated_funds');
+  if (unallocAcc) return Number(unallocAcc.balance) || 0;
   return Math.round((netWorth.value - totalAllocated.value) * 100) / 100;
 });
 
@@ -530,7 +484,8 @@ const form = ref({
   notes: '',
   account_id: '',
   category_id: '',
-  bucket_id: props.defaultBucketId || ''
+  bucket_id: props.defaultBucketId || '',
+  include_in_chart: false
 });
 
 watch(() => form.value.bucket_id, (newVal) => {
@@ -542,11 +497,11 @@ watch(() => form.value.bucket_id, (newVal) => {
 // Helper labels
 const selectedBucketName = computed(() => {
   const b = props.buckets.find(b => b.id === form.value.bucket_id);
-  return b ? `${b.icon || '🪣'} ${b.name}` : 'Unassigned';
+  return b ? `${b.icon || '🪣'} ${b.name}` : 'General';
 });
 
 const selectedAccountName = computed(() => {
-  if (!form.value.account_id || form.value.account_id === 'acc_unassigned_pool') {
+  if (!form.value.account_id) {
     return 'No Account';
   }
   const acc = props.accounts.find(a => a.id === form.value.account_id);
@@ -570,9 +525,10 @@ onMounted(() => {
       adjustment_direction: props.transaction.adjustment_direction || 'add',
       adjustment_target: props.transaction.adjustment_target || 'both',
       notes: props.transaction.notes || '',
-      account_id: props.transaction.account_id || 'acc_unassigned_pool',
+      account_id: props.transaction.account_id || '',
       category_id: props.transaction.category_id,
-      bucket_id: props.transaction.bucket_id || ''
+      bucket_id: props.transaction.bucket_id || '',
+      include_in_chart: Number(props.transaction.include_in_chart) === 1
     };
     focusAmountInput();
   } else {
@@ -595,13 +551,13 @@ const handleSubmit = async () => {
   }
   
   // Validation checks
-  const accountId = form.value.account_id || 'acc_unassigned_pool';
+  const accountId = form.value.account_id || null;
   const normalizedAmount = String(form.value.amount).replace(',', '.');
   if (Number(normalizedAmount) <= 0 || !Number.isFinite(Number(normalizedAmount))) {
     error.value = 'Amount must be greater than zero.';
     return;
   }
-  if (form.value.bucket_id !== '' && !form.value.category_id) {
+  if (form.value.account_id !== 'acc_unallocated_funds' && !form.value.category_id) {
     error.value = 'Please select a category.';
     return;
   }
@@ -609,12 +565,16 @@ const handleSubmit = async () => {
   submitting.value = true;
   try {
     const selectedCat = props.categories.find(c => c.id === form.value.category_id);
+    const isUnallocated = form.value.account_id === 'acc_unallocated_funds';
+    const defaultTitle = isUnallocated ? 'Unallocated Funds Deposit' : (selectedCat ? selectedCat.name : 'Transaction');
     const finalDesc = form.value.description && form.value.description.trim() 
       ? form.value.description.trim() 
-      : (selectedCat ? selectedCat.name : 'Transaction');
+      : defaultTitle;
 
     const payload = {
       ...form.value,
+      category_id: isUnallocated ? null : (form.value.category_id || null),
+      bucket_id: isUnallocated ? null : (form.value.bucket_id || null),
       account_id: accountId,
       amount: Number(normalizedAmount),
       description: finalDesc,

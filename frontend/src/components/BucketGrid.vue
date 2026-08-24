@@ -14,14 +14,15 @@
         <span class="material-symbols-outlined text-base leading-none text-[#FFD1B3]">savings</span>
       </div>
       <div class="min-w-0 flex-1">
-        <p class="text-xs font-bold text-[#f1f0f5] truncate">Unassigned</p>
-        <p class="text-[10px] text-[#9e9cae] truncate mt-0.5">No bucket</p>
+        <p class="text-xs font-bold text-[#f1f0f5] truncate">Unallocated Funds</p>
+        <p v-if="unassignedAmount !== null && unassignedAmount !== undefined" class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+        <p v-else class="text-[10px] text-[#9e9cae] truncate mt-0.5">Pool</p>
       </div>
     </button>
 
     <!-- Bucket cards -->
     <button
-      v-for="bucket in buckets"
+      v-for="bucket in filteredBuckets"
       :key="bucket.id"
       type="button"
       @click="$emit('update:modelValue', bucket.id)"
@@ -42,15 +43,19 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 
-defineProps({
+const props = defineProps({
   buckets: { type: Array, required: true },
   modelValue: { type: String, default: null },
-  showUnassigned: { type: Boolean, default: false }
+  showUnassigned: { type: Boolean, default: false },
+  unassignedAmount: { type: Number, default: null }
 });
 
 defineEmits(['update:modelValue']);
+
+const filteredBuckets = computed(() => (props.buckets || []).filter(b => !b.is_archived));
 
 const formatAmount = (val) => {
   const num = Number(val);

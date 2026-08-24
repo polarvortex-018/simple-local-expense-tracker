@@ -126,6 +126,24 @@
           </div>
         </button>
 
+        <!-- 7. Balance Adjustments Log Tile -->
+        <button 
+          type="button"
+          @click="openAdjustmentAuditSheet"
+          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
+        >
+          <div class="flex items-center justify-between">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-lg">history_edu</span>
+            </div>
+            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">arrow_forward</span>
+          </div>
+          <div>
+            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight">Balance Adjustments Log</h3>
+            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">Adjustment history & logs</p>
+          </div>
+        </button>
+
       </div>
     </div>
 
@@ -255,9 +273,28 @@
                 <p class="text-[9px] font-bold uppercase tracking-wider text-[#D4BFFF]">Total allocated</p>
                 <p class="mt-0.5 text-sm font-bold text-[#f1f0f5] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
               </div>
-              <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-3">
-                <p class="text-[9px] font-bold uppercase tracking-wider text-[#FFD1B3]">Unassigned</p>
-                <p class="mt-0.5 text-sm font-bold text-[#FFD1B3] tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+              <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div>
+                  <p class="text-[9px] font-bold uppercase tracking-wider text-[#FFD1B3]">Unallocated Funds Pool</p>
+                  <p class="mt-0.5 text-sm font-bold text-[#FFD1B3] tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    @click="openAllocateModal()"
+                    class="px-2.5 py-1 bg-[#FFD1B3]/20 hover:bg-[#FFD1B3]/30 border border-[#FFD1B3]/40 text-[#FFD1B3] text-xs font-bold rounded-lg transition cursor-pointer"
+                  >
+                    Allocate
+                  </button>
+                  <button
+                    type="button"
+                    @click="showPresetsModal = true"
+                    class="px-2.5 py-1 bg-[#D4BFFF]/20 hover:bg-[#D4BFFF]/30 border border-[#D4BFFF]/40 text-[#D4BFFF] text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-xs">payments</span>
+                    <span>Salary Allocation</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -304,7 +341,7 @@
                     v-if="unassignedAmount > 0 && !bucket.is_archived"
                     @click="allocateToBucket(bucket)"
                     class="px-2 py-1.5 rounded-lg border border-amber-800/50 bg-amber-950/40 text-[9px] font-bold text-amber-300 cursor-pointer"
-                    title="Allocate unassigned money"
+                    title="Deposit funds into bucket"
                   >Allocate</button>
                   <button 
                     @click="openEditBucketModal(bucket)"
@@ -719,7 +756,7 @@
                   This app has been on my mind for the past 4-ish years, and I’ve been making versions of it for a very long time. But this is the first time that I’ve brought it to a phone. I am still actively working on making it better.
                 </p>
 
-                <!-- On-Device Local Data Storage Guarantee -->
+              <!-- On-Device Local Data Storage Guarantee -->
                 <div class="p-4 bg-[#0f0f15]/60 border border-[#29293a] rounded-xl space-y-2 text-[#9e9cae]">
                   <p class="font-bold text-[#dae2fd] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
                     <span>🔒</span> 100% Local On-Phone Storage Guarantee
@@ -735,6 +772,118 @@
             </div>
           </div>
 
+          <!-- 7. BALANCE ADJUSTMENTS & AUDIT LOG PAGE -->
+          <div v-if="activeSheet === 'adjustment_audit'" class="space-y-6">
+            <div>
+              <h3 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Balance Adjustments & Audit Log</h3>
+              <p class="text-xs text-[#9e9cae]">Complete audit trail of account balance adjustments and ledger records.</p>
+            </div>
+
+            <div v-if="unassignedAuditLogs.length > 0" class="border-y border-[#1f202e] divide-y divide-[#1f202e]">
+              <div 
+                v-for="log in unassignedAuditLogs" 
+                :key="log.id"
+                class="py-3 px-1.5 hover:bg-[#141520] transition flex items-center justify-between gap-3 text-xs"
+              >
+                <div class="min-w-0 flex-1">
+                  <p class="font-bold text-[#f1f0f5] truncate">{{ log.description || 'Account Adjustment' }}</p>
+                  <p class="text-[10px] text-[#9e9cae] mt-0.5">
+                    {{ log.date }} • Account: {{ log.account_name || 'General' }} • Bucket: {{ log.bucket_name || 'General' }}
+                  </p>
+                </div>
+                <span 
+                  class="font-bold tabular-nums text-xs shrink-0"
+                  :class="log.adjustment_direction === 'subtract' ? 'text-[#FFD1B3]' : 'text-[#B3F5E1]'"
+                >
+                  {{ log.adjustment_direction === 'subtract' ? '-' : '+' }}₹{{ formatAmount(log.amount) }}
+                </span>
+              </div>
+            </div>
+            <div v-else class="text-center py-8 border-y border-[#1f202e] text-xs text-[#9e9cae]">
+              No balance adjustment logs recorded yet.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Allocate from Unallocated Funds Modal -->
+    <Transition name="modal">
+      <div v-if="showAllocateModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 pt-[max(1.5rem,env(safe-area-inset-top))] sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm overflow-y-auto" @click.self="showAllocateModal = false">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[88vh] my-auto">
+          <!-- Header -->
+          <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
+            <div>
+              <h3 class="text-base font-bold text-[#f1f0f5]">Allocate Unallocated Funds</h3>
+              <p class="text-[10px] text-[#FFD1B3] mt-0.5 font-bold">Available Pool: ₹{{ formatAmount(unassignedAmount) }}</p>
+            </div>
+            <button @click="showAllocateModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
+          </div>
+
+          <form @submit.prevent="submitAllocateFromUnallocated" class="flex flex-col flex-1 min-h-0">
+            <div class="overflow-y-auto p-5 space-y-4 flex-1 pb-14 sm:pb-5">
+              <div class="p-3 bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 rounded-xl text-xs text-[#FFD1B3]">
+                <p>Reallocating from <strong>Unallocated Funds</strong> creates a real transaction for the chosen target bucket & category, so it instantly reflects in your pie charts & analytics!</p>
+              </div>
+
+              <!-- Target Bucket Selection -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-[#ccc3d8]">To Bucket *</label>
+                <BucketGrid :buckets="activeBuckets" v-model="allocateForm.bucket_id" :show-unassigned="false" />
+              </div>
+
+              <!-- Category Selection -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-[#ccc3d8]">Category *</label>
+                <CategoryPicker :categories="categories" v-model="allocateForm.category_id" title="Select Target Category" placeholder="Choose Category" />
+              </div>
+
+              <!-- Amount Input -->
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Allocate (₹) *</label>
+                <input 
+                  v-model="allocateForm.amount"
+                  type="text"
+                  inputmode="decimal"
+                  pattern="[0-9]*[.,]?[0-9]*"
+                  autocomplete="off"
+                  placeholder="0.00"
+                  required
+                  class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
+                />
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
+                <input 
+                  v-model="allocateForm.description"
+                  type="text"
+                  placeholder="e.g. Allocation from pool to Vacation"
+                  class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
+                />
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="border-t border-[#29293a] p-4 bg-[#14141d] shrink-0 flex gap-3">
+              <button 
+                type="button" 
+                @click="showAllocateModal = false"
+                class="flex-1 py-2.5 bg-[#1f1f2e] hover:bg-[#29293a] text-[#f1f0f5] text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                :disabled="submittingAllocate"
+                class="flex-1 py-2.5 bg-[#FFD1B3] hover:bg-[#ffbe94] text-[#0f0f15] text-xs font-bold rounded-xl transition cursor-pointer disabled:opacity-50"
+              >
+                {{ submittingAllocate ? 'Allocating...' : 'Allocate Funds' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </Transition>
@@ -742,8 +891,8 @@
     <!-- Sub-Modals (Bucket Transfer, Account Transfer, Presets, Category Form, Bucket Form) -->
     <!-- Bucket Transfer Modal -->
     <Transition name="modal">
-      <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showTransferModal = false">
-        <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+      <div v-if="showTransferModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 pt-[max(1.5rem,env(safe-area-inset-top))] sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm overflow-y-auto" @click.self="showTransferModal = false">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[88vh] my-auto">
           <!-- Header -->
           <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
             <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Allocation</h3>
@@ -751,7 +900,7 @@
           </div>
 
           <form @submit.prevent="submitBucketTransfer" class="flex flex-col flex-1 min-h-0">
-            <div class="overflow-y-auto p-5 space-y-4 flex-1">
+            <div class="overflow-y-auto p-5 space-y-4 flex-1 pb-14 sm:pb-5">
               <div class="p-3 bg-[#1a1030]/30 border border-[#D4BFFF]/15 rounded-xl text-xs text-[#ccc3d8]">
                 <p>This moves allocated funds from one bucket to another. Your physical <strong>bank account balances remain 100% unchanged</strong>.</p>
               </div>
@@ -761,7 +910,7 @@
               </div>
               <div class="space-y-1.5">
                 <label class="block text-xs font-semibold text-[#ccc3d8]">To Bucket *</label>
-                <BucketGrid :buckets="activeBuckets" v-model="transferForm.to_bucket_id" :show-unassigned="true" />
+                <BucketGrid :buckets="activeBuckets" v-model="transferForm.to_bucket_id" :show-unassigned="false" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move (₹) *</label>
@@ -773,6 +922,7 @@
                   autocomplete="off"
                   placeholder="0.00"
                   required
+                  @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })"
                   class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
                 />
               </div>
@@ -782,6 +932,7 @@
                   v-model="transferForm.description"
                   type="text"
                   placeholder="e.g. Reallocating trip funds to laptop"
+                  @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })"
                   class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition"
                 />
               </div>
@@ -799,8 +950,8 @@
 
     <!-- Account Transfer Modal -->
     <Transition name="modal">
-      <div v-if="showAccountTransferModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showAccountTransferModal = false">
-        <div class="bg-[#14141d] border border-[#29293a] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+      <div v-if="showAccountTransferModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 pt-[max(1.5rem,env(safe-area-inset-top))] sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm overflow-y-auto" @click.self="showAccountTransferModal = false">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[88vh] my-auto">
           <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
             <div>
               <h3 class="text-base font-bold text-[#f1f0f5]">Transfer Between Accounts</h3>
@@ -809,7 +960,7 @@
             <button @click="showAccountTransferModal = false" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
           </div>
           <form @submit.prevent="submitAccountTransfer" class="flex flex-col flex-1 min-h-0">
-            <div class="overflow-y-auto p-5 space-y-4 flex-1">
+            <div class="overflow-y-auto p-5 space-y-4 flex-1 pb-14 sm:pb-5">
               <div class="space-y-3">
                 <div>
                   <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">From Account *</label>
@@ -822,11 +973,11 @@
               </div>
               <div>
                 <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount (₹) *</label>
-                <input v-model="accountTransferForm.amount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="0.00" required class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+                <input v-model="accountTransferForm.amount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="0.00" required @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Description (Optional)</label>
-                <input v-model="accountTransferForm.description" type="text" placeholder="e.g. Moving savings to checking" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
+                <input v-model="accountTransferForm.description" type="text" placeholder="e.g. Moving savings to checking" @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
               </div>
             </div>
             <div class="flex justify-end gap-3 px-5 py-3.5 border-t border-[#29293a] bg-[#14141d] shrink-0">
@@ -842,20 +993,20 @@
 
     <!-- Salary Allocation Presets Modal -->
     <Transition name="modal">
-      <div v-if="showPresetsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="showPresetsModal = false; editingPreset = null">
-        <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
-          <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4">
+      <div v-if="showPresetsModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm overflow-y-auto" @click.self="showPresetsModal = false; editingPreset = null">
+        <div class="bg-[#14141d] border border-[#29293a] rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[calc(100dvh-1rem)] my-auto">
+          <div class="flex justify-between items-center border-b border-[#29293a] px-5 py-4 shrink-0">
             <div>
               <h3 class="text-base font-bold text-[#f1f0f5]">Salary Allocation Presets</h3>
               <p class="text-[11px] text-[#9e9cae] mt-0.5">Auto-split any amount across your buckets</p>
             </div>
             <button @click="showPresetsModal = false; editingPreset = null" class="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-[#9e9cae] hover:text-[#f1f0f5] text-lg cursor-pointer">✕</button>
           </div>
-          <div class="overflow-y-auto flex-1 p-5 space-y-4">
+          <div class="overflow-y-auto flex-1 p-5 space-y-4 pb-48 sm:pb-6">
             <div v-if="editingPreset" class="space-y-4">
               <div>
                 <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Preset Name *</label>
-                <input v-model="editingPreset.name" type="text" placeholder="e.g. Monthly Salary Split" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition font-bold" />
+                <input v-model="editingPreset.name" type="text" placeholder="e.g. Monthly Salary Split" @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition font-bold" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-[#ccc3d8] mb-1.5">Preset Mode (Applies to all rules) *</label>
@@ -987,8 +1138,8 @@
             <div v-else-if="applyingPreset" class="space-y-4">
               <div class="bg-[#1a1a24] border border-[#29293a] rounded-xl p-3.5 flex justify-between items-center">
                 <div>
-                  <p class="text-[9px] uppercase tracking-wider text-[#9e9cae] font-bold">Unassigned Cash Pool</p>
-                  <p class="text-[10px] text-[#9e9cae] mt-0.5">Total cash in system not allocated to any bucket</p>
+                  <p class="text-[9px] uppercase tracking-wider text-[#9e9cae] font-bold">Unallocated Account Balance</p>
+                  <p class="text-[10px] text-[#9e9cae] mt-0.5">Total unallocated cash in bank accounts</p>
                 </div>
                 <p class="text-sm font-black text-[#B3F5E1]">
                   ₹{{ formatAmount(unassignedAmount) }}
@@ -1005,7 +1156,7 @@
               </div>
               <div class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
                 <span>Source Funds:</span>
-                <span class="font-bold text-[#f1f0f5]">Unassigned Pool (₹{{ formatAmount(unassignedAmount) }})</span>
+                <span class="font-bold text-[#f1f0f5]">Unallocated Pool (₹{{ formatAmount(unassignedAmount) }})</span>
               </div>
               <div v-if="applyingPreset.mode === 'percentage'" class="space-y-1.5">
                 <label class="block text-xs font-semibold text-[#ccc3d8]">Enter Total Salary Deposit Amount (₹) *</label>
@@ -1099,7 +1250,19 @@ import { api } from '../services/api';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
-const activeSheet = ref(null); // null, 'quick_actions', 'buckets', 'accounts', 'categories', 'backup', 'faq'
+const activeSheet = ref(null); // null, 'quick_actions', 'buckets', 'accounts', 'categories', 'backup', 'faq', 'unassigned_audit'
+const unassignedAuditLogs = ref([]);
+
+const openAdjustmentAuditSheet = async () => {
+  activeSheet.value = 'adjustment_audit';
+  try {
+    unassignedAuditLogs.value = await api.getAdjustmentAuditLogs();
+  } catch (err) {
+    console.error('Failed to load adjustment audit logs:', err);
+  }
+};
+
+const openUnassignedAuditSheet = openAdjustmentAuditSheet;
 
 const getSheetIcon = (sheet) => {
   switch (sheet) {
@@ -1109,6 +1272,8 @@ const getSheetIcon = (sheet) => {
     case 'categories': return 'category';
     case 'backup': return 'database';
     case 'faq': return 'help_outline';
+    case 'adjustment_audit':
+    case 'unassigned_audit': return 'history_edu';
     default: return 'widgets';
   }
 };
@@ -1121,6 +1286,8 @@ const getSheetTitle = (sheet) => {
     case 'categories': return 'Manage Categories';
     case 'backup': return 'Backup & Export';
     case 'faq': return 'FAQ & About';
+    case 'adjustment_audit':
+    case 'unassigned_audit': return 'Balance Adjustments & Audit Log';
     default: return 'More';
   }
 };
@@ -1136,12 +1303,6 @@ onMounted(() => {
   }
 });
 
-onUnmounted(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('online', updateOnlineStatus);
-    window.removeEventListener('offline', updateOnlineStatus);
-  }
-});
 
 const props = defineProps({
   accounts: { type: Array, default: () => [] },
@@ -1252,7 +1413,10 @@ const displayedBuckets = computed(() => {
 });
 
 const totalAllocated = computed(() => {
-  return (props.buckets || []).reduce((sum, b) => sum + (Number(b.allocated_balance) || 0), 0);
+  return (props.buckets || []).reduce((sum, b) => {
+    if (b.is_archived) return sum;
+    return sum + (Number(b.allocated_balance) || 0);
+  }, 0);
 });
 
 const totalAccountBalance = computed(() => {
@@ -1260,8 +1424,61 @@ const totalAccountBalance = computed(() => {
 });
 
 const unassignedAmount = computed(() => {
+  const unallocAcc = (props.accounts || []).find(a => a.id === 'acc_unallocated_funds');
+  if (unallocAcc) return Number(unallocAcc.balance) || 0;
   return Math.max(0, totalAccountBalance.value - totalAllocated.value);
 });
+
+const showAllocateModal = ref(false);
+const submittingAllocate = ref(false);
+const allocateForm = ref({
+  bucket_id: '',
+  category_id: '',
+  amount: '',
+  description: ''
+});
+
+const openAllocateModal = (targetBucketId = null) => {
+  allocateForm.value = {
+    bucket_id: targetBucketId || activeBuckets.value[0]?.id || '',
+    category_id: props.categories[0]?.id || '',
+    amount: '',
+    description: ''
+  };
+  showAllocateModal.value = true;
+};
+
+const submitAllocateFromUnallocated = async () => {
+  const amt = Math.round(Number(String(allocateForm.value.amount).replace(',', '.')) * 100) / 100;
+  if (!amt || amt <= 0) {
+    alert('Please enter a valid allocation amount.');
+    return;
+  }
+  if (!allocateForm.value.bucket_id) {
+    alert('Please select a target bucket.');
+    return;
+  }
+  if (amt > unassignedAmount.value) {
+    alert(`Allocation exceeds available unallocated funds (₹${unassignedAmount.value.toFixed(2)} available).`);
+    return;
+  }
+
+  submittingAllocate.value = true;
+  try {
+    await api.allocateUnassigned({
+      bucket_id: allocateForm.value.bucket_id,
+      category_id: allocateForm.value.category_id || null,
+      amount: amt,
+      description: allocateForm.value.description
+    });
+    showAllocateModal.value = false;
+    emit('data-refresh');
+  } catch (err) {
+    alert(err.message || 'Failed to allocate funds.');
+  } finally {
+    submittingAllocate.value = false;
+  }
+};
 
 const openCreateBucketModal = () => {
   activeEditingBucket.value = null;
@@ -1293,7 +1510,7 @@ const confirmDeleteBucket = (bucket) => {
 };
 
 const allocateToBucket = (bucket) => {
-  emit('allocate-unassigned', bucket.id);
+  openAllocateModal(bucket?.id);
 };
 
 // Quick Actions & Transfer Modals
@@ -1357,7 +1574,7 @@ const loadPresets = async () => {
 };
 
 const getBucketName = (id) => {
-  if (id === '__UNASSIGNED__' || !id) return 'Unassigned Pool';
+  if (!id) return 'General / No Bucket';
   return (props.buckets || []).find(b => b.id === id)?.name || 'Unknown Bucket';
 };
 const getAccountName = (id) => (props.accounts || []).find(a => a.id === id)?.name || 'Unknown Account';
@@ -1469,10 +1686,10 @@ const moveCategoryPriority = (idx, direction) => {
   emit('reorder-categories', ids);
 };
 
-// Data Backup & Export Controls (Original System)
 const exportUrl = computed(() => api.exportDatabaseUrl());
 const backupsList = ref([]);
 const creatingBackup = ref(false);
+
 
 const loadBackupsList = async () => {
   try {
@@ -1484,6 +1701,7 @@ const loadBackupsList = async () => {
 
 onMounted(() => {
   loadBackupsList();
+  loadSettings();
 });
 
 watch(showPresetsModal, (val) => {

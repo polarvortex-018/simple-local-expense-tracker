@@ -1487,7 +1487,6 @@ const parseYearMonth = (dateStr) => {
 // Transaction Filtering Logic
 const isMatchingTransaction = (t) => {
   if (!t || !t.date) return false;
-  if (t.account_id === 'acc_unassigned_pool') return false;
 
   // 1. Time Horizon Filter
   let dateMatch = true;
@@ -1634,13 +1633,19 @@ const formatDateHeader = (dateStr) => {
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   allPeriodTransactions.value.forEach(t => {
-    if (t.transaction_type === 'expense') {
-      const catName = getCategoryName(t.category_id);
-      const catColor = getCategoryColor(t.category_id);
-      const catIcon = getCategoryIcon(t.category_id);
+    if (t.account_id === 'acc_unallocated_funds') return;
+    const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments';
+    if (isAdjustment && Number(t.include_in_chart) !== 1) return;
+
+    if (t.transaction_type === 'expense' || (isAdjustment && t.adjustment_direction === 'subtract')) {
+      const catId = t.category_id || 'cat_adjustments';
+      const bName = t.bucket_id ? getBucketName(t.bucket_id) : null;
+      const catName = getCategoryName(catId) || bName || (isAdjustment ? 'Adjustments' : 'Uncategorized');
+      const catColor = getCategoryColor(catId) || (isAdjustment ? '#a855f7' : '#ef4444');
+      const catIcon = getCategoryIcon(catId) || (isAdjustment ? 'tune' : 'category');
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
-        map[catName] = { id: t.category_id, name: catName, color: catColor, icon: catIcon, total: 0 };
+        map[catName] = { id: catId, name: catName, color: catColor, icon: catIcon, total: 0 };
       }
       map[catName].total += amt;
     }
@@ -1655,13 +1660,19 @@ const totalFilteredCategoryExpense = computed(() => {
 const filteredCategoryIncome = computed(() => {
   const map = {};
   allPeriodTransactions.value.forEach(t => {
-    if (t.transaction_type === 'income') {
-      const catName = getCategoryName(t.category_id);
-      const catColor = getCategoryColor(t.category_id);
-      const catIcon = getCategoryIcon(t.category_id);
+    if (t.account_id === 'acc_unallocated_funds') return;
+    const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments';
+    if (isAdjustment && Number(t.include_in_chart) !== 1) return;
+
+    if (t.transaction_type === 'income' || (isAdjustment && t.adjustment_direction === 'add')) {
+      const catId = t.category_id || 'cat_adjustments';
+      const bName = t.bucket_id ? getBucketName(t.bucket_id) : null;
+      const catName = getCategoryName(catId) || bName || (isAdjustment ? 'Adjustments' : 'Uncategorized');
+      const catColor = getCategoryColor(catId) || (isAdjustment ? '#a855f7' : '#10b981');
+      const catIcon = getCategoryIcon(catId) || (isAdjustment ? 'tune' : 'category');
       const amt = Number(t.amount) || 0;
       if (!map[catName]) {
-        map[catName] = { id: t.category_id, name: catName, color: catColor, icon: catIcon, total: 0 };
+        map[catName] = { id: catId, name: catName, color: catColor, icon: catIcon, total: 0 };
       }
       map[catName].total += amt;
     }

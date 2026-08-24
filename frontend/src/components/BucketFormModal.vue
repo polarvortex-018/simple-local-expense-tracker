@@ -4,10 +4,10 @@
     <Transition name="fade-slide">
       <div 
         v-if="isOpen" 
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md pb-16 sm:pb-0"
+        class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto"
         @click.self="$emit('close')"
       >
-        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[78vh] sm:max-h-[85vh] my-0 sm:my-auto">
+        <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] my-auto">
           
           <!-- Header -->
           <div class="flex justify-between items-center px-4 py-3.5 border-b border-[#1f202e] bg-[#0c0d14] shrink-0">
@@ -26,7 +26,7 @@
           <!-- Form Wrapper -->
           <form @submit.prevent="handleSubmit" class="flex flex-col flex-1 overflow-hidden">
             <!-- Body -->
-            <div class="p-4 space-y-4 overflow-y-auto flex-1">
+            <div class="p-4 space-y-4 overflow-y-auto flex-1 pb-48 sm:pb-6">
               <!-- Bucket Name Input -->
               <div class="space-y-1">
                 <label class="block text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">Bucket Name *</label>
@@ -35,6 +35,7 @@
                   type="text"
                   placeholder="e.g. Emergency Fund, New Laptop, Trip"
                   required
+                  @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })"
                   class="w-full px-3.5 py-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-bold focus:outline-none transition"
                 />
               </div>

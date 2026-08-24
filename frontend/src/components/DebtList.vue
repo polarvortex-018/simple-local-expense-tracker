@@ -145,8 +145,8 @@
 
     <!-- Add Debt Modal Sheet -->
     <Transition name="modal">
-      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md pb-16 sm:pb-0" @click.self="showAddModal = false">
-        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[85vh] sm:max-h-[90vh] flex flex-col my-0 sm:my-auto">
+      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto" @click.self="showAddModal = false">
+        <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[calc(100dvh-1rem)] flex flex-col my-auto">
           
           <!-- Header -->
           <div class="px-5 py-3.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
@@ -159,7 +159,7 @@
             </button>
           </div>
 
-          <form @submit.prevent="submitAddDebt" class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
+          <form @submit.prevent="submitAddDebt" class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain pb-48 sm:pb-6">
             <!-- Person Name -->
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Person Name *</label>
@@ -168,6 +168,7 @@
                 type="text"
                 placeholder="e.g. John Doe"
                 required
+                @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })"
                 class="w-full px-3 py-2 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae] focus:outline-none transition"
               />
             </div>
@@ -210,6 +211,7 @@
                   autocomplete="off"
                   placeholder="0.00"
                   required
+                  @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })"
                   class="w-full text-base sm:text-lg font-bold text-[#f1f0f5] tabular-nums bg-transparent focus:outline-none transition"
                 />
               </div>
@@ -234,6 +236,7 @@
                 v-model="newDebt.description"
                 type="text"
                 placeholder="e.g. Dinner split, Emergency cash"
+                @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })"
                 class="w-full px-3 py-2 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae] focus:outline-none transition"
               />
             </div>
