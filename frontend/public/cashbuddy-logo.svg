@@ -19,6 +19,6 @@
     <ellipse cx="225" cy="360" rx="72" ry="82" fill="#f5f0eb" />
 
     <!-- Currency Symbol (₹ in #5b21b6) -->
-    <text x="225" y="394" font-family="system-ui, -apple-system, sans-serif" font-size="105" font-weight="900" fill="#5b21b6" text-anchor="middle">₹</text>
+    <path d="M185,310 H265 V324 H202 V336 H265 V350 H218 C238,350 252,360 252,374 C252,388 238,396 210,396 L254,428 H232 L192,396 H185 V382 H208 C224,382 236,377 236,374 C236,370 224,364 202,364 H185 V310 Z" fill="#5b21b6" />
   </g>
 </svg>
