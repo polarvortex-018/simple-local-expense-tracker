@@ -7,6 +7,7 @@ import TransactionForm from './components/TransactionForm.vue';
 import DebtList from './components/DebtList.vue';
 import SettingsView from './components/SettingsView.vue';
 import VaultModal from './components/VaultModal.vue';
+import OnboardingModal from './components/OnboardingModal.vue';
 
 // State
 const currentTab = ref('dashboard'); // 'dashboard', 'transactions', 'debts', or 'settings'
@@ -17,6 +18,27 @@ const accounts = ref([]);
 const categories = ref([]);
 const buckets = ref([]);
 const debts = ref([]);
+
+// Onboarding State
+const showOnboardingModal = ref(false);
+const onboardingStage = ref('setup');
+
+const checkOnboarding = async () => {
+  try {
+    const ob = await api.getOnboardingState();
+    if (!ob.setupComplete || !ob.tutorialComplete) {
+      onboardingStage.value = !ob.setupComplete ? 'setup' : 'tutorial';
+      showOnboardingModal.value = true;
+    }
+  } catch (err) {
+    console.error('Check onboarding error:', err);
+  }
+};
+
+const openTutorial = () => {
+  onboardingStage.value = 'tutorial';
+  showOnboardingModal.value = true;
+};
 
 // Vaults State
 const vaults = ref([]);
@@ -125,6 +147,7 @@ const refreshAll = async () => {
       loadVaults()
     ]);
     dashboardTransactions.value = await api.getTransactions();
+    await checkOnboarding();
   } catch (err) {
     console.error("refreshAll error:", err);
     error.value = err.message || 'Error loading local database';
@@ -186,10 +209,13 @@ const handleRenameVault = async ({ filename, name }) => {
 };
 
 // Form Open/Close Handlers
+const transactionFormStep = ref(1);
+
 const openAddTransaction = (opts = {}) => {
   editingTransaction.value = null;
   selectedBucketForTx.value = opts.bucketId || '';
   selectedTypeForTx.value = opts.type || 'expense';
+  transactionFormStep.value = opts.step || 1;
   showForm.value = true;
 };
 
@@ -461,6 +487,7 @@ onMounted(() => {
           
           <!-- Vault Switcher Trigger -->
           <button 
+            data-tour="vault-switcher"
             @click="showVaultModal = true"
             class="ml-1.5 px-2.5 py-1 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/50 rounded-full text-[11px] font-medium text-[#f1f0f5] flex items-center gap-1.5 transition cursor-pointer"
             :title="`Active Vault: ${activeVaultName}. Click to switch database.`"
@@ -482,6 +509,7 @@ onMounted(() => {
             <span>Dashboard</span>
           </button>
           <button 
+            data-tour="history-tab"
             @click="currentTab = 'transactions'"
             class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'transactions' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
@@ -490,6 +518,7 @@ onMounted(() => {
             <span>History</span>
           </button>
           <button 
+            data-tour="debts-tab"
             @click="currentTab = 'debts'"
             class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'debts' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
@@ -498,6 +527,7 @@ onMounted(() => {
             <span>Debts</span>
           </button>
           <button 
+            data-tour="settings-tab"
             @click="currentTab = 'settings'"
             class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'settings' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
@@ -509,6 +539,7 @@ onMounted(() => {
 
         <!-- Desktop Quick Add Button -->
         <button
+          data-tour="add-tx-btn"
           @click="openAddTransaction()"
           class="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer shadow-sm ml-2"
         >
@@ -599,6 +630,7 @@ onMounted(() => {
           @reorder-categories="handleReorderCategories"
           @allocate-unassigned="handleAllocateUnassigned"
           @data-refresh="handleDataRefresh"
+          @open-tutorial="openTutorial"
         />
       </div>
     </main>
@@ -627,6 +659,7 @@ onMounted(() => {
 
       <!-- Center Quick Log Action Button -->
       <button 
+        data-tour="add-tx-btn-mobile"
         @click="openAddTransaction()"
         class="w-11 h-11 -mt-5 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center shadow-lg transition active:scale-95 cursor-pointer shrink-0 border-2 border-[#0f0f15]"
         title="Add Transaction"
@@ -665,6 +698,7 @@ onMounted(() => {
         :buckets="buckets"
         :default-bucket-id="selectedBucketForTx"
         :default-type="selectedTypeForTx"
+        :initial-step="transactionFormStep"
         @close="showForm = false"
         @save="handleSaveTransaction"
       />
@@ -680,6 +714,18 @@ onMounted(() => {
       @import-vault="handleImportVault"
       @delete-vault="handleDeleteVault"
       @rename-vault="handleRenameVault"
+    />
+
+    <!-- Onboarding & Interactive App Tour Modal -->
+    <OnboardingModal 
+      :is-open="showOnboardingModal"
+      :initial-stage="onboardingStage"
+      @close="showOnboardingModal = false"
+      @completed="refreshAll"
+      @switch-tab="currentTab = $event"
+      @open-form-step-1="openAddTransaction({ step: 1 })"
+      @open-form-step-2="openAddTransaction({ step: 2 })"
+      @close-form="showForm = false"
     />
   </div>
 </template>

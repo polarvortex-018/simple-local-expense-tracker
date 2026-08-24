@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-start justify-center p-3 pt-[max(2.5rem,env(safe-area-inset-top))] sm:pt-10 safe-area-modal-pt bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
-    <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[86vh] my-0 sm:my-auto">
+    <div data-tour="transaction-form" class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[86vh] my-0 sm:my-auto">
       
       <!-- Header -->
       <div class="px-4 py-2.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
@@ -421,16 +421,24 @@ const props = defineProps({
   defaultType: {
     type: String,
     default: 'expense'
+  },
+  initialStep: {
+    type: Number,
+    default: 1
   }
 });
 
 const emit = defineEmits(['close', 'save']);
 
 const isEdit = computed(() => !!props.transaction);
-const currentStep = ref(1);
+const currentStep = ref(props.initialStep || 1);
 const slideDirection = ref('next');
 const submitting = ref(false);
 const error = ref('');
+
+watch(() => props.initialStep, (val) => {
+  if (val) currentStep.value = val;
+}, { immediate: true });
 
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
 const userAccounts = computed(() => props.accounts.filter(a => a.type !== 'Unassigned' && a.id !== 'acc_unassigned_pool'));

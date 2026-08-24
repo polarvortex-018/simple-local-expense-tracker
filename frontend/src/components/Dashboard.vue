@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- 1. Header & Net Worth Overview Section (Flush, Hairline Dividers) -->
-    <section class="space-y-3 pb-4 border-b border-[#1f202e] animate-cascade-1">
+    <section data-tour="dashboard-summary" class="space-y-3 pb-4 border-b border-[#1f202e] animate-cascade-1">
       <div>
         <h2 class="text-base font-bold text-[#f1f0f5] tracking-tight">Financial Overview</h2>
         <p class="text-xs text-[#9e9cae]">Real-time summary of your accounts, income, expenses, and savings buckets.</p>
@@ -38,7 +38,7 @@
     </section>
 
     <!-- 2. SAVINGS ALLOCATIONS (Hairline Grid Layout) -->
-    <section class="space-y-2 animate-cascade-2">
+    <section data-tour="buckets-grid" class="space-y-2 animate-cascade-2">
       <div class="px-0.5">
         <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Savings Allocations</h3>
       </div>
@@ -229,7 +229,7 @@
     </section>
 
     <!-- 4. STORAGE ACCOUNTS BREAKDOWN (Staggered Entrance) -->
-    <section class="space-y-2 pt-2 animate-cascade-4">
+    <section data-tour="accounts-grid" class="space-y-2 pt-2 animate-cascade-4">
       <div class="flex justify-between items-center border-b border-[#1f202e] pb-2 px-0.5">
         <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Storage Accounts</h3>
         <span class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider">Real-time Balances</span>

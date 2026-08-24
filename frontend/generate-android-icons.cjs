@@ -34,15 +34,15 @@ async function generate() {
           <path d="M304,185 Q350,225 365,270" stroke="#f5f0eb" stroke-width="11" fill="none" />
           <path d="M256,190 C138,190 60,275 60,392 C60,466 138,498 256,498 C374,498 452,466 452,392 C452,275 374,190 256,190 Z" fill="#c084fc" />
           <ellipse cx="225" cy="360" rx="72" ry="82" fill="#f5f0eb" />
-          <path d="M185,310 H265 V324 H202 V336 H265 V350 H218 C238,350 252,360 252,374 C252,388 238,396 210,396 L254,428 H232 L192,396 H185 V382 H208 C224,382 236,377 236,374 C236,370 224,364 202,364 H185 V310 Z" fill="#5b21b6" />
+          <text x="225" y="394" font-family="system-ui, -apple-system, sans-serif" font-size="105" font-weight="900" fill="#5b21b6" text-anchor="middle">₹</text>
         </g>
       </svg>
     `;
 
-    // Foreground icon for adaptive Android icons (padded inside 108dp canvas)
+    // Foreground icon for adaptive Android icons (20% smaller)
     const foregroundSvg = `
       <svg width="${d.foreground}" height="${d.foreground}" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <g transform="translate(122.88, 116.12) scale(0.52)">
+        <g transform="translate(130.8, 130.8) scale(0.489)">
           <path d="M256,40 C190,40 160,78 160,122 C160,160 195,185 256,185 C317,185 352,160 352,122 C352,78 322,40 256,40 Z" fill="#d8b4fe" />
           <path d="M188,110 C210,88 302,88 324,110 C302,128 210,128 188,110 Z" fill="#f5f0eb" />
           <path d="M200,180 C222,194 290,194 312,180" stroke="#f5f0eb" stroke-width="16" stroke-linecap="round" fill="none" />
@@ -52,7 +52,7 @@ async function generate() {
           <path d="M304,185 Q350,225 365,270" stroke="#f5f0eb" stroke-width="11" fill="none" />
           <path d="M256,190 C138,190 60,275 60,392 C60,466 138,498 256,498 C374,498 452,466 452,392 C452,275 374,190 256,190 Z" fill="#c084fc" />
           <ellipse cx="225" cy="360" rx="72" ry="82" fill="#f5f0eb" />
-          <path d="M185,310 H265 V324 H202 V336 H265 V350 H218 C238,350 252,360 252,374 C252,388 238,396 210,396 L254,428 H232 L192,396 H185 V382 H208 C224,382 236,377 236,374 C236,370 224,364 202,364 H185 V310 Z" fill="#5b21b6" />
+          <text x="225" y="394" font-family="system-ui, -apple-system, sans-serif" font-size="105" font-weight="900" fill="#5b21b6" text-anchor="middle">₹</text>
         </g>
       </svg>
     `;

@@ -34,6 +34,7 @@
 
         <!-- 2. Savings Buckets Tile -->
         <button 
+          data-tour="buckets-tile"
           type="button"
           @click="activeSheet = 'buckets'"
           class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
@@ -70,6 +71,7 @@
 
         <!-- 4. Manage Categories Tile -->
         <button 
+          data-tour="categories-tile"
           type="button"
           @click="activeSheet = 'categories'"
           class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#FFD1B3]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
@@ -88,6 +90,8 @@
 
         <!-- 5. Backup & Export Tile -->
         <button 
+          data-tour="backup-[#D4BFFF]"
+          data-tour-target="backup-tile"
           type="button"
           @click="activeSheet = 'backup'"
           class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
@@ -598,6 +602,22 @@
 
           <!-- 6. FAQ & ABOUT PAGE (Sajid's Exact Content) -->
           <div v-if="activeSheet === 'faq'" class="space-y-6">
+            <!-- Take Tour Again Banner -->
+            <div class="p-4 bg-[#0f1019] border border-[#D4BFFF]/30 rounded-2xl flex items-center justify-between shadow-lg">
+              <div>
+                <h4 class="text-xs font-bold text-[#f1f0f5]">Interactive App Tour</h4>
+                <p class="text-[10px] text-[#9e9cae] mt-0.5">Re-run the Cash Buddy guided tutorial anytime</p>
+              </div>
+              <button 
+                @click="emit('open-tutorial')" 
+                type="button"
+                class="px-3.5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer active:scale-95 flex items-center gap-1.5 shadow-sm"
+              >
+                <span class="material-symbols-outlined text-base">auto_stories</span>
+                <span>Take Tour Again</span>
+              </button>
+            </div>
+
             <!-- Frequently Asked Questions Card -->
             <div class="bg-[#14141d] border border-[#29293a] rounded-2xl p-6 shadow-xl space-y-4">
               <div class="border-b border-[#29293a] pb-3">
@@ -1133,7 +1153,7 @@ const emit = defineEmits([
   'create-account', 'update-account', 'delete-account',
   'create-category', 'update-category', 'delete-category',
   'create-bucket', 'update-bucket', 'delete-bucket', 'transfer-bucket', 'transfer-accounts',
-  'reorder-buckets', 'reorder-categories', 'allocate-unassigned', 'data-refresh'
+  'reorder-buckets', 'reorder-categories', 'allocate-unassigned', 'data-refresh', 'open-tutorial'
 ]);
 
 const formatAmount = (val) => {

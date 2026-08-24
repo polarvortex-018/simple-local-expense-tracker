@@ -403,6 +403,7 @@ export async function createNewVault(name) {
   const filename = normalizeFilename(name);
   if (await getRecord('vaults', filename)) throw new Error(`Vault '${filename}' already exists.`);
   await loadVault(filename);
+  db.run("INSERT OR REPLACE INTO app_metadata (key, value) VALUES ('setup_complete', 'false'), ('tutorial_complete', 'false')");
   await saveVaultBytes(filename, db.export(), String(name).trim());
   await refreshVaultIndex();
   return filename;

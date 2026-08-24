@@ -10,7 +10,7 @@
     @mouseleave="onTouchEnd"
   >
     <!-- Top Header & Controls Strip (Flush, Hairline Divider) -->
-    <div class="border-b border-[#1f202e] pb-3 space-y-3 animate-cascade-1">
+    <div data-tour="history-filters" class="border-b border-[#1f202e] pb-3 space-y-3 animate-cascade-1">
       <!-- Centered Header: < Month Year > (Moves synchronously with touch swipe) -->
       <div class="flex items-center justify-between px-1">
         <button 

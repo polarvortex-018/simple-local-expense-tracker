@@ -1075,5 +1075,49 @@ export const api = {
     }
   },
 
-  async checkIntegrity() { await ensureDB(); return checkDatabaseIntegrity(); }
+  async checkIntegrity() { await ensureDB(); return checkDatabaseIntegrity(); },
+
+  // ----------------------------------------------------
+  // ONBOARDING & TUTORIAL STATE (PER VAULT)
+  // ----------------------------------------------------
+  async getOnboardingState() {
+    await ensureDB();
+    const rows = execQuery("SELECT key, value FROM app_metadata WHERE key IN ('setup_complete', 'tutorial_complete')");
+    const map = {};
+    rows.forEach(r => { map[r.key] = r.value; });
+
+    let setupComplete = map['setup_complete'] === 'true';
+    let tutorialComplete = map['tutorial_complete'] === 'true';
+
+    // If setup_complete key is missing in app_metadata
+    if (map['setup_complete'] === undefined) {
+      const txCount = execQuery('SELECT COUNT(*) count FROM transactions')[0]?.count || 0;
+      const accCount = execQuery("SELECT COUNT(*) count FROM accounts WHERE id != 'acc_unassigned_pool'")[0]?.count || 0;
+      const catCount = execQuery('SELECT COUNT(*) count FROM categories')[0]?.count || 0;
+
+      // Existing vaults with data or user customization are marked as complete
+      if (txCount > 0 || accCount > 2 || catCount > 9) {
+        setupComplete = true;
+        tutorialComplete = true;
+      } else {
+        setupComplete = false;
+        tutorialComplete = false;
+      }
+    }
+
+    return { setupComplete, tutorialComplete };
+  },
+
+  async setOnboardingState({ setupComplete, tutorialComplete }) {
+    await ensureDB();
+    return runInTransaction(async () => {
+      if (setupComplete !== undefined) {
+        execRun("INSERT OR REPLACE INTO app_metadata (key, value) VALUES ('setup_complete', ?)", [setupComplete ? 'true' : 'false'], false);
+      }
+      if (tutorialComplete !== undefined) {
+        execRun("INSERT OR REPLACE INTO app_metadata (key, value) VALUES ('tutorial_complete', ?)", [tutorialComplete ? 'true' : 'false'], false);
+      }
+      return this.getOnboardingState();
+    });
+  }
 };

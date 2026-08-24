@@ -5,10 +5,10 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <group
-        android:scaleX="0.115"
-        android:scaleY="0.115"
-        android:translateX="24.6"
-        android:translateY="23.1">
+        android:scaleX="0.103"
+        android:scaleY="0.103"
+        android:translateX="27.63"
+        android:translateY="27.63">
         <!-- Cinched Top Opening & Rim (#D8B4FE) -->
         <path
             android:fillColor="#D8B4FE"
@@ -51,7 +51,7 @@
             android:fillColor="#F5F0EB"
             android:pathData="M225,278 C265,278 297,315 297,360 C297,405 265,442 225,442 C185,442 153,405 153,360 C153,315 185,278 225,278 Z" />
 
-        <!-- Official Indian Rupee Symbol (₹ in #5B21B6) -->
+        <!-- Official Rupee Symbol (₹ in #5B21B6) -->
         <path
             android:fillColor="#5B21B6"
             android:pathData="M185,310 H265 V324 H202 V336 H265 V350 H218 C238,350 252,360 252,374 C252,388 238,396 210,396 L254,428 H232 L192,396 H185 V382 H208 C224,382 236,377 236,374 C236,370 224,364 202,364 H185 V310 Z" />

@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#1f202e] pb-3 animate-cascade-1">
+    <div data-tour="debt-list" class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#1f202e] pb-3 animate-cascade-1">
       <div>
         <h2 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Debt Tracker</h2>
         <p class="text-xs text-[#9e9cae]">Track money lent to people and money borrowed from others</p>
