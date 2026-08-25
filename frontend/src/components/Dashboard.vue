@@ -426,7 +426,10 @@ watch([netWorth, () => totalIncome.value, () => totalExpenses.value], () => {
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   currentMonthTransactions.value.forEach(t => {
-    if (t.account_id === 'acc_unallocated_funds') return;
+    if (t.account_id === 'acc_unallocated_funds') {
+      const isSalaryAlloc = Boolean(t.bucket_id) && (t.transaction_type === 'income' || (t.description && t.description.includes('Salary Allocation')));
+      if (!isSalaryAlloc) return;
+    }
     const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments' || t.category?.name === 'Adjustments';
     if (isAdjustment && Number(t.include_in_chart) !== 1) return;
 
@@ -456,7 +459,10 @@ const totalFilteredCategoryExpense = totalExpenses;
 const filteredCategoryIncome = computed(() => {
   const map = {};
   currentMonthTransactions.value.forEach(t => {
-    if (t.account_id === 'acc_unallocated_funds') return;
+    if (t.account_id === 'acc_unallocated_funds') {
+      const isSalaryAlloc = Boolean(t.bucket_id) && (t.transaction_type === 'income' || (t.description && t.description.includes('Salary Allocation')));
+      if (!isSalaryAlloc) return;
+    }
     const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments' || t.category?.name === 'Adjustments';
     if (isAdjustment && Number(t.include_in_chart) !== 1) return;
 

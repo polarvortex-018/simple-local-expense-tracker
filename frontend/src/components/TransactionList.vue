@@ -935,10 +935,10 @@
     <Transition name="modal-sheet">
       <div 
         v-if="selectedTransactionForView"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md pb-16 sm:pb-0"
+        class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0c0d14]/95 backdrop-blur-md"
         @click.self="closeViewModal"
       >
-        <div class="modal-sheet-card relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh] my-0 sm:my-auto">
+        <div class="modal-sheet-card relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh] pb-6 sm:pb-0 my-0 sm:my-auto">
           <!-- Modal Header -->
           <div class="flex justify-between items-center px-5 py-3.5 border-b border-[#1f202e] bg-[#0c0d14]">
             <div class="flex items-center gap-2.5">
@@ -1059,6 +1059,25 @@
               </div>
             </div>
 
+            <!-- Include on Pie Chart Slider Toggle (Visible ONLY when transaction_type === 'adjustment') -->
+            <div v-if="editForm.transaction_type === 'adjustment'" class="p-3 bg-[#0f1019] border border-[#1f202e] rounded-xl flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xs font-bold text-[#f1f0f5]">Include in Pie Charts & Analytics?</p>
+                <p class="text-[10px] text-[#9e9cae]">Include this adjustment in pie chart analytics & daily totals</p>
+              </div>
+              <button
+                type="button"
+                @click="editForm.include_in_chart = editForm.include_in_chart === 1 ? 0 : 1"
+                class="w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer p-0.5"
+                :class="editForm.include_in_chart === 1 ? 'bg-[#a855f7]' : 'bg-[#191924] border border-[#1f202e]'"
+              >
+                <span
+                  class="block w-5 h-5 rounded-full transition-transform"
+                  :class="editForm.include_in_chart === 1 ? 'translate-x-5 bg-white' : 'translate-x-0 bg-[#9e9cae]'"
+                ></span>
+              </button>
+            </div>
+
             <div class="grid grid-cols-2 gap-2.5">
               <CategoryPicker 
                 :categories="categories" 
@@ -1159,6 +1178,46 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Custom App-Styled Delete Transaction Confirmation Modal -->
+    <Transition name="modal-fade">
+      <div 
+        v-if="showDeleteConfirmModal" 
+        class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#0c0d14]/95 backdrop-blur-md"
+        @click.self="showDeleteConfirmModal = false"
+      >
+        <div class="relative w-full max-w-sm bg-[#0f1019] border border-[#1f202e] rounded-2xl shadow-2xl p-5 space-y-4 text-left animate-cascade-1">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">delete_forever</span>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-[#f1f0f5]">Delete Transaction</h3>
+              <p class="text-xs text-[#9e9cae] mt-0.5 leading-snug">
+                Are you sure you want to delete <strong class="text-[#f1f0f5]">"{{ txToDelete?.description || 'this transaction' }}"</strong>? This action cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-[#1f202e]">
+            <button 
+              type="button" 
+              @click="showDeleteConfirmModal = false" 
+              class="px-4 py-2 bg-[#141520] hover:bg-[#191924] border border-[#1f202e] text-[#9e9cae] hover:text-[#f1f0f5] text-xs font-bold rounded-xl transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button 
+              type="button" 
+              @click="executeDeleteTransaction" 
+              class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </Transition>
@@ -1605,9 +1664,23 @@ const groupedTransactionsByDate = computed(() => {
       groups[rawDate] = { dateStr: rawDate, transactions: [], totalExpense: 0, totalIncome: 0 };
     }
     groups[rawDate].transactions.push(t);
+
+    // Unallocated Funds deposits/adjustments must NEVER count toward daily summary headers EXCEPT Salary Allocations
+    if (t.account_id === 'acc_unallocated_funds') {
+      const isSalaryAlloc = Boolean(t.bucket_id) && (t.transaction_type === 'income' || (t.description && t.description.includes('Salary Allocation')));
+      if (!isSalaryAlloc) return;
+    }
+
+    const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments';
+    if (isAdjustment && Number(t.include_in_chart) !== 1) return;
+
     const amt = Number(t.amount) || 0;
-    if (t.transaction_type === 'expense') groups[rawDate].totalExpense += amt;
-    if (t.transaction_type === 'income') groups[rawDate].totalIncome += amt;
+    if (t.transaction_type === 'expense' || (isAdjustment && t.adjustment_direction === 'subtract')) {
+      groups[rawDate].totalExpense += amt;
+    }
+    if (t.transaction_type === 'income' || (isAdjustment && t.adjustment_direction === 'add')) {
+      groups[rawDate].totalIncome += amt;
+    }
   });
 
   return Object.values(groups);
@@ -1633,7 +1706,10 @@ const formatDateHeader = (dateStr) => {
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   allPeriodTransactions.value.forEach(t => {
-    if (t.account_id === 'acc_unallocated_funds') return;
+    if (t.account_id === 'acc_unallocated_funds') {
+      const isSalaryAlloc = Boolean(t.bucket_id) && (t.transaction_type === 'income' || (t.description && t.description.includes('Salary Allocation')));
+      if (!isSalaryAlloc) return;
+    }
     const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments';
     if (isAdjustment && Number(t.include_in_chart) !== 1) return;
 
@@ -1660,7 +1736,10 @@ const totalFilteredCategoryExpense = computed(() => {
 const filteredCategoryIncome = computed(() => {
   const map = {};
   allPeriodTransactions.value.forEach(t => {
-    if (t.account_id === 'acc_unallocated_funds') return;
+    if (t.account_id === 'acc_unallocated_funds') {
+      const isSalaryAlloc = Boolean(t.bucket_id) && (t.transaction_type === 'income' || (t.description && t.description.includes('Salary Allocation')));
+      if (!isSalaryAlloc) return;
+    }
     const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments';
     if (isAdjustment && Number(t.include_in_chart) !== 1) return;
 
@@ -1917,12 +1996,24 @@ const editForm = ref({
   category_id: '',
   account_id: '',
   bucket_id: '',
-  transaction_type: 'expense'
+  transaction_type: 'expense',
+  include_in_chart: 0
 });
 
 const viewTransactionDetails = (tx) => {
   selectedTransactionForView.value = tx;
   isEditingInModal.value = false;
+  editForm.value = {
+    description: tx.description || '',
+    notes: tx.notes || '',
+    amount: Number(tx.amount) || 0,
+    date: tx.date ? String(tx.date).split('T')[0] : '',
+    category_id: tx.category_id || '',
+    account_id: tx.account_id || '',
+    bucket_id: tx.bucket_id || '',
+    transaction_type: tx.transaction_type || 'expense',
+    include_in_chart: Number(tx.include_in_chart) === 1 ? 1 : 0
+  };
 };
 
 const closeViewModal = () => {
@@ -1958,10 +2049,20 @@ const deleteFromModal = () => {
   closeViewModal();
 };
 
+const showDeleteConfirmModal = ref(false);
+const txToDelete = ref(null);
+
 const confirmDelete = (tx) => {
-  if (confirm(`Are you sure you want to delete "${tx.description || 'this transaction'}"?`)) {
-    emit('delete-transaction', tx.id);
+  txToDelete.value = tx;
+  showDeleteConfirmModal.value = true;
+};
+
+const executeDeleteTransaction = () => {
+  if (txToDelete.value) {
+    emit('delete-transaction', txToDelete.value.id);
   }
+  showDeleteConfirmModal.value = false;
+  txToDelete.value = null;
 };
 
 // Computed O(1) Lookup Maps for High Performance

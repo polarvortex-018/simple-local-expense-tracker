@@ -145,7 +145,7 @@
 
     <!-- Add Debt Modal Sheet -->
     <Transition name="modal">
-      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto" @click.self="showAddModal = false">
+      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 safe-area-modal-pt sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto" @click.self="showAddModal = false">
         <div class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden transform transition-all max-h-[calc(100dvh-1rem)] flex flex-col my-auto">
           
           <!-- Header -->
@@ -260,8 +260,8 @@
 
     <!-- Settle Debt Modal -->
     <Transition name="modal">
-      <div v-if="showSettleModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md pb-16 sm:pb-0" @click.self="showSettleModal = false">
-        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+      <div v-if="showSettleModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0c0d14]/95 backdrop-blur-md" @click.self="showSettleModal = false">
+        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh] pb-6 sm:pb-0">
           
           <!-- Header -->
           <div class="px-5 py-3.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
@@ -305,14 +305,11 @@
 
     <!-- Debt Detail Modal -->
     <Transition name="modal-fade">
-      <div v-if="selectedDebt" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0f0f15]/80 backdrop-blur-sm" @click.self="selectedDebt = null">
-        <div class="relative w-full sm:max-w-sm bg-[#14141d] border border-[#29293a] sm:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden mb-16 sm:mb-0">
-
-          <!-- Top accent bar -->
-          <div class="h-1 w-full" :class="selectedDebt.type === 'lent' ? 'bg-[#B3F5E1]' : 'bg-[#FFD1B3]'"></div>
+      <div v-if="selectedDebt" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0c0d14]/95 backdrop-blur-md" @click.self="selectedDebt = null">
+        <div class="relative w-full sm:max-w-sm bg-[#0c0d14] border-t sm:border border-[#1f202e] sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden pb-6 sm:pb-0">
 
           <!-- Header -->
-          <div class="px-5 pt-4 pb-3 flex items-start justify-between border-b border-[#29293a]">
+          <div class="px-5 pt-4 pb-3 flex items-start justify-between border-b border-[#1f202e]">
             <div class="flex items-center gap-3">
               <div
                 class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
@@ -366,6 +363,46 @@
               @click="confirmDelete(selectedDebt); selectedDebt = null"
               class="px-4 py-2.5 bg-[#FFD1B3]/10 hover:bg-[#FFD1B3]/20 text-[#FFD1B3] border border-[#FFD1B3]/20 font-bold text-xs rounded-xl transition cursor-pointer"
             >Delete</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Custom App-Styled Delete Debt Confirmation Modal -->
+    <Transition name="modal-fade">
+      <div 
+        v-if="showDeleteConfirmModal" 
+        class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#0c0d14]/95 backdrop-blur-md"
+        @click.self="showDeleteConfirmModal = false"
+      >
+        <div class="relative w-full max-w-sm bg-[#0f1019] border border-[#1f202e] rounded-2xl shadow-2xl p-5 space-y-4 text-left">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">delete_forever</span>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-[#f1f0f5]">Delete Debt Record</h3>
+              <p class="text-xs text-[#9e9cae] mt-0.5 leading-snug">
+                Are you sure you want to delete debt record for <strong class="text-[#f1f0f5]">"{{ debtToDelete?.person_name }}"</strong>? This action cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-[#1f202e]">
+            <button 
+              type="button" 
+              @click="showDeleteConfirmModal = false" 
+              class="px-4 py-2 bg-[#141520] hover:bg-[#191924] border border-[#1f202e] text-[#9e9cae] hover:text-[#f1f0f5] text-xs font-bold rounded-xl transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button 
+              type="button" 
+              @click="executeDeleteDebt" 
+              class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md"
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>
@@ -525,10 +562,19 @@ const submitSettleDebt = async () => {
   }
 };
 
+const showDeleteConfirmModal = ref(false);
+const debtToDelete = ref(null);
+
 const confirmDelete = (debt) => {
-  const confirm = window.confirm(`Are you sure you want to delete the debt record for "${debt.person_name}"?`);
-  if (confirm) {
-    emit('delete-debt', debt.id);
+  debtToDelete.value = debt;
+  showDeleteConfirmModal.value = true;
+};
+
+const executeDeleteDebt = () => {
+  if (debtToDelete.value) {
+    emit('delete-debt', debtToDelete.value.id);
   }
+  showDeleteConfirmModal.value = false;
+  debtToDelete.value = null;
 };
 </script>

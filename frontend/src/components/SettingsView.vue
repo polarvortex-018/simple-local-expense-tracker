@@ -11,139 +11,128 @@
         </div>
       </div>
 
-      <!-- 2-3 Column Grid of Feature Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4 animate-cascade-2">
+      <!-- 2-Column Hairline Grid Directory (Matching Savings Allocations Grid on Dashboard) -->
+      <div class="border border-[#1f202e] rounded-2xl bg-[#0f1019] overflow-hidden divide-y divide-[#1f202e] animate-cascade-2">
         
-        <!-- 1. Quick Actions Tile -->
-        <button 
-          type="button"
-          @click="activeSheet = 'quick_actions'"
-          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-lg">bolt</span>
+        <!-- Row 1: Quick Actions & Savings Buckets -->
+        <div class="grid grid-cols-2 divide-x divide-[#1f202e]">
+          <!-- 1. Quick Actions -->
+          <button 
+            type="button"
+            @click="activeSheet = 'quick_actions'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">bolt</span>
             </div>
-            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">arrow_forward</span>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight">Quick Actions</h3>
-            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">Transfers & salary splits</p>
-          </div>
-        </button>
-
-        <!-- 2. Savings Buckets Tile -->
-        <button 
-          data-tour="buckets-tile"
-          type="button"
-          @click="activeSheet = 'buckets'"
-          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-lg">savings</span>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Quick Actions</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Transfers & splits</p>
             </div>
-            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">arrow_forward</span>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight">Savings Buckets</h3>
-            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">Goal buckets & allocations</p>
-          </div>
-        </button>
+          </button>
 
-        <!-- 3. Manage Accounts Tile -->
-        <button 
-          type="button"
-          @click="activeSheet = 'accounts'"
-          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#B3F5E1]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-lg">account_balance</span>
+          <!-- 2. Savings Buckets -->
+          <button 
+            data-tour="buckets-tile"
+            type="button"
+            @click="activeSheet = 'buckets'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">savings</span>
             </div>
-            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#B3F5E1] transition">arrow_forward</span>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight">Manage Accounts</h3>
-            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">Bank & wallet accounts</p>
-          </div>
-        </button>
-
-        <!-- 4. Manage Categories Tile -->
-        <button 
-          data-tour="categories-tile"
-          type="button"
-          @click="activeSheet = 'categories'"
-          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#FFD1B3]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 text-[#FFD1B3] flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-lg">category</span>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Savings Buckets</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Goal buckets</p>
             </div>
-            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#FFD1B3] transition">arrow_forward</span>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#FFD1B3] transition leading-tight">Manage Categories</h3>
-            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">Categories & appearance</p>
-          </div>
-        </button>
+          </button>
+        </div>
 
-        <!-- 5. Backup & Export Tile -->
-        <button 
-          data-tour="backup-[#D4BFFF]"
-          data-tour-target="backup-tile"
-          type="button"
-          @click="activeSheet = 'backup'"
-          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-lg">database</span>
+        <!-- Row 2: Manage Accounts & Manage Categories -->
+        <div class="grid grid-cols-2 divide-x divide-[#1f202e]">
+          <!-- 3. Manage Accounts -->
+          <button 
+            type="button"
+            @click="activeSheet = 'accounts'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">account_balance</span>
             </div>
-            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">arrow_forward</span>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight">Backup & Export</h3>
-            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">Database backup & snapshots</p>
-          </div>
-        </button>
-
-        <!-- 6. FAQ & About Tile -->
-        <button 
-          type="button"
-          @click="activeSheet = 'faq'"
-          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#B3F5E1]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-lg">help_outline</span>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight truncate">Manage Accounts</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Bank accounts</p>
             </div>
-            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#B3F5E1] transition">arrow_forward</span>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight">FAQ & About</h3>
-            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">App guide & creator note</p>
-          </div>
-        </button>
+          </button>
 
-        <!-- 7. Balance Adjustments Log Tile -->
-        <button 
-          type="button"
-          @click="openAdjustmentAuditSheet"
-          class="p-3.5 sm:p-4 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 rounded-2xl transition duration-200 cursor-pointer text-left flex flex-col justify-between space-y-3 group active:scale-[0.98] shadow-sm min-h-[110px]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-lg">history_edu</span>
+          <!-- 4. Manage Categories -->
+          <button 
+            data-tour="categories-tile"
+            type="button"
+            @click="activeSheet = 'categories'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 text-[#FFD1B3] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">category</span>
             </div>
-            <span class="material-symbols-outlined text-xs text-[#9e9cae] group-hover:text-[#D4BFFF] transition">arrow_forward</span>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight">Balance Adjustments Log</h3>
-            <p class="text-[10px] text-[#9e9cae] mt-1 leading-tight">Adjustment history & logs</p>
-          </div>
-        </button>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#FFD1B3] transition leading-tight truncate">Manage Categories</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Categories & icons</p>
+            </div>
+          </button>
+        </div>
 
+        <!-- Row 3: Backup & Export & FAQ / About -->
+        <div class="grid grid-cols-2 divide-x divide-[#1f202e]">
+          <!-- 5. Backup & Export -->
+          <button 
+            data-tour="backup-[#D4BFFF]"
+            data-tour-target="backup-tile"
+            type="button"
+            @click="activeSheet = 'backup'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">database</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Backup & Export</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Database & vaults</p>
+            </div>
+          </button>
+
+          <!-- 6. FAQ & About -->
+          <button 
+            type="button"
+            @click="activeSheet = 'faq'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">help_outline</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight truncate">FAQ & About</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">App guide & note</p>
+            </div>
+          </button>
+        </div>
+
+        <!-- Row 4: Balance Audit Log -->
+        <div class="grid grid-cols-1">
+          <button 
+            type="button"
+            @click="openAdjustmentAuditSheet"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924] w-full"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">history_edu</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Balance Audit Log</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Adjustment trail & audit</p>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -171,14 +160,6 @@
               </h3>
             </div>
           </div>
-
-          <button 
-            @click="activeSheet = null"
-            class="w-8 h-8 rounded-full bg-[#141520] hover:bg-[#1f202e] text-[#9e9cae] hover:text-[#f1f0f5] flex items-center justify-center transition cursor-pointer"
-            title="Close Page"
-          >
-            <span class="material-symbols-outlined text-base">close</span>
-          </button>
         </div>
 
         <!-- Full Page Content Body Container -->
@@ -247,15 +228,22 @@
 
           <!-- 2. SAVINGS BUCKETS PAGE -->
           <div v-if="activeSheet === 'buckets'" class="space-y-6">
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
               <div>
                 <h3 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Savings Buckets</h3>
                 <p class="text-xs text-[#9e9cae]">Allocate purposes for your money</p>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <button 
+                  @click="showTransferModal = true"
+                  class="px-2.5 py-1.5 bg-[#141520] hover:bg-[#1f202e] border border-[#1f202e] hover:border-[#D4BFFF]/40 text-[#D4BFFF] font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-1 shrink-0"
+                >
+                  <span class="material-symbols-outlined text-xs">swap_horiz</span>
+                  <span>Transfer</span>
+                </button>
                 <button 
                   @click="showArchivedBuckets = !showArchivedBuckets"
-                  class="text-[11px] font-bold text-[#9e9cae] hover:text-[#D4BFFF] hover:underline cursor-pointer"
+                  class="text-[11px] font-bold text-[#9e9cae] hover:text-[#D4BFFF] hover:underline cursor-pointer shrink-0"
                 >
                   {{ showArchivedBuckets ? 'Hide Archived' : 'Show Archived' }}
                 </button>
@@ -268,31 +256,50 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-3">
-                <p class="text-[9px] font-bold uppercase tracking-wider text-[#D4BFFF]">Total allocated</p>
-                <p class="mt-0.5 text-sm font-bold text-[#f1f0f5] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
-              </div>
-              <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+            <!-- Equal-Height Symmetrical Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Total Allocated Card -->
+              <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-4 flex flex-col justify-between">
                 <div>
-                  <p class="text-[9px] font-bold uppercase tracking-wider text-[#FFD1B3]">Unallocated Funds Pool</p>
-                  <p class="mt-0.5 text-sm font-bold text-[#FFD1B3] tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+                  <div class="flex items-center justify-between">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Total Allocated</p>
+                    <span class="material-symbols-outlined text-base text-[#D4BFFF]">pie_chart</span>
+                  </div>
+                  <p class="mt-1 text-lg sm:text-xl font-bold text-[#f1f0f5] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
                 </div>
-                <div class="flex items-center gap-1.5 shrink-0">
+                <p class="text-[10px] text-[#9e9cae] mt-2">Sum of all active goal bucket balances</p>
+              </div>
+
+              <!-- Unallocated Funds Pool Card -->
+              <div class="rounded-xl border border-[#1f202e] bg-[#0f1019] p-4 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-[#FFD1B3]">Unallocated Funds Pool</p>
+                    <span class="material-symbols-outlined text-base text-[#FFD1B3]">account_balance_wallet</span>
+                  </div>
+                  <p 
+                    class="mt-1 text-lg sm:text-xl font-bold tabular-nums"
+                    :class="unassignedAmount < 0 ? 'text-rose-400' : 'text-[#FFD1B3]'"
+                  >
+                    {{ unassignedAmount < 0 ? '-' : '' }}₹{{ formatAmount(Math.abs(unassignedAmount)) }}
+                  </p>
+                </div>
+
+                <div class="flex items-center gap-2 mt-3 pt-2.5 border-t border-[#1f202e]/60">
                   <button
                     type="button"
                     @click="openAllocateModal()"
-                    class="px-2.5 py-1 bg-[#FFD1B3]/20 hover:bg-[#FFD1B3]/30 border border-[#FFD1B3]/40 text-[#FFD1B3] text-xs font-bold rounded-lg transition cursor-pointer"
+                    class="flex-1 py-1.5 px-2 bg-[#FFD1B3]/15 hover:bg-[#FFD1B3]/25 border border-[#FFD1B3]/30 text-[#FFD1B3] text-xs font-bold rounded-lg transition cursor-pointer text-center"
                   >
                     Allocate
                   </button>
                   <button
                     type="button"
                     @click="showPresetsModal = true"
-                    class="px-2.5 py-1 bg-[#D4BFFF]/20 hover:bg-[#D4BFFF]/30 border border-[#D4BFFF]/40 text-[#D4BFFF] text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
+                    class="flex-1 py-1.5 px-2 bg-[#D4BFFF]/15 hover:bg-[#D4BFFF]/25 border border-[#D4BFFF]/30 text-[#D4BFFF] text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1"
                   >
-                    <span class="material-symbols-outlined text-xs">payments</span>
-                    <span>Salary Allocation</span>
+                    <span class="material-symbols-outlined text-xs shrink-0">payments</span>
+                    <span class="truncate">Salary Split</span>
                   </button>
                 </div>
               </div>
@@ -367,9 +374,19 @@
 
           <!-- 3. MANAGE ACCOUNTS PAGE -->
           <div v-if="activeSheet === 'accounts'" class="space-y-6">
-            <div>
-              <h3 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Manage Accounts</h3>
-              <p class="text-xs text-[#9e9cae]">Create accounts (where money is stored)</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Manage Accounts</h3>
+                <p class="text-xs text-[#9e9cae]">Create & manage bank accounts (where money is stored)</p>
+              </div>
+              <button 
+                type="button"
+                @click="showAccountTransferModal = true"
+                class="px-3 py-1.5 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 hover:bg-[#D4BFFF]/20 text-[#D4BFFF] font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-1 shrink-0"
+              >
+                <span class="material-symbols-outlined text-xs">swap_horiz</span>
+                <span>Account Transfer</span>
+              </button>
             </div>
 
             <!-- Add Account Form -->
@@ -773,15 +790,89 @@
           </div>
 
           <!-- 7. BALANCE ADJUSTMENTS & AUDIT LOG PAGE -->
-          <div v-if="activeSheet === 'adjustment_audit'" class="space-y-6">
+          <div v-if="activeSheet === 'adjustment_audit'" class="space-y-4">
             <div>
               <h3 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Balance Adjustments & Audit Log</h3>
               <p class="text-xs text-[#9e9cae]">Complete audit trail of account balance adjustments and ledger records.</p>
             </div>
 
-            <div v-if="unassignedAuditLogs.length > 0" class="border-y border-[#1f202e] divide-y divide-[#1f202e]">
+            <!-- Date Filter Toolbar with Month/Year Matrix Grid Picker -->
+            <div class="space-y-2.5 p-3 bg-[#0f1019] border border-[#1f202e] rounded-xl">
+              <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                  <button 
+                    type="button" 
+                    @click="auditDateFilter = 'all'; showAuditMonthPicker = false;"
+                    class="px-2.5 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer"
+                    :class="auditDateFilter === 'all' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#141520] text-[#9e9cae] hover:text-[#f1f0f5]'"
+                  >
+                    All Time
+                  </button>
+                  <button 
+                    type="button" 
+                    @click="auditDateFilter = 'this_month'; showAuditMonthPicker = false;"
+                    class="px-2.5 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer"
+                    :class="auditDateFilter === 'this_month' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#141520] text-[#9e9cae] hover:text-[#f1f0f5]'"
+                  >
+                    This Month
+                  </button>
+                  <button 
+                    type="button" 
+                    @click="auditDateFilter = 'last_month'; showAuditMonthPicker = false;"
+                    class="px-2.5 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer"
+                    :class="auditDateFilter === 'last_month' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#141520] text-[#9e9cae] hover:text-[#f1f0f5]'"
+                  >
+                    Last Month
+                  </button>
+                </div>
+                <button 
+                  type="button"
+                  @click="showAuditMonthPicker = !showAuditMonthPicker"
+                  class="px-2.5 py-1 bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/40 text-[#D4BFFF] text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm">calendar_month</span>
+                  <span>{{ auditDateFilter.includes('-') ? auditDateFilter : 'Pick Month' }}</span>
+                </button>
+              </div>
+
+              <!-- Sleek Month/Year Matrix Picker -->
+              <div v-if="showAuditMonthPicker" class="p-3 bg-[#141520] border border-[#1f202e] rounded-xl space-y-2.5 animate-cascade-1 mt-2">
+                <div class="flex items-center justify-between border-b border-[#1f202e] pb-2">
+                  <button 
+                    type="button"
+                    @click="changeAuditPickerYear(-1)"
+                    class="w-7 h-7 rounded-lg bg-[#0c0d14] hover:bg-[#191924] text-[#f1f0f5] flex items-center justify-center text-xs font-bold border border-[#1f202e] transition cursor-pointer"
+                  >
+                    ❮
+                  </button>
+                  <span class="text-sm font-bold text-[#D4BFFF]">{{ auditPickerYear }}</span>
+                  <button 
+                    type="button"
+                    @click="changeAuditPickerYear(1)"
+                    class="w-7 h-7 rounded-lg bg-[#0c0d14] hover:bg-[#191924] text-[#f1f0f5] flex items-center justify-center text-xs font-bold border border-[#1f202e] transition cursor-pointer"
+                  >
+                    ❯
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-4 gap-1.5">
+                  <button
+                    v-for="(mName, idx) in monthNames"
+                    :key="mName"
+                    type="button"
+                    @click="selectAuditMonthAndYear(idx)"
+                    class="py-2 rounded-lg border text-xs font-bold transition cursor-pointer text-center"
+                    :class="auditDateFilter === `${auditPickerYear}-${String(idx + 1).padStart(2, '0')}` ? 'bg-[#D4BFFF] text-[#0f0f15] border-[#D4BFFF]' : 'bg-[#0c0d14] border-[#1f202e] text-[#f1f0f5] hover:bg-[#191924]'"
+                  >
+                    {{ mName }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="filteredAuditLogs.length > 0" class="border-y border-[#1f202e] divide-y divide-[#1f202e]">
               <div 
-                v-for="log in unassignedAuditLogs" 
+                v-for="log in filteredAuditLogs" 
                 :key="log.id"
                 class="py-3 px-1.5 hover:bg-[#141520] transition flex items-center justify-between gap-3 text-xs"
               >
@@ -800,7 +891,7 @@
               </div>
             </div>
             <div v-else class="text-center py-8 border-y border-[#1f202e] text-xs text-[#9e9cae]">
-              No balance adjustment logs recorded yet.
+              No balance adjustment logs found for selected date filter.
             </div>
           </div>
 
@@ -1252,9 +1343,50 @@ const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true)
 
 const activeSheet = ref(null); // null, 'quick_actions', 'buckets', 'accounts', 'categories', 'backup', 'faq', 'unassigned_audit'
 const unassignedAuditLogs = ref([]);
+const auditDateFilter = ref('all');
+const customAuditMonth = ref('');
+
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const auditPickerYear = ref(new Date().getFullYear());
+const showAuditMonthPicker = ref(false);
+
+const selectAuditMonthAndYear = (monthIdx) => {
+  const m = String(monthIdx + 1).padStart(2, '0');
+  auditDateFilter.value = `${auditPickerYear.value}-${m}`;
+  showAuditMonthPicker.value = false;
+};
+
+const changeAuditPickerYear = (delta) => {
+  auditPickerYear.value += delta;
+};
+
+watch(activeSheet, (val) => {
+  emit('active-sheet-change', val);
+});
+
+const filteredAuditLogs = computed(() => {
+  if (auditDateFilter.value === 'all') return unassignedAuditLogs.value;
+  const today = new Date();
+  if (auditDateFilter.value === 'this_month') {
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const prefix = `${y}-${m}`;
+    return unassignedAuditLogs.value.filter(log => log.date && String(log.date).startsWith(prefix));
+  }
+  if (auditDateFilter.value === 'last_month') {
+    const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const y = prevMonth.getFullYear();
+    const m = String(prevMonth.getMonth() + 1).padStart(2, '0');
+    const prefix = `${y}-${m}`;
+    return unassignedAuditLogs.value.filter(log => log.date && String(log.date).startsWith(prefix));
+  }
+  return unassignedAuditLogs.value.filter(log => log.date && String(log.date).startsWith(auditDateFilter.value));
+});
 
 const openAdjustmentAuditSheet = async () => {
   activeSheet.value = 'adjustment_audit';
+  auditDateFilter.value = 'all';
+  customAuditMonth.value = '';
   try {
     unassignedAuditLogs.value = await api.getAdjustmentAuditLogs();
   } catch (err) {
@@ -1314,8 +1446,15 @@ const emit = defineEmits([
   'create-account', 'update-account', 'delete-account',
   'create-category', 'update-category', 'delete-category',
   'create-bucket', 'update-bucket', 'delete-bucket', 'transfer-bucket', 'transfer-accounts',
-  'reorder-buckets', 'reorder-categories', 'allocate-unassigned', 'data-refresh', 'open-tutorial'
+  'reorder-buckets', 'reorder-categories', 'allocate-unassigned', 'data-refresh', 'open-tutorial',
+  'active-sheet-change', 'error'
 ]);
+
+defineExpose({
+  closeActiveSheet: () => {
+    activeSheet.value = null;
+  }
+});
 
 const formatAmount = (val) => {
   const num = Number(val) || 0;
@@ -1426,7 +1565,7 @@ const totalAccountBalance = computed(() => {
 const unassignedAmount = computed(() => {
   const unallocAcc = (props.accounts || []).find(a => a.id === 'acc_unallocated_funds');
   if (unallocAcc) return Number(unallocAcc.balance) || 0;
-  return Math.max(0, totalAccountBalance.value - totalAllocated.value);
+  return totalAccountBalance.value - totalAllocated.value;
 });
 
 const showAllocateModal = ref(false);
@@ -1451,15 +1590,15 @@ const openAllocateModal = (targetBucketId = null) => {
 const submitAllocateFromUnallocated = async () => {
   const amt = Math.round(Number(String(allocateForm.value.amount).replace(',', '.')) * 100) / 100;
   if (!amt || amt <= 0) {
-    alert('Please enter a valid allocation amount.');
+    emit('error', 'Please enter a valid allocation amount.');
     return;
   }
   if (!allocateForm.value.bucket_id) {
-    alert('Please select a target bucket.');
+    emit('error', 'Please select a target bucket.');
     return;
   }
   if (amt > unassignedAmount.value) {
-    alert(`Allocation exceeds available unallocated funds (₹${unassignedAmount.value.toFixed(2)} available).`);
+    emit('error', `Allocation exceeds available unallocated funds (₹${unassignedAmount.value.toFixed(2)} available).`);
     return;
   }
 
@@ -1474,7 +1613,7 @@ const submitAllocateFromUnallocated = async () => {
     showAllocateModal.value = false;
     emit('data-refresh');
   } catch (err) {
-    alert(err.message || 'Failed to allocate funds.');
+    emit('error', err.message || 'Failed to allocate funds.');
   } finally {
     submittingAllocate.value = false;
   }
@@ -1520,7 +1659,7 @@ const transferForm = ref({ from_bucket_id: '', to_bucket_id: '', amount: '', des
 
 const submitBucketTransfer = () => {
   if (!transferForm.value.from_bucket_id || !transferForm.value.to_bucket_id || !transferForm.value.amount) {
-    alert('Please select both buckets and enter an amount.');
+    emit('error', 'Please select both buckets and enter an amount.');
     return;
   }
   submittingTransfer.value = true;
@@ -1541,7 +1680,7 @@ const accountTransferForm = ref({ from_account_id: '', to_account_id: '', amount
 
 const submitAccountTransfer = () => {
   if (!accountTransferForm.value.from_account_id || !accountTransferForm.value.to_account_id || !accountTransferForm.value.amount) {
-    alert('Please select both accounts and enter an amount.');
+    emit('error', 'Please select both accounts and enter an amount.');
     return;
   }
   submittingAccountTransfer.value = true;

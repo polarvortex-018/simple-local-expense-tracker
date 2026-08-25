@@ -202,8 +202,12 @@ export const api = {
     const categoryTotalsMap = {};
 
     txs.forEach(t => {
-      // Internal account transfers & Unallocated Funds transactions must NEVER be included in income or expense totals
-      if (t.transaction_type === 'transfer' || t.account_id === 'acc_unallocated_funds') return;
+      // Internal account transfers & Unallocated Funds transactions must NEVER be included in income or expense totals EXCEPT Salary Allocations
+      if (t.transaction_type === 'transfer') return;
+      if (t.account_id === 'acc_unallocated_funds') {
+        const isSalaryAlloc = Boolean(t.bucket_id) && (t.transaction_type === 'income' || (t.description && t.description.includes('Salary Allocation')));
+        if (!isSalaryAlloc) return;
+      }
 
       const isAdjustment = t.transaction_type === 'adjustment' || t.category_id === 'cat_adjustments' || t.category?.name === 'Adjustments';
       if (isAdjustment && Number(t.include_in_chart) !== 1) return;
@@ -629,17 +633,34 @@ export const api = {
     if (transferAmt > fromAlloc) throw new Error('Transfer amount exceeds the source bucket balance.');
 
     const now = new Date().toISOString();
+    const today = now.slice(0, 10);
+
     return runInTransaction(async () => {
       execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [fromAlloc - transferAmt, now, from_bucket_id], false);
+      let toName = 'Unallocated Funds';
       if (to_bucket_id) {
         // Transfer to another bucket
         const toRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [to_bucket_id]);
         if (!toRows.length) throw new Error("Destination bucket not found.");
         const toAlloc = Number(toRows[0].allocated_balance) || 0;
+        toName = toRows[0].name;
         execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [toAlloc + transferAmt, now, to_bucket_id], false);
       }
-      // if to_bucket_id is null → money returns to unassigned pool (no bucket row to update)
-      return { status: "transferred" };
+
+      // Log real transaction so bucket transfer appears in History
+      const fromName = fromRows[0].name;
+      const desc = `Bucket Transfer: ${fromName} → ${toName}`;
+      const txId = generateUUID();
+      const accId = fromRows[0].account_id || 'acc_unallocated_funds';
+
+      execRun(
+        `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at, include_in_chart)
+         VALUES (?, ?, 'transfer', 'subtract', ?, ?, ?, ?, NULL, ?, ?, 0)`,
+        [txId, transferAmt, desc, today, accId, from_bucket_id, now, now],
+        false
+      );
+
+      return { status: "transferred", transaction_id: txId };
     });
   },
 
@@ -819,12 +840,14 @@ export const api = {
           execRun('UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE id = ?', [rounded, now, targetAccountId], false);
         }
 
-        // 3. Log transaction
+        // 3. Log income transaction for bucket allocation so it reflects as bucket income
         const txId = generateUUID();
+        const bObj = targetBucketId ? execQuery('SELECT name FROM savings_buckets WHERE id = ?', [targetBucketId])[0] : null;
+        const allocDesc = bObj ? `Salary Allocation → ${bObj.name}` : desc;
         execRun(
-          `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at)
-           VALUES (?, ?, 'income', NULL, ?, ?, ?, ?, ?, ?, ?)`,
-          [txId, rounded, `${desc} → ${rule.bucket_id ? 'Bucket' : 'Unallocated'}`, today, targetAccountId || actualSourceAccountId, targetBucketId, rule.category_id || null, now, now],
+          `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at, include_in_chart)
+           VALUES (?, ?, 'income', 'add', ?, ?, ?, ?, ?, ?, ?, 1)`,
+          [txId, rounded, allocDesc, today, targetAccountId || actualSourceAccountId, targetBucketId, rule.category_id || null, now, now],
           false
         );
 

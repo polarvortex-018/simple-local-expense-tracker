@@ -45,40 +45,49 @@ const vaults = ref([]);
 const activeVault = ref('finance.db');
 const showVaultModal = ref(false);
 
-// Toast Notification State
-const toastMessage = ref('');
+// Toast Notification State (Success & Error Toasts)
+const toastNotification = ref({ show: false, message: '', type: 'success' });
 let toastTimer = null;
 
-const showToast = (msg) => {
+const showToast = (message, colorTheme = 'green') => {
   if (toastTimer) clearTimeout(toastTimer);
-  toastMessage.value = msg;
+  toastNotification.value = { show: true, message, colorTheme };
   toastTimer = setTimeout(() => {
-    toastMessage.value = '';
+    toastNotification.value.show = false;
   }, 2800);
 };
+
+const showSuccess = (message) => {
+  let theme = 'green';
+  const lower = String(message || '').toLowerCase();
+  if (lower.includes('edit') || lower.includes('update') || lower.includes('modifi')) {
+    theme = 'orange'; // Orange for editing
+  } else if (lower.includes('debt') || lower.includes('transfer') || lower.includes('preset') || lower.includes('salary allocation success')) {
+    theme = 'purple'; // Purple for debts, bucket transfers, account transfers, and salary allocation success
+  } else if (lower.includes('salary') || lower.includes('allocat')) {
+    theme = 'green'; // Green for salary allocation
+  } else if (lower.includes('delete') || lower.includes('add') || lower.includes('create') || lower.includes('record')) {
+    theme = 'green'; // Green for adding and deleting
+  }
+  showToast(message, theme);
+};
+
+const showError = (message) => showToast(message, 'red');
 
 const activeVaultName = computed(() => {
   const v = vaults.value.find(item => item.is_active);
   return v ? v.name : 'Personal';
 });
 
-// Modal control
+// Modal & Subpage Control State
 const showForm = ref(false);
 const editingTransaction = ref(null);
 const selectedBucketForTx = ref('');
 const selectedTypeForTx = ref('expense');
 const loading = ref(false);
 const error = ref('');
-const successMessage = ref('');
-let successTimer;
-
-const showSuccess = (message) => {
-  successMessage.value = message;
-  clearTimeout(successTimer);
-  successTimer = setTimeout(() => {
-    successMessage.value = '';
-  }, 1800);
-};
+const settingsViewRef = ref(null);
+const isSettingsSubpageOpen = ref(false);
 
 const fetchTransactions = async () => {
   try {
@@ -162,8 +171,9 @@ const handleSwitchVault = async (filename) => {
     await api.switchVault(filename);
     await refreshAll();
     showVaultModal.value = false;
+    showSuccess('Switched vault');
   } catch (err) {
-    alert(err.message || 'Failed to switch vault.');
+    showError(err.message || 'Failed to switch vault.');
   }
 };
 
@@ -172,8 +182,9 @@ const handleCreateVault = async (name) => {
     await api.createVault(name);
     await refreshAll();
     showVaultModal.value = false;
+    showSuccess('Vault created');
   } catch (err) {
-    alert(err.message || 'Failed to create vault.');
+    showError(err.message || 'Failed to create vault.');
   }
 };
 
@@ -182,8 +193,9 @@ const handleImportVault = async (file) => {
     await api.importVault(file);
     await refreshAll();
     showVaultModal.value = false;
+    showSuccess('Vault imported');
   } catch (err) {
-    alert(err.message || 'Failed to import vault.');
+    showError(err.message || 'Failed to import vault.');
   }
 };
 
@@ -192,8 +204,9 @@ const handleDeleteVault = async (filename) => {
     try {
       await api.deleteVault(filename);
       await loadVaults();
+      showSuccess('Vault deleted');
     } catch (err) {
-      alert(err.message || 'Failed to delete vault.');
+      showError(err.message || 'Failed to delete vault.');
     }
   }
 };
@@ -204,7 +217,7 @@ const handleRenameVault = async ({ filename, name }) => {
     await loadVaults();
     showSuccess('Vault renamed successfully');
   } catch (err) {
-    alert(err.message || 'Failed to rename vault.');
+    showError(err.message || 'Failed to rename vault.');
   }
 };
 
@@ -227,20 +240,18 @@ const openEditTransaction = (transaction) => {
 };
 
 const handleSaveTransaction = async (payload) => {
+  const wasEditing = Boolean(editingTransaction.value);
   try {
-    const wasEditing = Boolean(editingTransaction.value);
-    if (editingTransaction.value) {
+    if (wasEditing) {
       await api.updateTransaction(editingTransaction.value.id, payload);
     } else {
       await api.createTransaction(payload);
     }
-    showForm.value = false;
     await refreshAll();
-    showSuccess(payload.transaction_type === 'adjustment'
-      ? (wasEditing ? 'Adjustment updated' : 'Adjustment recorded')
-      : (wasEditing ? 'Transaction updated' : 'Transaction added'));
+    showForm.value = false;
+    showSuccess(wasEditing ? 'Transaction updated' : 'Transaction added');
   } catch (err) {
-    alert(err.message || 'Failed to save transaction.');
+    showError(err.message || 'Failed to save transaction.');
   }
 };
 
@@ -250,7 +261,7 @@ const handleDirectSaveTransaction = async ({ id, payload }) => {
     await refreshAll();
     showSuccess('Transaction updated');
   } catch (err) {
-    alert(err.message || 'Failed to update transaction.');
+    showError(err.message || 'Failed to update transaction.');
   }
 };
 
@@ -260,7 +271,7 @@ const handleDeleteTransaction = async (id) => {
     await refreshAll();
     showSuccess('Transaction deleted');
   } catch (err) {
-    alert(err.message || 'Failed to delete transaction.');
+    showError(err.message || 'Failed to delete transaction.');
   }
 };
 
@@ -269,8 +280,9 @@ const handleCreateAccount = async (payload) => {
   try {
     await api.createAccount(payload);
     await refreshAll();
+    showSuccess('Account created');
   } catch (err) {
-    alert(err.message || 'Failed to create account.');
+    showError(err.message || 'Failed to create account.');
   }
 };
 
@@ -278,8 +290,9 @@ const handleUpdateAccount = async (id, payload) => {
   try {
     await api.updateAccount(id, payload);
     await refreshAll();
+    showSuccess('Account updated');
   } catch (err) {
-    alert(err.message || 'Failed to update account.');
+    showError(err.message || 'Failed to update account.');
   }
 };
 
@@ -287,8 +300,9 @@ const handleDeleteAccount = async (id) => {
   try {
     await api.deleteAccount(id);
     await refreshAll();
+    showSuccess('Account deleted');
   } catch (err) {
-    alert(err.message || 'Failed to delete account.');
+    showError(err.message || 'Failed to delete account.');
   }
 };
 
@@ -296,8 +310,9 @@ const handleCreateCategory = async (payload) => {
   try {
     await api.createCategory(payload);
     await refreshAll();
+    showSuccess('Category created');
   } catch (err) {
-    alert(err.message || 'Failed to create category.');
+    showError(err.message || 'Failed to create category.');
   }
 };
 
@@ -305,8 +320,9 @@ const handleUpdateCategory = async (id, payload) => {
   try {
     await api.updateCategory(id, payload);
     await refreshAll();
+    showSuccess('Category updated');
   } catch (err) {
-    alert(err.message || 'Failed to update category.');
+    showError(err.message || 'Failed to update category.');
   }
 };
 
@@ -314,8 +330,9 @@ const handleDeleteCategory = async (id) => {
   try {
     await api.deleteCategory(id);
     await refreshAll();
+    showSuccess('Category deleted');
   } catch (err) {
-    alert(err.message || 'Failed to delete category.');
+    showError(err.message || 'Failed to delete category.');
   }
 };
 
@@ -324,8 +341,9 @@ const handleCreateBucket = async (payload) => {
   try {
     await api.createBucket(payload);
     await refreshAll();
+    showSuccess('Bucket created');
   } catch (err) {
-    alert(err.message || 'Failed to create savings bucket.');
+    showError(err.message || 'Failed to create savings bucket.');
   }
 };
 
@@ -333,8 +351,9 @@ const handleUpdateBucket = async (id, payload) => {
   try {
     await api.updateBucket(id, payload);
     await refreshAll();
+    showSuccess('Bucket updated');
   } catch (err) {
-    alert(err.message || 'Failed to update savings bucket.');
+    showError(err.message || 'Failed to update savings bucket.');
   }
 };
 
@@ -344,7 +363,7 @@ const handleDeleteBucket = async (id) => {
     await refreshAll();
     showSuccess('Bucket permanently deleted');
   } catch (err) {
-    alert(err.message || 'Failed to delete savings bucket.');
+    showError(err.message || 'Failed to delete savings bucket.');
   }
 };
 
@@ -352,8 +371,9 @@ const handleTransferBucket = async (payload) => {
   try {
     await api.transferBucket(payload);
     await refreshAll();
+    showSuccess('Bucket transfer completed');
   } catch (err) {
-    alert(err.message || 'Failed to transfer bucket funds.');
+    showError(err.message || 'Failed to transfer bucket funds.');
   }
 };
 
@@ -361,9 +381,72 @@ const handleTransferAccounts = async (payload) => {
   try {
     await api.transferBetweenAccounts(payload);
     await refreshAll();
-    showSuccess('Account transfer complete');
+    showSuccess('Account transfer completed');
   } catch (err) {
-    alert(err.message || 'Failed to transfer between accounts.');
+    showError(err.message || 'Failed to transfer between accounts.');
+  }
+};
+
+const floatingInput = ref({
+  show: false,
+  label: '',
+  value: '',
+  type: 'text',
+  inputmode: 'text',
+  placeholder: '',
+  targetEl: null
+});
+const floatingInputRef = ref(null);
+
+const setupGlobalFloatingInputHandler = () => {
+  if (typeof window === 'undefined') return;
+
+  window.addEventListener('focusin', (e) => {
+    const el = e.target;
+    if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
+    if (el === floatingInputRef.value) return;
+
+    const rect = el.getBoundingClientRect();
+    const isBottom40Percent = rect.top > window.innerHeight * 0.60;
+
+    if (isBottom40Percent) {
+      let labelText = '';
+      const parentContainer = el.closest('.space-y-1, .space-y-2, .space-y-3, div');
+      if (parentContainer) {
+        const lbl = parentContainer.querySelector('label, p.font-bold, span.font-bold');
+        if (lbl && lbl.innerText) labelText = lbl.innerText.trim();
+      }
+      if (!labelText) {
+        labelText = el.getAttribute('placeholder') || el.name || el.id || 'Input Field';
+      }
+      floatingInput.value = {
+        show: true,
+        label: labelText ? labelText.trim() : 'Input Field',
+        value: el.value || '',
+        type: el.type || 'text',
+        inputmode: el.getAttribute('inputmode') || 'text',
+        placeholder: el.getAttribute('placeholder') || '',
+        targetEl: el
+      };
+      setTimeout(() => {
+        floatingInputRef.value?.focus();
+      }, 60);
+    }
+  }, true);
+};
+
+const syncFloatingValueToTarget = () => {
+  if (floatingInput.value.targetEl) {
+    floatingInput.value.targetEl.value = floatingInput.value.value;
+    floatingInput.value.targetEl.dispatchEvent(new Event('input', { bubbles: true }));
+    floatingInput.value.targetEl.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+};
+
+const closeFloatingInput = () => {
+  floatingInput.value.show = false;
+  if (floatingInput.value.targetEl) {
+    floatingInput.value.targetEl.blur();
   }
 };
 
@@ -434,7 +517,19 @@ import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
+const isScrolling = ref(false);
+let scrollTimer = null;
+
+const handleWindowScroll = () => {
+  isScrolling.value = true;
+  if (scrollTimer) clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    isScrolling.value = false;
+  }, 350);
+};
+
 onMounted(() => {
+  window.addEventListener('scroll', handleWindowScroll, { passive: true });
   if (typeof window !== 'undefined' && window.visualViewport) {
     const handleVVResize = () => {
       document.documentElement.style.setProperty('--vv-height', `${window.visualViewport.height}px`);
@@ -447,6 +542,7 @@ onMounted(() => {
   window.addEventListener('cashbuddy-storage-error', event => {
     error.value = `Your latest change could not be saved securely: ${event.detail}`;
   });
+  setupGlobalFloatingInputHandler();
   refreshAll();
 
   if (Capacitor.isNativePlatform()) {
@@ -454,10 +550,14 @@ onMounted(() => {
     StatusBar.setBackgroundColor({ color: '#0f0f15' }).catch(() => {});
 
     CapApp.addListener('backButton', () => {
-      if (showForm.value) {
+      if (floatingInput.value.show) {
+        floatingInput.value.show = false;
+      } else if (showForm.value) {
         showForm.value = false;
       } else if (showVaultModal.value) {
         showVaultModal.value = false;
+      } else if (currentTab.value === 'settings' && isSettingsSubpageOpen.value) {
+        settingsViewRef.value?.closeActiveSheet();
       } else if (currentTab.value !== 'dashboard') {
         currentTab.value = 'dashboard';
       } else {
@@ -560,14 +660,30 @@ onMounted(() => {
 
     <!-- Main Content Container -->
     <main class="flex-grow max-w-5xl w-full mx-auto px-3.5 sm:px-6 py-4 pb-24 sm:pb-8">
-      <!-- Spring Float Toast Notification Banner -->
-      <Transition name="toast">
+      <!-- Top-Down Slide Toast Notification Banner (10% Compact & Notch Safe) -->
+      <Transition name="toast-top-down">
         <div 
-          v-if="toastMessage"
-          class="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-[#141520] border border-[#D4BFFF]/40 text-[#f1f0f5] text-xs font-bold rounded-2xl shadow-2xl flex items-center gap-2 max-w-xs sm:max-w-sm pointer-events-none"
+          v-if="toastNotification.show"
+          class="fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-[10000] px-4 py-2.5 sm:px-5 sm:py-3 border-2 rounded-2xl shadow-2xl flex items-center gap-2.5 max-w-xs sm:max-w-sm pointer-events-none backdrop-blur-md transition-all duration-300"
+          :class="{
+            'bg-[#0c1f17]/95 border-[#B3F5E1] text-[#B3F5E1]': toastNotification.colorTheme === 'green',
+            'bg-[#26150b]/95 border-[#FFD1B3] text-[#FFD1B3]': toastNotification.colorTheme === 'orange',
+            'bg-[#1c122b]/95 border-[#D4BFFF] text-[#D4BFFF]': toastNotification.colorTheme === 'purple',
+            'bg-[#280d14]/95 border-rose-600 text-rose-200': toastNotification.colorTheme === 'red'
+          }"
         >
-          <span class="material-symbols-outlined text-base text-[#D4BFFF]">check_circle</span>
-          <span>{{ toastMessage }}</span>
+          <span 
+            class="material-symbols-outlined text-lg sm:text-xl shrink-0"
+            :class="{
+              'text-[#B3F5E1]': toastNotification.colorTheme === 'green',
+              'text-[#FFD1B3]': toastNotification.colorTheme === 'orange',
+              'text-[#D4BFFF]': toastNotification.colorTheme === 'purple',
+              'text-rose-400': toastNotification.colorTheme === 'red'
+            }"
+          >
+            {{ toastNotification.colorTheme === 'red' ? 'error' : (toastNotification.colorTheme === 'orange' ? 'edit_note' : 'check_circle') }}
+          </span>
+          <span class="text-xs sm:text-sm font-bold leading-snug">{{ toastNotification.message }}</span>
         </div>
       </Transition>
 
@@ -621,10 +737,13 @@ onMounted(() => {
         />
 
         <SettingsView 
+          ref="settingsViewRef"
           v-show="currentTab === 'settings'"
           :accounts="accounts"
           :categories="categories"
           :buckets="buckets"
+          @active-sheet-change="isSettingsSubpageOpen = Boolean($event)"
+          @error="showError"
           @create-account="handleCreateAccount"
           @update-account="handleUpdateAccount"
           @delete-account="handleDeleteAccount"
@@ -668,14 +787,16 @@ onMounted(() => {
       </button>
 
       <!-- Center Quick Log Action Button -->
-      <button 
-        data-tour="add-tx-btn-mobile"
-        @click="openAddTransaction()"
-        class="w-11 h-11 -mt-5 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center shadow-lg transition active:scale-95 cursor-pointer shrink-0 border-2 border-[#0f0f15]"
-        title="Add Transaction"
-      >
-        <span class="material-symbols-outlined text-2xl leading-none font-bold">add</span>
-      </button>
+      <div class="relative -mt-5 flex items-center justify-center shrink-0 w-12 h-12">
+        <button 
+          data-tour="add-tx-btn-mobile"
+          @click="openAddTransaction()"
+          class="relative w-11 h-11 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center shadow-xl transition active:scale-95 cursor-pointer border-2 border-[#0f0f15] z-10"
+          title="Add Transaction"
+        >
+          <span class="material-symbols-outlined text-2xl leading-none font-bold">add</span>
+        </button>
+      </div>
 
       <button 
         @click="currentTab = 'debts'"
@@ -737,5 +858,39 @@ onMounted(() => {
       @open-form-step-2="openAddTransaction({ step: 2 })"
       @close-form="showForm = false"
     />
+
+    <!-- Floating Virtual Input Bar for Bottom 40% Screen Fields -->
+    <Transition name="floating-down">
+      <div 
+        v-if="floatingInput.show" 
+        class="fixed top-[30vh] sm:top-[35vh] left-3.5 right-3.5 sm:left-1/2 sm:-translate-x-1/2 sm:max-w-md z-[9999] bg-[#141520] border-2 border-[#D4BFFF] rounded-2xl shadow-2xl p-4 flex flex-col gap-2.5 backdrop-blur-md"
+      >
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-[#D4BFFF] uppercase tracking-wider truncate flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm">edit</span>
+            <span>{{ floatingInput.label }}</span>
+          </span>
+          <button 
+            type="button" 
+            @click="closeFloatingInput" 
+            class="px-3.5 py-1 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] text-xs font-black rounded-lg cursor-pointer transition shadow-md active:scale-95"
+          >
+            Done ✓
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <input 
+            ref="floatingInputRef"
+            v-model="floatingInput.value"
+            :type="floatingInput.type"
+            :inputmode="floatingInput.inputmode"
+            :placeholder="floatingInput.placeholder"
+            @input="syncFloatingValueToTarget"
+            @keydown.enter="closeFloatingInput"
+            class="w-full px-3.5 py-2.5 bg-[#0c0d14] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-sm font-bold focus:outline-none shadow-inner"
+          />
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>

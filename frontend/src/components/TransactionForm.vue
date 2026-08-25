@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-start justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:pt-10 safe-area-modal-pt bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
+  <div class="fixed inset-0 z-50 flex items-start justify-center p-2 pt-[max(2.25rem,env(safe-area-inset-top))] sm:pt-10 safe-area-modal-pt bg-[#0c0d14]/90 backdrop-blur-sm overflow-y-auto">
     <div data-tour="transaction-form" class="relative w-full max-w-md bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] my-auto">
       
       <!-- Header -->
@@ -36,6 +36,7 @@
       <!-- Form Body (Scrollable container with autofill prevention) -->
       <form 
         id="transaction-entry-form" 
+        novalidate
         @submit.prevent="handleSubmit" 
         autocomplete="off" 
         autocorrect="off" 
@@ -133,7 +134,10 @@
             <!-- Selected Allocation Badges Bar -->
             <div v-if="!isEdit" class="flex items-center justify-between gap-2 p-2 px-3 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs">
               <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-                <span class="px-2 py-0.5 rounded-md bg-[#D4BFFF]/15 text-[#D4BFFF] font-semibold text-[10px] truncate">{{ selectedBucketName }}</span>
+                <span class="px-2 py-0.5 rounded-md bg-[#D4BFFF]/15 text-[#D4BFFF] font-semibold text-[10px] truncate flex items-center gap-1">
+                  <span v-if="selectedBucketObj" class="material-symbols-outlined text-xs leading-none">{{ resolveIcon(selectedBucketObj.icon, 'savings') }}</span>
+                  <span>{{ selectedBucketObj ? selectedBucketObj.name : 'General' }}</span>
+                </span>
                 <span class="text-[#9e9cae] shrink-0 text-[10px]">•</span>
                 <span class="px-2 py-0.5 rounded-md bg-[#141520] border border-[#1f202e] text-[#f1f0f5] font-semibold text-[10px] truncate">{{ selectedAccountName }}</span>
               </div>
@@ -179,7 +183,7 @@
                   <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-sm shrink-0" :style="{ color: cat.color || '#D4BFFF' }">{{ resolveIcon(cat.icon, 'category') }}</span>
                   </div>
-                  <span class="text-[11px] font-bold truncate max-w-full leading-tight text-[#f1f0f5]">{{ cat.name }}</span>
+                  <span class="text-[10px] sm:text-[11px] font-bold leading-tight text-[#f1f0f5] whitespace-normal break-words line-clamp-2">{{ cat.name }}</span>
                 </button>
 
                 <!-- More Categories Picker Trigger Card -->
@@ -199,7 +203,7 @@
                     </span>
                     <span v-else class="material-symbols-outlined text-sm text-[#D4BFFF]">more_horiz</span>
                   </div>
-                  <span class="text-[11px] font-bold truncate max-w-full leading-tight">
+                  <span class="text-[10px] sm:text-[11px] font-bold leading-tight whitespace-normal break-words line-clamp-2">
                     {{ selectedCategoryIsNonQuick ? categories.find(c => c.id === form.category_id)?.name : 'More' }}
                   </span>
                 </button>
@@ -412,8 +416,58 @@ const goToStep1 = () => {
   currentStep.value = 1;
 };
 
+const validateStep1Selection = () => {
+  const accId = form.value.account_id || '';
+  const bucketId = form.value.bucket_id || '';
+
+  // Exception Rule: Unallocated Funds account with NO bucket selected is allowed
+  if (accId === 'acc_unallocated_funds' && !bucketId) {
+    return true;
+  }
+
+  // Rule 1: If ANY bucket is chosen -> Real Bank Account is MANDATORY
+  if (bucketId) {
+    if (!accId || accId === 'acc_unallocated_funds') {
+      error.value = 'Selecting a bank account is mandatory when a bucket is chosen.';
+      return false;
+    }
+  }
+
+  // Rule 2: If ANY account is chosen -> Savings Bucket is MANDATORY
+  if (accId) {
+    if (!bucketId) {
+      error.value = 'Selecting a savings bucket is mandatory when an account is chosen.';
+      return false;
+    }
+  }
+
+  // Rule 3: If NEITHER account nor bucket is chosen -> Both are MANDATORY
+  if (!accId && !bucketId) {
+    error.value = 'Selecting an account and a savings bucket is mandatory.';
+    return false;
+  }
+
+  return true;
+};
+
+const validateMutualSelection = () => {
+  if (!validateStep1Selection()) return false;
+  const accId = form.value.account_id || '';
+  const catId = form.value.category_id || '';
+
+  if (accId !== 'acc_unallocated_funds' && !catId) {
+    error.value = 'Selecting a category is mandatory.';
+    return false;
+  }
+
+  return true;
+};
+
 const goToStep2 = () => {
   error.value = '';
+  if (!validateStep1Selection()) {
+    return;
+  }
   slideDirection.value = 'next';
   currentStep.value = 2;
   focusAmountInput();
@@ -427,9 +481,17 @@ const selectBucket = (bId) => {
 };
 
 const selectAccount = (accId) => {
+  const prevAcc = form.value.account_id;
   form.value.account_id = accId || '';
   if (accId === 'acc_unallocated_funds') {
     form.value.bucket_id = '';
+    if (form.value.transaction_type !== 'adjustment') {
+      form.value.transaction_type = 'income';
+    }
+  } else if (prevAcc === 'acc_unallocated_funds') {
+    if (form.value.transaction_type !== 'adjustment') {
+      form.value.transaction_type = props.defaultType || 'expense';
+    }
   }
 };
 
@@ -494,10 +556,27 @@ watch(() => form.value.bucket_id, (newVal) => {
   }
 }, { immediate: true });
 
+watch(() => form.value.account_id, (newAccId, oldAccId) => {
+  if (newAccId === 'acc_unallocated_funds') {
+    form.value.bucket_id = '';
+    if (form.value.transaction_type !== 'adjustment') {
+      form.value.transaction_type = 'income';
+    }
+  } else if (oldAccId === 'acc_unallocated_funds') {
+    if (form.value.transaction_type !== 'adjustment') {
+      form.value.transaction_type = props.defaultType || 'expense';
+    }
+  }
+});
+
 // Helper labels
+const selectedBucketObj = computed(() => {
+  return props.buckets.find(b => b.id === form.value.bucket_id) || null;
+});
+
 const selectedBucketName = computed(() => {
-  const b = props.buckets.find(b => b.id === form.value.bucket_id);
-  return b ? `${b.icon || '🪣'} ${b.name}` : 'General';
+  const b = selectedBucketObj.value;
+  return b ? b.name : 'General';
 });
 
 const selectedAccountName = computed(() => {
@@ -551,14 +630,13 @@ const handleSubmit = async () => {
   }
   
   // Validation checks
-  const accountId = form.value.account_id || null;
   const normalizedAmount = String(form.value.amount).replace(',', '.');
   if (Number(normalizedAmount) <= 0 || !Number.isFinite(Number(normalizedAmount))) {
     error.value = 'Amount must be greater than zero.';
     return;
   }
-  if (form.value.account_id !== 'acc_unallocated_funds' && !form.value.category_id) {
-    error.value = 'Please select a category.';
+
+  if (!validateMutualSelection()) {
     return;
   }
 
@@ -575,7 +653,7 @@ const handleSubmit = async () => {
       ...form.value,
       category_id: isUnallocated ? null : (form.value.category_id || null),
       bucket_id: isUnallocated ? null : (form.value.bucket_id || null),
-      account_id: accountId,
+      account_id: form.value.account_id || null,
       amount: Number(normalizedAmount),
       description: finalDesc,
       notes: form.value.notes ? form.value.notes.trim() : null
