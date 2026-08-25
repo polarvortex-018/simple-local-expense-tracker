@@ -673,92 +673,185 @@
             </div>
 
             <!-- Frequently Asked Questions Card -->
-            <div class="bg-[#14141d] border border-[#29293a] rounded-2xl p-6 shadow-xl space-y-4">
-              <div class="border-b border-[#29293a] pb-3">
-                <h3 class="text-base font-bold text-[#f1f0f5] flex items-center gap-2">
-                  <span>❓</span> Frequently Asked Questions & App Guide
+            <div class="bg-[#0f1019] border border-[#1f202e] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+              <div class="border-b border-[#1f202e] pb-3.5">
+                <h3 class="text-base font-bold text-[#f1f0f5] tracking-tight flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#D4BFFF] text-xl">help</span>
+                  <span>Frequently Asked Questions & Guides</span>
                 </h3>
-                <p class="text-xs text-[#9e9cae] mt-0.5">Quick guide on how Cash Buddy works and how to organize your finances.</p>
+                <p class="text-xs text-[#9e9cae] mt-1">Comprehensive guide on Cash Buddy mechanics, Savings Buckets, Salary Allocation, and Vaults.</p>
               </div>
 
-              <div class="space-y-3">
-                <!-- Q1: Buckets -->
-                <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
-                  <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
-                    <span>🪣 What are Savings Buckets & why create them?</span>
-                    <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
+              <div class="border border-[#1f202e] rounded-2xl bg-[#0f1019] overflow-hidden divide-y divide-[#1f202e]">
+                <!-- Q1: Savings Buckets Mechanics (Tips & Tricks) -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">savings</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">How do Savings Buckets work?</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
                   </summary>
-                  <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
-                    <p><strong>Buckets represent the PURPOSE of your money (why it exists).</strong></p>
-                    <p class="text-[#9e9cae]">Instead of just seeing a lump sum in your bank account, Savings Buckets allow you to allocate funds for specific goals or expenses—such as an <em>Emergency Fund</em>, <em>Japan Trip</em>, <em>Rent</em>, or <em>Monthly Budget</em>.</p>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p><strong class="text-[#f1f0f5]">Savings Buckets represent the PURPOSE of your money (why it exists).</strong></p>
+                    <p>Instead of needing multiple real bank accounts, Savings Buckets organize your single bank balance into virtual goal allocations (e.g. <em>Emergency Fund</em>, <em>Japan Trip</em>, <em>Monthly Budget</em>, <em>Bike EMI</em>).</p>
+                    <div class="p-2.5 bg-[#141520] border border-[#1f202e] rounded-xl space-y-1 text-[11px] text-[#f1f0f5]">
+                      <p class="font-bold text-[#D4BFFF] flex items-center gap-1">Pro Tips:</p>
+                      <ul class="list-disc pl-4 space-y-1 text-[#9e9cae]">
+                        <li><strong class="text-[#f1f0f5]">Bucket Transfer:</strong> Move allocated funds between buckets anytime without altering physical bank accounts.</li>
+                        <li><strong class="text-[#f1f0f5]">Unallocated Funds Pool:</strong> Any money in bank accounts not assigned to a bucket lives in the Unallocated Pool.</li>
+                        <li><strong class="text-[#f1f0f5]">Mutual Mandate:</strong> Selecting a bucket for a transaction strictly requires selecting a physical storage account!</li>
+                      </ul>
+                    </div>
                   </div>
                 </details>
 
-                <!-- Q2: Accounts -->
-                <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
-                  <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
-                    <span>🏦 What are Accounts & what do they mean?</span>
-                    <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
+                <!-- Q2: Salary Allocation & Salary Split Detailed Guide -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">payments</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">How does Salary Allocation work?</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
                   </summary>
-                  <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
-                    <p><strong>Accounts represent the PHYSICAL STORAGE LOCATION of your money (where it lives).</strong></p>
-                    <p class="text-[#9e9cae]">Examples include your <em>Checking Account</em>, <em>Savings Account</em>, <em>Physical Cash</em>, or <em>Digital Wallet</em>.</p>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p><strong class="text-[#f1f0f5]">Salary Allocation lets you automatically split incoming income into your buckets.</strong></p>
+                    <div class="space-y-2 pt-1">
+                      <div class="flex items-start gap-2">
+                        <span class="w-4.5 h-4.5 rounded-full bg-[#B3F5E1]/15 text-[#B3F5E1] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                        <p><strong class="text-[#f1f0f5]">Log Income:</strong> Add your salary to Unallocated Funds or your bank account (e.g. +₹30,000).</p>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <span class="w-4.5 h-4.5 rounded-full bg-[#B3F5E1]/15 text-[#B3F5E1] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                        <p><strong class="text-[#f1f0f5]">Configure Presets:</strong> Set up a Salary Preset with percentage or fixed rules (e.g. 50% Monthly Budget, 20% Emergency, 30% Savings).</p>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <span class="w-4.5 h-4.5 rounded-full bg-[#B3F5E1]/15 text-[#B3F5E1] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                        <p><strong class="text-[#f1f0f5]">Execute Salary Split:</strong> Tap "Apply Preset" to split unallocated funds across target buckets. Each split creates an income transaction (`include_in_chart = 1`), accurately showing in pie charts!</p>
+                      </div>
+                    </div>
                   </div>
                 </details>
 
-                <!-- Q3: Adding Transactions -->
-                <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
-                  <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
-                    <span>➕ How do I add a transaction and link Buckets & Accounts?</span>
-                    <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
+                <!-- Q3: Debt & Settlement Tracking -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">handshake</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">Debt & Settlement tracking</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
                   </summary>
-                  <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
-                    <p>Tap the <strong>+ Add</strong> button anywhere in the app. You'll choose:</p>
-                    <ul class="list-disc pl-4 space-y-1 text-[#9e9cae]">
-                      <li><strong>Account</strong>: The bank account or cash wallet that paid or received the money.</li>
-                      <li><strong>Savings Bucket</strong>: The purpose allocation that was spent from or added to.</li>
-                      <li><strong>Category</strong>: The category (Food, Utilities, Shopping) for spending charts.</li>
-                    </ul>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p><strong class="text-[#f1f0f5]">Track money you have lent to others or borrowed.</strong></p>
+                    <p>When someone pays you back (or when you settle a debt), tap <strong class="text-[#B3F5E1]">Settle Debt</strong> inside the Debts tab to log a settlement directly to your target bank account.</p>
                   </div>
                 </details>
 
-                <!-- Q4: Filtering -->
-                <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
-                  <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
-                    <span>🔍 How does filtering work across the app?</span>
-                    <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
+                <!-- Q4: Multi-Vault Management -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 text-[#FFD1B3] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">dataset</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">Vaults & switching between them</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
                   </summary>
-                  <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
-                    <p class="text-[#9e9cae]">In the <strong>History</strong> tab, you can filter by Date Range (This Month, Last Month, Custom), Transaction Type (Income/Expense), Account, Bucket, or Categories. The spending breakdown pie charts automatically update to reflect your active filter selection!</p>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p><strong class="text-[#f1f0f5]">Vaults are completely isolated SQLite databases on your phone.</strong></p>
+                    <p>You can create separate vaults for <em>Personal Finances</em>, <em>Business / Freelance</em>, or <em>Test Experiments</em>. Tap the vault name badge at the top of the header anytime to switch or create new vaults.</p>
                   </div>
                 </details>
 
-                <!-- Q5: Export & Backup -->
-                <details class="group bg-[#0f0f15]/40 border border-[#29293a]/80 rounded-xl overflow-hidden transition">
-                  <summary class="p-3.5 text-xs font-bold text-[#dae2fd] cursor-pointer flex items-center justify-between hover:bg-[#0f0f15]/80">
-                    <span>💾 How do I backup or export my database?</span>
-                    <span class="text-[#6b6a7d] group-open:rotate-180 transition-transform">▼</span>
+                <!-- Q5: Storage Accounts -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 text-[#FFD1B3] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">account_balance</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">What are Accounts?</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
                   </summary>
-                  <div class="px-3.5 pb-3.5 text-xs text-[#ccc3d8] space-y-2 border-t border-[#29293a]/40 pt-2.5">
-                    <p class="text-[#9e9cae]">Scroll up to <strong>Data Backup & Export Controls</strong> in Settings. Tap <strong>Export Active Database</strong> to download your standard <code class="text-[#D4BFFF] font-mono">.db</code> SQLite file directly to your phone's Files app, or tap <strong>Create Local Snapshot</strong> to save a local restore point anytime.</p>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p><strong class="text-[#f1f0f5]">Accounts represent physical storage locations where your money lives.</strong></p>
+                    <p>Examples include your <em>Checking Bank Account</em>, <em>Savings Account</em>, <em>Physical Cash Wallet</em>, or <em>UPI Wallet</em>.</p>
+                  </div>
+                </details>
+
+                <!-- Q6: Filtering & Search -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">filter_alt</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">Filtering & searching</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
+                  </summary>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p>In the <strong>History</strong> tab, filter by Date Range (This Month, Last Month, Month Grid Matrix, Custom Range), Transaction Type (Income/Expense), Account, Bucket, or Category.</p>
+                  </div>
+                </details>
+
+                <!-- Q7: Balance Audit Log -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">history_edu</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">Balance Audit Log</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
+                  </summary>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p>Under <strong>More → Balance Audit Log</strong>, view a complete audit trail of all balance recalibrations and adjustments made across accounts and buckets.</p>
+                  </div>
+                </details>
+
+                <!-- Q8: Export & Backup -->
+                <details class="group">
+                  <summary class="p-3 sm:p-3.5 text-xs font-bold text-[#f1f0f5] cursor-pointer flex items-center justify-between hover:bg-[#141520] transition select-none">
+                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div class="w-6.5 h-6.5 rounded-lg bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm">database</span>
+                      </div>
+                      <span class="text-xs font-bold text-[#f1f0f5] truncate">Backup & Export</span>
+                    </div>
+                    <span class="text-[#9e9cae] group-open:rotate-180 transition-transform text-xs shrink-0">▼</span>
+                  </summary>
+                  <div class="px-3.5 pb-3.5 pt-2.5 text-xs text-[#9e9cae] space-y-2 border-t border-[#1f202e] bg-[#0f0f15]/80 leading-relaxed">
+                    <p>Under <strong>More → Backup & Export</strong>, tap <strong>Export Active Database</strong> to save your standard <code class="text-[#D4BFFF] font-mono">.db</code> SQLite file, or tap <strong>Create Local Snapshot</strong> to save a local restore point anytime.</p>
                   </div>
                 </details>
               </div>
             </div>
 
-            <!-- ABOUT CASH BUDDY (Sajid's Creator Note & Guarantee) -->
-            <div class="bg-gradient-to-br from-[#1a1030]/50 via-[#14141d] to-[#14141d] border border-[#D4BFFF]/15 rounded-2xl p-6 shadow-2xl space-y-5">
-              <div class="flex items-center gap-3 border-b border-[#29293a]/80 pb-4">
-                <img src="/cashbuddy-logo.svg?v=3" alt="Cash Buddy Logo" class="w-11 h-11 object-contain" />
+            <!-- ABOUT CASH BUDDY (Sajid's Creator Note & Guarantee - Content Preserved 100% Intact) -->
+            <div class="bg-[#0f1019] border border-[#1f202e] rounded-2xl p-5 shadow-2xl space-y-4">
+              <div class="flex items-center gap-3 border-b border-[#1f202e] pb-3.5">
+                <img src="/cashbuddy-logo.svg?v=3" alt="Cash Buddy Logo" class="w-10 h-10 object-contain shrink-0" />
                 <div>
-                  <h3 class="text-base font-bold text-[#f1f0f5]">About Cash Buddy</h3>
-                  <p class="text-xs text-[#D4BFFF] font-medium">Your Personal Expense Tracker</p>
+                  <h3 class="text-base font-bold text-[#f1f0f5] leading-tight">About Cash Buddy</h3>
+                  <p class="text-xs text-[#D4BFFF] font-medium leading-tight">Your Personal Expense Tracker</p>
                 </div>
               </div>
 
-              <!-- Ideation & Creator Note -->
-              <div class="space-y-3.5 text-xs text-[#ccc3d8] leading-relaxed">
-                <div class="p-3.5 bg-[#1a1030]/50 border border-[#D4BFFF]/20 rounded-xl text-[#D4BFFF] font-medium flex items-center gap-2">
+              <!-- Ideation & Creator Note (Content Intact) -->
+              <div class="space-y-3 text-xs text-[#9e9cae] leading-relaxed">
+                <div class="p-3 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl text-[#D4BFFF] font-medium flex items-center gap-2">
                   <span>✨</span>
                   <span>This whole app was built and ideated by <strong>Sajid</strong>.</span>
                 </div>
@@ -773,9 +866,9 @@
                   This app has been on my mind for the past 4-ish years, and I’ve been making versions of it for a very long time. But this is the first time that I’ve brought it to a phone. I am still actively working on making it better.
                 </p>
 
-              <!-- On-Device Local Data Storage Guarantee -->
-                <div class="p-4 bg-[#0f0f15]/60 border border-[#29293a] rounded-xl space-y-2 text-[#9e9cae]">
-                  <p class="font-bold text-[#dae2fd] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                <!-- On-Device Local Data Storage Guarantee -->
+                <div class="p-3.5 bg-[#141520] border border-[#1f202e] rounded-xl space-y-1.5 text-[#9e9cae]">
+                  <p class="font-bold text-[#f1f0f5] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
                     <span>🔒</span> 100% Local On-Phone Storage Guarantee
                   </p>
                   <p class="text-[#ccc3d8] text-[11px] leading-normal">
@@ -1825,9 +1918,9 @@ const moveCategoryPriority = (idx, direction) => {
   emit('reorder-categories', ids);
 };
 
-const exportUrl = computed(() => api.exportDatabaseUrl());
-const backupsList = ref([]);
-const creatingBackup = ref(false);
+const closeSheet = () => {
+  activeSheet.value = null;
+};
 
 
 const loadBackupsList = async () => {

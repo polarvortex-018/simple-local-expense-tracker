@@ -40,6 +40,18 @@ const openTutorial = () => {
   showOnboardingModal.value = true;
 };
 
+// Settings Component Ref
+const settingsViewRef = ref(null);
+
+const handleSwitchTabFromTour = (tab) => {
+  currentTab.value = tab;
+  if (tab === 'settings') {
+    nextTick(() => {
+      settingsViewRef.value?.closeActiveSheet();
+    });
+  }
+};
+
 // Vaults State
 const vaults = ref([]);
 const activeVault = ref('finance.db');
@@ -86,7 +98,6 @@ const selectedBucketForTx = ref('');
 const selectedTypeForTx = ref('expense');
 const loading = ref(false);
 const error = ref('');
-const settingsViewRef = ref(null);
 const isSettingsSubpageOpen = ref(false);
 
 const fetchTransactions = async () => {
@@ -853,7 +864,7 @@ onMounted(() => {
       :initial-stage="onboardingStage"
       @close="showOnboardingModal = false"
       @completed="refreshAll"
-      @switch-tab="currentTab = $event"
+      @switch-tab="handleSwitchTabFromTour"
       @open-form-step-1="openAddTransaction({ step: 1 })"
       @open-form-step-2="openAddTransaction({ step: 2 })"
       @close-form="showForm = false"

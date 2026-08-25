@@ -3,8 +3,8 @@
     <!-- ============================================================== -->
     <!-- MODE 1: QUICK SETUP MODAL DIALOG                               -->
     <!-- ============================================================== -->
-    <div v-if="isOpen" class="fixed inset-0 z-[100] bg-[#0c0d14]/95 backdrop-blur-xl flex items-start sm:items-center justify-center p-2 pt-[max(1rem,env(safe-area-inset-top))] sm:p-4 overflow-y-auto">
-      <div class="relative w-full max-w-xl bg-[#0f1019] border border-[#1f202e] rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[calc(100dvh-1rem)]">
+    <div v-if="isOpen && !isSpotlightTour" class="fixed inset-0 z-[100] bg-[#0c0d14]/95 backdrop-blur-xl flex items-start sm:items-center justify-center p-3 pt-[max(2.5rem,env(safe-area-inset-top))] sm:p-4 overflow-y-auto">
+      <div class="relative w-full max-w-xl bg-[#0f1019] border border-[#1f202e] rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[calc(100dvh-3.5rem)]">
         
         <!-- TOP HEADER BAR -->
         <div class="px-5 py-4 border-b border-[#1f202e] flex items-center justify-between bg-[#141520]/80 shrink-0">
@@ -767,38 +767,38 @@ const SPOTLIGHT_STEPS = [
     openFormStep: 1,
     title: 'Logging a Transaction (Step 1: Bucket & Account)',
     icon: 'post_add',
-    description: 'First, select which Savings Bucket (or General Account) the transaction belongs to, then pick the Storage Account (e.g. Bank Account, Cash) used for the money.'
+    description: 'First, select your Savings Bucket and Bank Account. Note: choosing a goal bucket strictly requires selecting a real bank account, and vice versa!'
   },
   {
     target: 'transaction-form',
     tab: 'dashboard',
     openFormStep: 2,
-    title: 'Logging a Transaction (Step 2: Type, Category & Amount)',
+    title: 'Logging a Transaction (Step 2: Category, Amount & Date)',
     icon: 'payments',
-    description: 'Next, select the Transaction Type (Expense, Income, Transfer, or Adjust), pick a Category, and enter the Amount and Date. Tap Save to record!'
+    description: 'Next, select the Category, enter the Amount and Date, and optional notes. Tap Save to record with color-coded toast feedback!'
   },
   {
     target: 'history-filters',
     tab: 'transactions',
     closeForm: true,
-    title: 'History & Filtering',
+    title: 'History & Sleek Filtering',
     icon: 'receipt_long',
-    description: 'View your complete ledger grouped by date. Filter by date range, account, or category, or search for any transaction.'
+    description: 'View your complete ledger grouped by date. Use the sleek month/year grid matrix, date filters, or search bar to find any record.'
   },
   {
     target: 'debt-list',
     tab: 'debts',
     title: 'Debt & Settlement Tracker',
     icon: 'handshake',
-    description: 'Track money you have lent to others or borrowed, and log settlements directly to your accounts.'
+    description: 'Track money lent or borrowed, record partial/full settlements directly to your accounts, and get purple toast feedback on settlement.'
   },
   {
     target: 'categories-tile',
     altTarget: 'buckets-tile',
     tab: 'settings',
-    title: 'Managing Categories & Buckets',
+    title: 'More Directory Grid (Categories & Buckets)',
     icon: 'category',
-    description: 'You can create, edit, reorder, or customize colors and icons for new Categories and Savings Buckets anytime under Settings → Manage Categories or Savings Buckets.'
+    description: 'Browse the 2-column hairline grid under More. Manage accounts, goal buckets, categories, icons, and colors anytime.'
   },
   {
     target: 'backup-tile',
@@ -857,17 +857,25 @@ function updateSpotlightStep() {
           height: rect.height + 12
         };
 
-        // Position tooltip below or above target
+        // Smart position tooltip below, above, or anchored to safe edges
         const spaceBelow = window.innerHeight - rect.bottom;
-        if (spaceBelow > 240) {
+        const spaceAbove = rect.top;
+
+        if (spaceBelow >= 240) {
           tooltipStyle.value = { 
-            top: (rect.bottom + 16) + 'px', 
+            top: (rect.bottom + 14) + 'px', 
+            left: '50%', 
+            transform: 'translateX(-50%)' 
+          };
+        } else if (spaceAbove >= 240) {
+          tooltipStyle.value = { 
+            top: Math.max(54, rect.top - 210) + 'px', 
             left: '50%', 
             transform: 'translateX(-50%)' 
           };
         } else {
           tooltipStyle.value = { 
-            bottom: (window.innerHeight - rect.top + 16) + 'px', 
+            bottom: 'max(24px, env(safe-area-inset-bottom))', 
             left: '50%', 
             transform: 'translateX(-50%)' 
           };
