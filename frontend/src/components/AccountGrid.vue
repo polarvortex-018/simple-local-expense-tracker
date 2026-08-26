@@ -27,6 +27,7 @@
 <script setup>
 import { computed } from 'vue';
 import { currencySymbol } from '../utils/currency.js';
+import { sortAccountsByOrder } from '../utils/accountSorter.js';
 
 const props = defineProps({
   accounts: { type: Array, required: true },
@@ -34,7 +35,7 @@ const props = defineProps({
 });
 
 const filteredAccounts = computed(() => {
-  return props.accounts || [];
+  return sortAccountsByOrder(props.accounts || []);
 });
 
 const emit = defineEmits(['update:modelValue', 'accountClick']);

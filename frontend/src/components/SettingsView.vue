@@ -321,29 +321,37 @@
               </div>
             </div>
 
-            <div v-if="displayedBuckets.length > 0" class="divide-y divide-[#1f202e] border-y border-[#1f202e]">
+            <div 
+              v-if="localBuckets.length > 0" 
+              class="divide-y divide-[#1f202e]/60 border-y border-[#1f202e]/60 relative"
+            >
               <div 
-                v-for="(bucket, idx) in displayedBuckets" 
+                v-for="(bucket, idx) in localBuckets" 
                 :key="bucket.id"
-                class="py-3 px-1 hover:bg-[#141520] transition duration-150 flex items-center justify-between"
+                :data-drag-idx="idx"
+                class="py-2.5 px-2 hover:bg-[#141520] flex items-center justify-between group rounded-lg select-none relative bg-[#0c0d14]"
+                :class="{
+                  'z-50 shadow-2xl scale-[1.02] bg-[#1a1b2a] border border-[#D4BFFF]/80 text-white rounded-xl ring-2 ring-[#D4BFFF]/30': isDragActive && activeDragType === 'buckets' && activeDragIdx === idx,
+                  'border-t-2 border-[#D4BFFF]': isDragActive && activeDragType === 'buckets' && dropTargetIdx === idx && activeDragIdx !== idx
+                }"
+                :style="{ 
+                  transform: getItemTransform(idx, 'buckets'), 
+                  transition: (isDragActive && activeDragType === 'buckets' && activeDragIdx === idx) ? 'none' : 'transform 0.22s cubic-bezier(0.2, 1, 0.3, 1)',
+                  pointerEvents: (isDragActive && activeDragType === 'buckets' && activeDragIdx === idx) ? 'none' : 'auto'
+                }"
               >
                 <div class="flex items-center gap-2.5 min-w-0 flex-grow">
-                  <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
-                    <button 
-                      type="button"
-                      @click="moveBucketPriority(idx, -1)"
-                      :disabled="idx === 0"
-                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Up"
-                    >▲</button>
-                    <button 
-                      type="button"
-                      @click="moveBucketPriority(idx, 1)"
-                      :disabled="idx === displayedBuckets.length - 1"
-                      class="text-[10px] leading-none p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Down"
-                    >▼</button>
-                  </div>
+                  <!-- Long-Press Drag Handle -->
+                  <span 
+                    @pointerdown="handleDragPointerDown($event, idx, 'buckets')"
+                    @pointermove="handleDragPointerMove"
+                    @pointerup="handleDragPointerUp"
+                    @pointercancel="handleDragPointerUp"
+                    class="material-symbols-outlined text-base text-[#9e9cae]/50 hover:text-[#D4BFFF] cursor-grab active:cursor-grabbing select-none shrink-0 p-1.5 transition-colors touch-none"
+                    title="Press & hold to drag reorder"
+                  >
+                    drag_indicator
+                  </span>
 
                   <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-base leading-none" :style="{ color: bucket.color || '#D4BFFF' }">{{ resolveIcon(bucket.icon, 'savings') }}</span>
@@ -437,77 +445,109 @@
               </button>
             </form>
 
-            <!-- Account List -->
+            <!-- Reorderable Account List -->
             <div>
-              <div v-if="userAccounts.length > 0" class="divide-y divide-[#1f202e] border-y border-[#1f202e]">
+              <div 
+                v-if="localAccounts.length > 0" 
+                class="divide-y divide-[#1f202e]/60 border-y border-[#1f202e]/60 relative"
+              >
                 <div 
-                  v-for="account in userAccounts" 
+                  v-for="(account, idx) in localAccounts" 
                   :key="account.id"
-                  class="py-3 px-1 hover:bg-[#141520] transition duration-150"
+                  :data-drag-idx="idx"
+                  class="py-2.5 px-2 hover:bg-[#141520] flex items-center justify-between group rounded-lg select-none relative bg-[#0c0d14]"
+                  :class="{
+                    'z-50 shadow-2xl scale-[1.02] bg-[#1a1b2a] border border-[#D4BFFF]/80 text-white rounded-xl ring-2 ring-[#D4BFFF]/30': isDragActive && activeDragType === 'accounts' && activeDragIdx === idx,
+                    'border-t-2 border-[#D4BFFF]': isDragActive && activeDragType === 'accounts' && dropTargetIdx === idx && activeDragIdx !== idx
+                  }"
+                  :style="{ 
+                    transform: getItemTransform(idx, 'accounts'), 
+                    transition: (isDragActive && activeDragType === 'accounts' && activeDragIdx === idx) ? 'none' : 'transform 0.22s cubic-bezier(0.2, 1, 0.3, 1)',
+                    pointerEvents: (isDragActive && activeDragType === 'accounts' && activeDragIdx === idx) ? 'none' : 'auto'
+                  }"
                 >
-                  <!-- Editing Mode -->
-                  <div v-if="editingAccountId === account.id" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input 
-                        v-model="editAccountName"
-                        type="text"
-                        required
-                        class="w-full px-3 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
-                      />
-                      <select 
-                        v-model="editAccountType"
-                        class="w-full px-2.5 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
-                      >
-                        <option value="Checking" class="bg-[#0c0d14]">Checking</option>
-                        <option value="Savings" class="bg-[#0c0d14]">Savings</option>
-                        <option value="Credit Card" class="bg-[#0c0d14]">Credit Card</option>
-                        <option value="Cash" class="bg-[#0c0d14]">Cash</option>
-                        <option value="Wallet" class="bg-[#0c0d14]">Wallet</option>
-                      </select>
+                  <!-- Long-Press Drag Handle & Account Info -->
+                  <div class="flex items-center gap-2.5 min-w-0 flex-grow">
+                    <span 
+                      @pointerdown="handleDragPointerDown($event, idx, 'accounts')"
+                      @pointermove="handleDragPointerMove"
+                      @pointerup="handleDragPointerUp"
+                      @pointercancel="handleDragPointerUp"
+                      class="material-symbols-outlined text-base text-[#9e9cae]/50 hover:text-[#D4BFFF] cursor-grab active:cursor-grabbing select-none shrink-0 p-1.5 transition-colors touch-none"
+                      title="Press & hold to drag reorder"
+                    >
+                      drag_indicator
+                    </span>
+
+                    <!-- Editing Mode (User Accounts Only) -->
+                    <div v-if="editingAccountId === account.id" class="space-y-3 flex-1">
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input 
+                          v-model="editAccountName"
+                          type="text"
+                          required
+                          class="w-full px-3 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition"
+                        />
+                        <select 
+                          v-model="editAccountType"
+                          class="w-full px-2.5 py-1.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-lg text-[#f1f0f5] text-xs focus:outline-none transition cursor-pointer"
+                        >
+                          <option value="Checking" class="bg-[#0c0d14]">Checking</option>
+                          <option value="Savings" class="bg-[#0c0d14]">Savings</option>
+                          <option value="Credit Card" class="bg-[#0c0d14]">Credit Card</option>
+                          <option value="Cash" class="bg-[#0c0d14]">Cash</option>
+                          <option value="Wallet" class="bg-[#0c0d14]">Wallet</option>
+                        </select>
+                      </div>
+                      <div class="flex justify-end gap-2">
+                        <button 
+                          type="button"
+                          @click="cancelEditAccount"
+                          class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          type="button"
+                          @click="saveAccountEdit(account)"
+                          class="px-2.5 py-1 bg-[#D4BFFF] text-[#0f0f15] font-bold text-[10px] rounded-lg transition cursor-pointer"
+                        >
+                          Save
+                        </button>
+                      </div>
                     </div>
-                    <div class="flex justify-end gap-2">
-                      <button 
-                        type="button"
-                        @click="cancelEditAccount"
-                        class="px-2.5 py-1 text-[10px] font-semibold text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        type="button"
-                        @click="saveAccountEdit(account)"
-                        class="px-2.5 py-1 bg-[#D4BFFF] text-[#0f0f15] font-bold text-[10px] rounded-lg transition cursor-pointer"
-                      >
-                        Save
-                      </button>
+
+                    <!-- Normal Mode -->
+                    <div v-else class="min-w-0 flex-1">
+                      <div class="flex items-center gap-2">
+                        <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ account.name }}</p>
+                        <span v-if="account.id === 'acc_unallocated_funds'" class="px-1.5 py-0.2 rounded bg-[#FFD1B3]/15 text-[#FFD1B3] text-[9px] font-bold uppercase tracking-wider border border-[#FFD1B3]/30">System Default</span>
+                      </div>
+                      <p class="text-[10px] text-[#9e9cae] mt-0.5">
+                        <span class="px-1.5 py-0.5 rounded bg-[#0f1019] border border-[#1f202e] text-[#9e9cae]">{{ account.type || 'System Pool' }}</span>
+                        <span class="ml-2 font-medium text-[#f1f0f5]">Balance: <span class="font-bold text-[#B3F5E1]">{{ currencySymbol }}{{ formatAmount(account.id === 'acc_unallocated_funds' ? unassignedAmount : account.balance) }}</span></span>
+                      </p>
                     </div>
                   </div>
 
-                  <!-- Normal Mode -->
-                  <div v-else class="flex items-center justify-between">
-                    <div>
-                      <p class="text-xs font-bold text-[#f1f0f5]">{{ account.name }}</p>
-                      <p class="text-[10px] text-[#9e9cae] mt-0.5">
-                        <span class="px-1.5 py-0.5 rounded bg-[#0f1019] border border-[#1f202e] text-[#9e9cae]">{{ account.type }}</span>
-                        <span class="ml-2 font-medium text-[#f1f0f5]">Balance: <span class="font-bold text-[#B3F5E1]">{{ currencySymbol }}{{ formatAmount(account.balance) }}</span></span>
-                      </p>
-                    </div>
-                    <div class="flex gap-1">
+                  <!-- Actions -->
+                  <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                    <template v-if="account.id !== 'acc_unallocated_funds' && editingAccountId !== account.id">
                       <button 
                         @click="startEditAccount(account)"
-                        class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#141520] p-1.5 rounded-lg transition cursor-pointer"
+                        class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#141520] p-1.5 rounded-lg transition cursor-pointer text-xs"
                         title="Edit Account"
                       >
                         <span class="material-symbols-outlined text-sm">edit</span>
                       </button>
                       <button 
                         @click="confirmDeleteAccount(account)"
-                        class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer"
+                        class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer text-xs"
                         title="Delete Account"
                       >
                         <span class="material-symbols-outlined text-sm">delete</span>
                       </button>
-                    </div>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -532,29 +572,38 @@
               </button>
             </div>
 
-            <div v-if="categories.length > 0" class="divide-y divide-[#1f202e] border-y border-[#1f202e]">
+            <div 
+              v-if="localCategories.length > 0" 
+              class="divide-y divide-[#1f202e]/60 border-y border-[#1f202e]/60 relative"
+            >
               <div 
-                v-for="(category, idx) in categories" 
+                v-for="(category, idx) in localCategories" 
                 :key="category.id"
-                class="py-2.5 px-1 flex items-center justify-between gap-2 hover:bg-[#141520] transition duration-150"
+                :data-drag-idx="idx"
+                class="py-2.5 px-2 hover:bg-[#141520] flex items-center justify-between gap-2 group rounded-lg select-none relative bg-[#0c0d14]"
+                :class="{
+                  'z-50 shadow-2xl scale-[1.02] bg-[#1a1b2a] border border-[#D4BFFF]/80 text-white rounded-xl ring-2 ring-[#D4BFFF]/30': isDragActive && activeDragType === 'categories' && activeDragIdx === idx,
+                  'border-t-2 border-[#D4BFFF]': isDragActive && activeDragType === 'categories' && dropTargetIdx === idx && activeDragIdx !== idx
+                }"
+                :style="{ 
+                  transform: getItemTransform(idx, 'categories'), 
+                  transition: (isDragActive && activeDragType === 'categories' && activeDragIdx === idx) ? 'none' : 'transform 0.22s cubic-bezier(0.2, 1, 0.3, 1)',
+                  pointerEvents: (isDragActive && activeDragType === 'categories' && activeDragIdx === idx) ? 'none' : 'auto'
+                }"
               >
                 <div class="flex items-center gap-2.5 min-w-0 flex-grow">
-                  <div class="flex flex-col gap-0.5 shrink-0 mr-0.5">
-                    <button 
-                      type="button"
-                      @click="moveCategoryPriority(idx, -1)"
-                      :disabled="idx === 0"
-                      class="text-[9px] p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Up"
-                    >▲</button>
-                    <button 
-                      type="button"
-                      @click="moveCategoryPriority(idx, 1)"
-                      :disabled="idx === categories.length - 1"
-                      class="text-[9px] p-0.5 text-[#9e9cae] hover:text-[#D4BFFF] disabled:opacity-20 cursor-pointer"
-                      title="Move Priority Down"
-                    >▼</button>
-                  </div>
+                  <!-- Long-Press Drag Handle -->
+                  <span 
+                    @pointerdown="handleDragPointerDown($event, idx, 'categories')"
+                    @pointermove="handleDragPointerMove"
+                    @pointerup="handleDragPointerUp"
+                    @pointercancel="handleDragPointerUp"
+                    class="material-symbols-outlined text-base text-[#9e9cae]/50 hover:text-[#D4BFFF] cursor-grab active:cursor-grabbing select-none shrink-0 p-1.5 transition-colors touch-none"
+                    title="Press & hold to drag reorder"
+                  >
+                    drag_indicator
+                  </span>
+
                   <div class="w-7 h-7 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-base leading-none" :style="{ color: category.color || '#D4BFFF' }">{{ resolveIcon(category.icon, 'category') }}</span>
                   </div>
@@ -988,7 +1037,7 @@
                 <div class="min-w-0 flex-1">
                   <p class="font-bold text-[#f1f0f5] truncate">{{ log.description || 'Account Adjustment' }}</p>
                   <p class="text-[10px] text-[#9e9cae] mt-0.5">
-                    {{ log.date }} • Account: {{ log.account_name || 'General' }} • Bucket: {{ log.bucket_name || 'General' }}
+                    {{ log.date }} • Account: {{ log.account_name || 'Unassigned' }} • Bucket: {{ log.bucket_name || 'Unassigned' }}
                   </p>
                 </div>
                 <span 
@@ -1536,6 +1585,8 @@ import CategoryPicker from './CategoryPicker.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 import { api } from '../services/api';
 import { CURRENCIES, currentCurrency, currencySymbol, setCurrency } from '../utils/currency.js';
+import { sortAccountsByOrder, saveAccountOrder } from '../utils/accountSorter.js';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -1546,6 +1597,14 @@ const customAuditMonth = ref('');
 
 const backupsList = ref([]);
 const creatingBackup = ref(false);
+
+const hideUnallocatedDashboard = ref(localStorage.getItem('cashbuddy_hide_unallocated_dashboard') === 'true');
+
+const toggleHideUnallocatedDashboard = () => {
+  hideUnallocatedDashboard.value = !hideUnallocatedDashboard.value;
+  localStorage.setItem('cashbuddy_hide_unallocated_dashboard', String(hideUnallocatedDashboard.value));
+  window.dispatchEvent(new CustomEvent('cashbuddy-settings-updated'));
+};
 
 const currencySearchQuery = ref('');
 const customCurrencyCode = ref('');
@@ -1683,7 +1742,7 @@ const emit = defineEmits([
   'create-account', 'update-account', 'delete-account',
   'create-category', 'update-category', 'delete-category',
   'create-bucket', 'update-bucket', 'delete-bucket', 'transfer-bucket', 'transfer-accounts',
-  'reorder-buckets', 'reorder-categories', 'allocate-unassigned', 'data-refresh', 'open-tutorial',
+  'reorder-buckets', 'reorder-categories', 'reorder-accounts', 'allocate-unassigned', 'data-refresh', 'open-tutorial',
   'active-sheet-change', 'error'
 ]);
 
@@ -1707,6 +1766,31 @@ const editAccountType = ref('Checking');
 
 const userAccounts = computed(() => props.accounts || []);
 
+const displayedAccounts = computed(() => {
+  const list = [...(props.accounts || [])];
+  const hasUnalloc = list.some(a => a.id === 'acc_unallocated_funds');
+  if (!hasUnalloc) {
+    list.unshift({
+      id: 'acc_unallocated_funds',
+      name: 'Unallocated Funds',
+      type: 'System Pool',
+      balance: unassignedAmount.value,
+      isSystemDefault: true
+    });
+  }
+  return sortAccountsByOrder(list);
+});
+
+const moveAccountPriority = (idx, direction) => {
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= displayedAccounts.value.length) return;
+  const list = [...displayedAccounts.value];
+  const [moved] = list.splice(idx, 1);
+  list.splice(newIdx, 0, moved);
+  const ids = list.map(a => a.id);
+  saveAccountOrder(ids);
+};
+
 const submitAccount = () => {
   if (!newAccount.value.name.trim()) return;
   submittingAccount.value = true;
@@ -1719,6 +1803,7 @@ const submitAccount = () => {
 };
 
 const startEditAccount = (account) => {
+  if (account.id === 'acc_unallocated_funds') return;
   editingAccountId.value = account.id;
   editAccountName.value = account.name;
   editAccountType.value = account.type;
@@ -1729,6 +1814,7 @@ const cancelEditAccount = () => {
 };
 
 const saveAccountEdit = (account) => {
+  if (account.id === 'acc_unallocated_funds') return;
   const name = editAccountName.value.trim();
   if (!name) return;
   emit('update-account', account.id, {
@@ -1739,6 +1825,10 @@ const saveAccountEdit = (account) => {
 };
 
 const confirmDeleteAccount = (account) => {
+  if (account.id === 'acc_unallocated_funds') {
+    alert('Unallocated Funds is a system default account and cannot be deleted.');
+    return;
+  }
   const confirm = window.confirm(`Are you sure you want to delete the account "${account.name}"?`);
   if (confirm) {
     emit('delete-account', account.id);
@@ -1950,7 +2040,7 @@ const loadPresets = async () => {
 };
 
 const getBucketName = (id) => {
-  if (!id) return 'General / No Bucket';
+  if (!id) return 'Unassigned / No Bucket';
   return (props.buckets || []).find(b => b.id === id)?.name || 'Unknown Bucket';
 };
 const getAccountName = (id) => (props.accounts || []).find(a => a.id === id)?.name || 'Unknown Account';
@@ -2042,24 +2132,221 @@ const editingPresetTotalFixed = computed(() => {
   return editingPreset.value.rules.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
 });
 
-const moveBucketPriority = (idx, direction) => {
-  const newIdx = idx + direction;
-  if (newIdx < 0 || newIdx >= displayedBuckets.value.length) return;
-  const list = [...displayedBuckets.value];
-  const [moved] = list.splice(idx, 1);
-  list.splice(newIdx, 0, moved);
-  const ids = list.map(b => b.id);
-  emit('reorder-buckets', ids);
+// Local reactive copies for smooth instant reordering & drag & drop
+const localAccounts = ref([]);
+const localBuckets = ref([]);
+const localCategories = ref([]);
+
+const updateLocalAccounts = () => {
+  const list = [...(props.accounts || [])];
+  const hasUnalloc = list.some(a => a.id === 'acc_unallocated_funds');
+  if (!hasUnalloc) {
+    list.unshift({
+      id: 'acc_unallocated_funds',
+      name: 'Unallocated Funds',
+      type: 'System Pool',
+      balance: unassignedAmount.value,
+      isSystemDefault: true
+    });
+  }
+  localAccounts.value = sortAccountsByOrder(list);
 };
 
-const moveCategoryPriority = (idx, direction) => {
-  const newIdx = idx + direction;
-  if (newIdx < 0 || newIdx >= props.categories.length) return;
-  const list = [...props.categories];
-  const [moved] = list.splice(idx, 1);
-  list.splice(newIdx, 0, moved);
-  const ids = list.map(c => c.id);
-  emit('reorder-categories', ids);
+const updateLocalBuckets = () => {
+  const list = showArchivedBuckets.value 
+    ? (props.buckets || [])
+    : (props.buckets || []).filter(b => !b.is_archived);
+  localBuckets.value = [...list];
+};
+
+const updateLocalCategories = () => {
+  localCategories.value = [...(props.categories || [])];
+};
+
+watch(() => props.accounts, updateLocalAccounts, { immediate: true, deep: true });
+watch([() => props.buckets, showArchivedBuckets], updateLocalBuckets, { immediate: true, deep: true });
+watch(() => props.categories, updateLocalCategories, { immediate: true, deep: true });
+
+// Mobile Long-Press Drag & Drop State
+const activeDragType = ref(null); // 'accounts', 'buckets', 'categories'
+const activeDragIdx = ref(null);
+const dropTargetIdx = ref(null);
+const isDragActive = ref(false);
+const touchStartY = ref(0);
+const touchStartX = ref(0);
+const dragOffsetY = ref(0);
+let pressTimer = null;
+
+const getTargetList = (type) => {
+  if (type === 'accounts') return localAccounts;
+  if (type === 'buckets') return localBuckets;
+  if (type === 'categories') return localCategories;
+  return null;
+};
+
+const triggerHaptic = async () => {
+  try {
+    await Haptics.impact({ style: ImpactStyle.Medium });
+  } catch (e) {}
+  try {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([50]);
+    }
+  } catch (err) {}
+};
+
+const removePointerListeners = () => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('pointermove', handleDragPointerMove);
+    window.removeEventListener('pointerup', handleDragPointerUp);
+    window.removeEventListener('pointercancel', handleDragPointerUp);
+    window.removeEventListener('touchmove', handleDragPointerMove);
+    window.removeEventListener('touchend', handleDragPointerUp);
+  }
+};
+
+// Start Pointer gesture on Drag Handle with 180ms Long-Press delay
+const handleDragPointerDown = (event, idx, type) => {
+  try {
+    if (typeof window !== 'undefined' && window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
+  } catch (e) {}
+
+  activeDragType.value = type;
+  activeDragIdx.value = idx;
+  dropTargetIdx.value = idx;
+  isDragActive.value = false;
+  dragOffsetY.value = 0;
+
+  const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+  const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+  touchStartY.value = clientY;
+  touchStartX.value = clientX;
+
+  if (pressTimer) clearTimeout(pressTimer);
+
+  if (event.target && event.target.setPointerCapture && event.pointerId !== undefined) {
+    try {
+      event.target.setPointerCapture(event.pointerId);
+    } catch (e) {}
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('pointermove', handleDragPointerMove, { passive: false });
+    window.addEventListener('pointerup', handleDragPointerUp);
+    window.addEventListener('pointercancel', handleDragPointerUp);
+    window.addEventListener('touchmove', handleDragPointerMove, { passive: false });
+    window.addEventListener('touchend', handleDragPointerUp);
+  }
+
+  // 180ms long press timer for fast responsive card pickup with native haptic vibration
+  pressTimer = setTimeout(() => {
+    isDragActive.value = true;
+    triggerHaptic();
+  }, 180);
+};
+
+const handleDragPointerMove = (event) => {
+  if (activeDragIdx.value === null || !activeDragType.value) return;
+
+  const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+  const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+  const deltaY = clientY - touchStartY.value;
+  const deltaX = clientX - touchStartX.value;
+
+  // Cancel long-press if movement occurs before 180ms threshold -> enables native sheet scrolling!
+  if (!isDragActive.value) {
+    if (Math.hypot(deltaY, deltaX) > 6) {
+      if (pressTimer) clearTimeout(pressTimer);
+      pressTimer = null;
+      removePointerListeners();
+    }
+    return;
+  }
+
+  if (event.cancelable && event.preventDefault) {
+    event.preventDefault();
+  }
+
+  dragOffsetY.value = deltaY;
+
+  const element = document.elementFromPoint(clientX, clientY);
+  if (!element) return;
+  const rowElement = element.closest('[data-drag-idx]');
+  if (rowElement) {
+    const idx = parseInt(rowElement.getAttribute('data-drag-idx'), 10);
+    if (!isNaN(idx) && idx !== dropTargetIdx.value) {
+      dropTargetIdx.value = idx;
+    }
+  }
+};
+
+const handleDragPointerUp = () => {
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+
+  removePointerListeners();
+
+  const fromIdx = activeDragIdx.value;
+  const toIdx = dropTargetIdx.value;
+  const type = activeDragType.value;
+  const wasActive = isDragActive.value;
+
+  // Instantly clear drag state to eliminate visual lag/glitch when placing card
+  activeDragType.value = null;
+  activeDragIdx.value = null;
+  dropTargetIdx.value = null;
+  isDragActive.value = false;
+  dragOffsetY.value = 0;
+
+  if (wasActive && fromIdx !== null && toIdx !== null && type && fromIdx !== toIdx) {
+    requestAnimationFrame(() => {
+      const targetRef = getTargetList(type);
+      if (targetRef && targetRef.value) {
+        const list = [...targetRef.value];
+        const [moved] = list.splice(fromIdx, 1);
+        list.splice(toIdx, 0, moved);
+        targetRef.value = list;
+
+        const ids = list.map(item => item.id);
+        if (type === 'accounts') {
+          saveAccountOrder(ids);
+          emit('reorder-accounts', ids);
+        } else if (type === 'buckets') {
+          emit('reorder-buckets', ids);
+        } else if (type === 'categories') {
+          emit('reorder-categories', ids);
+        }
+      }
+    });
+  }
+};
+
+// Calculate hardware-accelerated CSS translateY transform for surrounding rows
+const getItemTransform = (idx, type) => {
+  if (!isDragActive.value || activeDragType.value !== type || activeDragIdx.value === null || dropTargetIdx.value === null) {
+    return 'translateY(0px)';
+  }
+
+  const from = activeDragIdx.value;
+  const to = dropTargetIdx.value;
+
+  if (idx === from) {
+    return `translateY(${dragOffsetY.value}px)`;
+  }
+
+  if (from < to && idx > from && idx <= to) {
+    return 'translateY(-52px)';
+  }
+
+  if (from > to && idx >= to && idx < from) {
+    return 'translateY(52px)';
+  }
+
+  return 'translateY(0px)';
 };
 
 const closeSheet = () => {
@@ -2154,3 +2441,9 @@ const formatSize = (bytes) => {
   return `${(kb / 1024).toFixed(1)} MB`;
 };
 </script>
+
+<style scoped>
+.flip-list-move {
+  transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1);
+}
+</style>

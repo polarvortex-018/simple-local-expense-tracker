@@ -280,6 +280,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 import { currencySymbol } from '../utils/currency.js';
+import { sortAccountsByOrder } from '../utils/accountSorter.js';
 import BlackHoleCanvas from './BlackHoleCanvas.vue';
 import AccountAdjustmentModal from './AccountAdjustmentModal.vue';
 
@@ -355,8 +356,24 @@ const blackHoleColors = computed(() => {
 });
 
 // Metrics & Number Ticker Animations
+const hideUnallocatedDashboard = ref(localStorage.getItem('cashbuddy_hide_unallocated_dashboard') === 'true');
+
+const updateHideUnallocated = () => {
+  hideUnallocatedDashboard.value = localStorage.getItem('cashbuddy_hide_unallocated_dashboard') === 'true';
+};
+
+const toggleHideUnallocatedDashboard = () => {
+  hideUnallocatedDashboard.value = !hideUnallocatedDashboard.value;
+  localStorage.setItem('cashbuddy_hide_unallocated_dashboard', String(hideUnallocatedDashboard.value));
+  window.dispatchEvent(new CustomEvent('cashbuddy-settings-updated'));
+};
+
 const physicalAccounts = computed(() => {
-  return props.accounts || [];
+  let list = props.accounts || [];
+  if (hideUnallocatedDashboard.value) {
+    list = list.filter(a => a.id !== 'acc_unallocated_funds');
+  }
+  return sortAccountsByOrder(list);
 });
 
 const currentMonthLabel = computed(() => {
@@ -537,10 +554,12 @@ const animateOrbit = (timestamp) => {
 
 onMounted(() => {
   animFrameId = requestAnimationFrame(animateOrbit);
+  window.addEventListener('cashbuddy-settings-updated', updateHideUnallocated);
 });
 
 onUnmounted(() => {
   if (animFrameId) cancelAnimationFrame(animFrameId);
+  window.removeEventListener('cashbuddy-settings-updated', updateHideUnallocated);
 });
 
 watch(activeDashboardIndex, (newVal) => {

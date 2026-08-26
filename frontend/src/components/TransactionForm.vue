@@ -136,7 +136,7 @@
               <div class="flex flex-wrap items-center gap-1.5 min-w-0">
                 <span class="px-2 py-0.5 rounded-md bg-[#D4BFFF]/15 text-[#D4BFFF] font-semibold text-[10px] truncate flex items-center gap-1">
                   <span v-if="selectedBucketObj" class="material-symbols-outlined text-xs leading-none">{{ resolveIcon(selectedBucketObj.icon, 'savings') }}</span>
-                  <span>{{ selectedBucketObj ? selectedBucketObj.name : 'General' }}</span>
+                  <span>{{ selectedBucketObj ? selectedBucketObj.name : 'Unassigned' }}</span>
                 </span>
                 <span class="text-[#9e9cae] shrink-0 text-[10px]">•</span>
                 <span class="px-2 py-0.5 rounded-md bg-[#141520] border border-[#1f202e] text-[#f1f0f5] font-semibold text-[10px] truncate">{{ selectedAccountName }}</span>
@@ -577,7 +577,7 @@ const selectedBucketObj = computed(() => {
 
 const selectedBucketName = computed(() => {
   const b = selectedBucketObj.value;
-  return b ? b.name : 'General';
+  return b ? b.name : 'Unassigned';
 });
 
 const selectedAccountName = computed(() => {

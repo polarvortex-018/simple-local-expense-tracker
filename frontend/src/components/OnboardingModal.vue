@@ -14,7 +14,7 @@
             </div>
             <div>
               <h2 class="text-sm font-bold text-[#f1f0f5] leading-tight">Quick Vault Setup</h2>
-              <p class="text-[10px] text-[#9e9cae] leading-tight">Step {{ setupStep }} of 4</p>
+              <p class="text-[10px] text-[#9e9cae] leading-tight">Step {{ setupStep }} of 5</p>
             </div>
           </div>
 
@@ -31,10 +31,102 @@
         <!-- MAIN SCROLLABLE CONTENT BODY -->
         <div class="p-5 sm:p-6 overflow-y-auto flex-grow space-y-5 pb-48 sm:pb-6">
           
-          <!-- STEP 1: ACCOUNTS -->
+          <!-- STEP 1: CURRENCY & REGION -->
           <div v-if="setupStep === 1" class="space-y-4">
             <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Step 1 • Accounts</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#B3F5E1]">Step 1 • Currency & Region</span>
+              <h3 class="text-lg font-bold text-[#f1f0f5] mt-0.5">Choose your Vault Currency</h3>
+              <p class="text-xs text-[#9e9cae] mt-1">Select your preferred currency symbol and formatting. Stored locally and works 100% offline.</p>
+            </div>
+
+            <!-- Active Selected Currency Preview Card -->
+            <div class="p-3.5 bg-[#141520] border border-[#B3F5E1]/40 rounded-2xl flex items-center justify-between shadow-md">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#B3F5E1]/15 border border-[#B3F5E1]/30 text-[#B3F5E1] flex items-center justify-center font-bold text-base">
+                  {{ currencySymbol }}
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-[#f1f0f5] leading-tight">{{ currentCurrency.name }}</h4>
+                  <p class="text-[10px] text-[#9e9cae] mt-0.5 font-mono">Code: {{ currentCurrency.code }} · Symbol: {{ currencySymbol }}</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-[#B3F5E1]/20 text-[#B3F5E1] text-[10px] font-bold uppercase">Active</span>
+            </div>
+
+            <!-- Search Currency Input -->
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-[#9e9cae]">search</span>
+              <input
+                v-model="currencySearchQuery"
+                type="text"
+                placeholder="Search currency (e.g. INR, SAR, USD, EUR...)"
+                class="w-full pl-9 pr-3 py-2 bg-[#141520] border border-[#1f202e] focus:border-[#B3F5E1] rounded-xl text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none transition"
+              />
+            </div>
+
+            <!-- Currencies Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
+              <button
+                v-for="curr in filteredCurrencies"
+                :key="curr.code"
+                @click="handleSelectCurrency(curr)"
+                type="button"
+                class="p-2.5 rounded-xl border text-left flex items-center justify-between transition cursor-pointer active:scale-95 min-h-[46px]"
+                :class="currentCurrency.code === curr.code ? 'bg-[#B3F5E1]/15 border-[#B3F5E1] ring-1 ring-[#B3F5E1]/30' : 'bg-[#141520] border-[#1f202e] hover:bg-[#191924]'"
+              >
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-6 h-6 rounded-lg bg-[#0f1019] border border-[#1f202e] flex items-center justify-center text-xs font-bold text-[#D4BFFF] shrink-0">
+                    {{ curr.symbol || curr.code }}
+                  </span>
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-[#f1f0f5] truncate leading-tight">{{ curr.code }}</p>
+                    <p class="text-[9px] text-[#9e9cae] truncate mt-0.5">{{ curr.name }}</p>
+                  </div>
+                </div>
+                <span v-if="currentCurrency.code === curr.code" class="text-xs font-bold text-[#B3F5E1]">✓</span>
+              </button>
+            </div>
+
+            <!-- Custom Currency Expander -->
+            <div v-if="showCustomCurrencyForm" class="p-3.5 bg-[#141520] border border-[#1f202e] rounded-2xl space-y-2.5">
+              <h4 class="text-xs font-bold text-[#B3F5E1]">Custom Currency</h4>
+              <div class="grid grid-cols-2 gap-2">
+                <input
+                  v-model="customCurrencyCode"
+                  type="text"
+                  placeholder="Code (e.g. KWD)"
+                  class="bg-[#0f1019] border border-[#1f202e] focus:border-[#B3F5E1] rounded-xl px-3 py-1.5 text-xs text-[#f1f0f5] focus:outline-none uppercase"
+                />
+                <input
+                  v-model="customCurrencySymbol"
+                  type="text"
+                  placeholder="Symbol (e.g. KD)"
+                  class="bg-[#0f1019] border border-[#1f202e] focus:border-[#B3F5E1] rounded-xl px-3 py-1.5 text-xs text-[#f1f0f5] focus:outline-none"
+                />
+              </div>
+              <button
+                @click="handleApplyCustomCurrency"
+                type="button"
+                class="w-full py-2 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer"
+              >
+                Apply Custom Currency
+              </button>
+            </div>
+            <button
+              v-else
+              @click="showCustomCurrencyForm = true"
+              type="button"
+              class="w-full py-2 bg-[#141520] hover:bg-[#191924] border border-dashed border-[#1f202e] hover:border-[#B3F5E1]/50 text-xs font-bold text-[#B3F5E1] rounded-2xl transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span class="material-symbols-outlined text-base">add</span>
+              <span>Other Custom Currency</span>
+            </button>
+          </div>
+
+          <!-- STEP 2: ACCOUNTS -->
+          <div v-else-if="setupStep === 2" class="space-y-4">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Step 2 • Accounts</span>
               <h3 class="text-lg font-bold text-[#f1f0f5] mt-0.5">What accounts do you use?</h3>
               <p class="text-xs text-[#9e9cae] mt-1">Accounts are where your money physically lives. Select the accounts you want in your new vault.</p>
             </div>
@@ -235,10 +327,10 @@
             </div>
           </div>
 
-          <!-- STEP 3: SAVINGS BUCKETS (WITH ADD CUSTOM BUCKET BUTTON & FORM) -->
-          <div v-else-if="setupStep === 3" class="space-y-4">
+          <!-- STEP 4: SAVINGS BUCKETS (WITH ADD CUSTOM BUCKET BUTTON & FORM) -->
+          <div v-else-if="setupStep === 4" class="space-y-4">
             <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Step 3 • Savings Buckets</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Step 4 • Savings Buckets</span>
               <h3 class="text-lg font-bold text-[#f1f0f5] mt-0.5">Want to organize money into buckets?</h3>
               <p class="text-xs text-[#9e9cae] mt-1">Buckets help you set money aside for specific purposes without needing another physical bank account.</p>
             </div>
@@ -311,10 +403,10 @@
             </div>
           </div>
 
-          <!-- STEP 4: SALARY ALLOCATION -->
-          <div v-else-if="setupStep === 4" class="space-y-4">
+          <!-- STEP 5: SALARY ALLOCATION -->
+          <div v-else-if="setupStep === 5" class="space-y-4">
             <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-[#B3F5E1]">Step 4 • Salary Allocation</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#B3F5E1]">Step 5 • Salary Allocation</span>
               <h3 class="text-lg font-bold text-[#f1f0f5] mt-0.5">Do you receive a regular salary?</h3>
               <p class="text-xs text-[#9e9cae] mt-1">Cash Buddy allows you to automatically split incoming salary into your accounts, buckets, and expense goals.</p>
             </div>
@@ -376,7 +468,7 @@
           </div>
 
           <!-- SETUP COMPLETION SUMMARY SCREEN -->
-          <div v-else-if="setupStep === 5" class="space-y-5 text-center py-2">
+          <div v-else-if="setupStep === 6" class="space-y-5 text-center py-2">
             <div class="w-12 h-12 rounded-full bg-[#B3F5E1]/20 border border-[#B3F5E1]/40 text-[#B3F5E1] flex items-center justify-center mx-auto text-2xl">
               <span class="material-symbols-outlined text-2xl">check</span>
             </div>
@@ -387,6 +479,11 @@
 
             <!-- Summary Chips -->
             <div class="p-4 bg-[#141520] border border-[#1f202e] rounded-2xl flex items-center justify-around">
+              <div>
+                <span class="block text-lg font-bold text-[#B3F5E1] font-mono">{{ currencySymbol }}</span>
+                <span class="text-[10px] font-medium text-[#9e9cae]">{{ currentCurrency.code }}</span>
+              </div>
+              <div class="h-6 w-px bg-[#1f202e]"></div>
               <div>
                 <span class="block text-lg font-bold text-[#D4BFFF]">{{ createdAccountsCount }}</span>
                 <span class="text-[10px] font-medium text-[#9e9cae]">Accounts</span>
@@ -410,7 +507,7 @@
         <!-- BOTTOM ACTION FOOTER BAR -->
         <div class="px-5 py-4 border-t border-[#1f202e] bg-[#141520]/80 shrink-0 flex items-center justify-between">
           <button
-            v-if="setupStep > 1 && setupStep < 5"
+            v-if="setupStep > 1 && setupStep < 6"
             @click="setupStep--"
             type="button"
             class="px-4 py-2 rounded-xl bg-[#141520] hover:bg-[#1f202e] border border-[#1f202e] text-xs font-bold text-[#f1f0f5] transition cursor-pointer active:scale-95"
@@ -424,7 +521,7 @@
             type="button"
             class="px-5 py-2.5 rounded-xl bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs transition cursor-pointer active:scale-95 shadow-md flex items-center gap-1.5"
           >
-            <span>{{ setupStep === 4 ? 'Finish Setup' : (setupStep === 5 ? 'Take Interactive Tour' : 'Continue') }}</span>
+            <span>{{ setupStep === 5 ? 'Finish Setup' : (setupStep === 6 ? 'Take Interactive Tour' : 'Continue') }}</span>
             <span class="material-symbols-outlined text-base">arrow_forward</span>
           </button>
         </div>
@@ -515,7 +612,7 @@ import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 import { api } from '../services/api.js';
 import IconPicker from './IconPicker.vue';
 import ColorPicker from './ColorPicker.vue';
-import { currencySymbol } from '../utils/currency.js';
+import { CURRENCIES, currentCurrency, currencySymbol, setCurrency } from '../utils/currency.js';
 
 const props = defineProps({
   isOpen: {
@@ -533,6 +630,40 @@ const emit = defineEmits(['close', 'completed', 'switch-tab', 'open-form-step-1'
 // Setup vs Spotlight Tour State
 const isSpotlightTour = ref(props.initialStage === 'tutorial');
 const setupStep = ref(1);
+
+// Currency Step Search State
+const currencySearchQuery = ref('');
+const showCustomCurrencyForm = ref(false);
+const customCurrencyCode = ref('');
+const customCurrencySymbol = ref('');
+const customCurrencyName = ref('');
+
+const filteredCurrencies = computed(() => {
+  const q = currencySearchQuery.value.trim().toLowerCase();
+  if (!q) return CURRENCIES;
+  return CURRENCIES.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    c.code.toLowerCase().includes(q) ||
+    (c.symbol && c.symbol.toLowerCase().includes(q))
+  );
+});
+
+const handleSelectCurrency = (curr) => {
+  setCurrency(curr);
+};
+
+const handleApplyCustomCurrency = () => {
+  if (!customCurrencyCode.value.trim()) return;
+  setCurrency({
+    code: customCurrencyCode.value.trim().toUpperCase(),
+    symbol: customCurrencySymbol.value.trim(),
+    name: customCurrencyName.value.trim() || customCurrencyCode.value.trim().toUpperCase()
+  });
+  customCurrencyCode.value = '';
+  customCurrencySymbol.value = '';
+  customCurrencyName.value = '';
+  showCustomCurrencyForm.value = false;
+};
 
 watch(() => props.initialStage, (val) => {
   isSpotlightTour.value = val === 'tutorial';
@@ -704,12 +835,12 @@ async function applyQuickSetup() {
 }
 
 async function goNextSetup() {
-  if (setupStep.value < 4) {
+  if (setupStep.value < 5) {
     setupStep.value++;
-  } else if (setupStep.value === 4) {
-    await applyQuickSetup();
-    setupStep.value = 5;
   } else if (setupStep.value === 5) {
+    await applyQuickSetup();
+    setupStep.value = 6;
+  } else if (setupStep.value === 6) {
     startSpotlightTour();
   }
 }

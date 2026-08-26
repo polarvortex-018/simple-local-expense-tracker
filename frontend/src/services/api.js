@@ -497,7 +497,7 @@ export const api = {
       SELECT 
         t.id, t.amount, t.transaction_type, t.adjustment_direction, t.description, t.date,
         t.account_id, t.bucket_id, t.category_id, t.created_at,
-        COALESCE(a.name, CASE WHEN t.account_id = 'acc_unallocated_funds' THEN 'Unallocated Funds' ELSE 'General' END) as account_name,
+        COALESCE(a.name, CASE WHEN t.account_id = 'acc_unallocated_funds' THEN 'Unallocated Funds' ELSE 'Unassigned' END) as account_name,
         c.name as category_name,
         b.name as bucket_name
       FROM transactions t

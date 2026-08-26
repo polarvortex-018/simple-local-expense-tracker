@@ -111,7 +111,7 @@ export const DEFAULT_ACCOUNTS = [
 ];
 
 export const DEFAULT_BUCKET = {
-  name: 'General',
+  name: 'Unassigned',
   icon: '🪣',
   color: '#6366f1',
   allocated_balance: 0.0,

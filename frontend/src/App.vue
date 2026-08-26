@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { api } from './services/api';
+import { saveAccountOrder } from './utils/accountSorter.js';
 import Dashboard from './components/Dashboard.vue';
 import TransactionList from './components/TransactionList.vue';
 import TransactionForm from './components/TransactionForm.vue';
@@ -493,6 +494,15 @@ const handleReorderCategories = async (categoryIds) => {
   }
 };
 
+const handleReorderAccounts = async (accountIds) => {
+  try {
+    saveAccountOrder(accountIds);
+    await refreshAll();
+  } catch (err) {
+    console.error('Failed to reorder accounts:', err);
+  }
+};
+
 // Debt Handlers
 const handleCreateDebt = async (payload) => {
   try {
@@ -768,6 +778,7 @@ onMounted(() => {
           @transfer-accounts="handleTransferAccounts"
           @reorder-buckets="handleReorderBuckets"
           @reorder-categories="handleReorderCategories"
+          @reorder-accounts="handleReorderAccounts"
           @allocate-unassigned="handleAllocateUnassigned"
           @data-refresh="handleDataRefresh"
           @open-tutorial="openTutorial"

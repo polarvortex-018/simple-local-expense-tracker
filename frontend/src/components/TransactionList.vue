@@ -2076,7 +2076,7 @@ const getCategoryName = (id) => categoryMap.value.get(id)?.name || 'Uncategorize
 const getCategoryIcon = (id) => categoryMap.value.get(id)?.icon || 'label';
 const getCategoryColor = (id) => categoryMap.value.get(id)?.color || '#64748b';
 const getAccountName = (id) => accountMap.value.get(id)?.name || 'Unknown Account';
-const getBucketName = (id) => (id ? bucketMap.value.get(id)?.name || 'General' : 'General');
+const getBucketName = (id) => (id ? bucketMap.value.get(id)?.name || 'Unassigned' : 'Unassigned');
 const getBucketIcon = (id) => (id ? bucketMap.value.get(id)?.icon || 'savings' : 'savings');
 const getBucketColor = (id) => (id ? bucketMap.value.get(id)?.color || '#D4BFFF' : '#D4BFFF');
 

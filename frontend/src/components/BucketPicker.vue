@@ -77,7 +77,7 @@
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="text-xs font-bold text-[#f1f0f5] truncate">Unallocated Funds</p>
-                  <p class="text-[10px] text-[#9e9cae] truncate">General Pool</p>
+                  <p class="text-[10px] text-[#9e9cae] truncate">Unassigned Pool</p>
                 </div>
               </div>
               <span v-if="modelValue === null" class="text-xs font-bold text-[#D4BFFF] shrink-0 ml-2">✓</span>
