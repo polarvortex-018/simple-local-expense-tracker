@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue';
+import { api } from '../services/api.js';
 
 export const CURRENCIES = [
   { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
@@ -36,24 +37,9 @@ export const CURRENCIES = [
   { code: 'TRY', symbol: '₺', name: 'Turkish Lira' }
 ];
 
-const STORAGE_KEY = 'cashbuddy_currency';
+const DEFAULT_CURRENCY = CURRENCIES[0]; // Default: INR
 
-const loadSavedCurrency = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && parsed.code) {
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to parse saved currency setting:', e);
-  }
-  return CURRENCIES[0]; // Default: INR
-};
-
-export const currentCurrency = ref(loadSavedCurrency());
+export const currentCurrency = ref(DEFAULT_CURRENCY);
 
 export const currencySymbol = computed(() => {
   if (!currentCurrency.value) return '₹';
@@ -64,17 +50,87 @@ export const currencyCode = computed(() => {
   return currentCurrency.value?.code || 'INR';
 });
 
-export const setCurrency = (curr) => {
-  if (!curr || !curr.code) return;
+export const loadCurrencyForActiveVault = async (vaultFilename) => {
+  // 1. Try reading from SQLite vault_settings table (database-bound per vault)
+  try {
+    const dbCurr = await api.getVaultCurrency();
+    if (dbCurr && dbCurr.code) {
+      currentCurrency.value = dbCurr;
+      if (vaultFilename) {
+        try {
+          localStorage.setItem(`cashbuddy_currency_${vaultFilename}`, JSON.stringify(dbCurr));
+        } catch (e) {}
+      }
+      return dbCurr;
+    }
+  } catch (e) {
+    console.warn('Failed to load currency from SQLite vault settings:', e);
+  }
+
+  // 2. Fallback to localStorage per-vault key
+  if (vaultFilename) {
+    try {
+      const raw = localStorage.getItem(`cashbuddy_currency_${vaultFilename}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.code) {
+          currentCurrency.value = parsed;
+          api.setVaultCurrency(parsed).catch(() => {});
+          return parsed;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 3. Fallback to global legacy localStorage key
+  try {
+    const legacy = localStorage.getItem('cashbuddy_currency');
+    if (legacy) {
+      const parsed = JSON.parse(legacy);
+      if (parsed && parsed.code) {
+        currentCurrency.value = parsed;
+        if (vaultFilename) {
+          api.setVaultCurrency(parsed).catch(() => {});
+        }
+        return parsed;
+      }
+    }
+  } catch (e) {}
+
+  currentCurrency.value = DEFAULT_CURRENCY;
+  return DEFAULT_CURRENCY;
+};
+
+export const setCurrency = async (curr, vaultFilename) => {
+  if (!curr) return;
+  let targetObj = null;
+  if (typeof curr === 'string') {
+    targetObj = CURRENCIES.find(c => c.code === curr.toUpperCase().trim()) || { code: curr.toUpperCase().trim(), symbol: curr.trim(), name: curr.trim() };
+  } else if (curr && curr.code) {
+    targetObj = curr;
+  }
+  if (!targetObj || !targetObj.code) return;
+
   const newCurr = {
-    code: String(curr.code).toUpperCase().trim(),
-    symbol: curr.symbol ? String(curr.symbol).trim() : '',
-    name: curr.name ? String(curr.name).trim() : String(curr.code).toUpperCase().trim()
+    code: String(targetObj.code).toUpperCase().trim(),
+    symbol: targetObj.symbol ? String(targetObj.symbol).trim() : String(targetObj.code).toUpperCase().trim(),
+    name: targetObj.name ? String(targetObj.name).trim() : String(targetObj.code).toUpperCase().trim()
   };
   currentCurrency.value = newCurr;
+
+  if (vaultFilename) {
+    try {
+      localStorage.setItem(`cashbuddy_currency_${vaultFilename}`, JSON.stringify(newCurr));
+    } catch (e) {}
+  }
+
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newCurr));
+    localStorage.setItem('cashbuddy_currency', JSON.stringify(newCurr));
+  } catch (e) {}
+
+  try {
+    await api.setVaultCurrency(newCurr);
   } catch (e) {
-    console.error('Failed to save currency setting to localStorage:', e);
+    console.error('Failed to save vault currency to SQLite:', e);
   }
 };

@@ -145,7 +145,7 @@
             </div>
             <div class="min-w-0 flex-1">
               <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight truncate">Currency</h3>
-              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">{{ currentCurrency.code }} ({{ currencySymbol }})</p>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">{{ currentCurrency?.code || 'INR' }} ({{ currencySymbol }})</p>
             </div>
           </button>
         </div>
@@ -740,7 +740,7 @@
                 <p class="text-[10px] text-[#9e9cae] mt-0.5">Re-run the Cash Buddy guided tutorial anytime</p>
               </div>
               <button 
-                @click="emit('open-tutorial')" 
+                @click="handleTakeTourAgain" 
                 type="button"
                 class="px-3.5 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer active:scale-95 flex items-center gap-1.5 shadow-sm"
               >
@@ -1080,11 +1080,11 @@
                 </div>
                 <div>
                   <p class="text-[10px] text-[#9e9cae] font-semibold uppercase tracking-wider">Active Currency</p>
-                  <h4 class="text-sm font-bold text-[#f1f0f5]">{{ currentCurrency.name }}</h4>
+                  <h4 class="text-sm font-bold text-[#f1f0f5]">{{ currentCurrency?.name || 'Indian Rupee' }}</h4>
                 </div>
               </div>
               <div class="px-3 py-1 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-full text-xs font-bold text-[#D4BFFF] shrink-0">
-                {{ currentCurrency.code }}
+                {{ currentCurrency?.code || 'INR' }}
               </div>
             </div>
 
@@ -1107,12 +1107,12 @@
                 type="button"
                 @click="handleSelectCurrency(c)"
                 class="p-3 bg-[#0f1019] hover:bg-[#141520] border rounded-xl text-left transition cursor-pointer flex items-center justify-between group active:scale-[0.98]"
-                :class="currentCurrency.code === c.code ? 'border-[#D4BFFF] bg-[#D4BFFF]/10' : 'border-[#1f202e] hover:border-[#D4BFFF]/40'"
+                :class="currentCurrency?.code === c.code ? 'border-[#D4BFFF] bg-[#D4BFFF]/10' : 'border-[#1f202e] hover:border-[#D4BFFF]/40'"
               >
                 <div class="flex items-center gap-3 min-w-0">
                   <div 
                     class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0"
-                    :class="currentCurrency.code === c.code ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#191924] border border-[#1f202e] text-[#f1f0f5]'"
+                    :class="currentCurrency?.code === c.code ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#191924] border border-[#1f202e] text-[#f1f0f5]'"
                   >
                     {{ c.symbol || c.code }}
                   </div>
@@ -1121,7 +1121,7 @@
                     <p class="text-[10px] text-[#9e9cae] mt-0.5">{{ c.code }}</p>
                   </div>
                 </div>
-                <span v-if="currentCurrency.code === c.code" class="material-symbols-outlined text-base text-[#D4BFFF] shrink-0">check_circle</span>
+                <span v-if="currentCurrency?.code === c.code" class="material-symbols-outlined text-base text-[#D4BFFF] shrink-0">check_circle</span>
               </button>
             </div>
 
@@ -1634,7 +1634,7 @@ const filteredCurrencies = computed(() => {
 });
 
 const handleSelectCurrency = (curr) => {
-  setCurrency(curr);
+  setCurrency(curr, props.activeVault);
 };
 
 const handleApplyCustomCurrency = () => {
@@ -1643,7 +1643,7 @@ const handleApplyCustomCurrency = () => {
     code: customCurrencyCode.value.trim().toUpperCase(),
     symbol: customCurrencySymbol.value.trim(),
     name: customCurrencyName.value.trim() || customCurrencyCode.value.trim().toUpperCase()
-  });
+  }, props.activeVault);
   customCurrencyCode.value = '';
   customCurrencySymbol.value = '';
   customCurrencyName.value = '';
@@ -1747,16 +1747,22 @@ onMounted(() => {
 const props = defineProps({
   accounts: { type: Array, default: () => [] },
   categories: { type: Array, default: () => [] },
-  buckets: { type: Array, default: () => [] }
+  buckets: { type: Array, default: () => [] },
+  activeVault: { type: String, default: '' }
 });
 
 const emit = defineEmits([
   'create-account', 'update-account', 'delete-account',
   'create-category', 'update-category', 'delete-category',
   'create-bucket', 'update-bucket', 'delete-bucket', 'transfer-bucket', 'transfer-accounts',
-  'reorder-buckets', 'reorder-categories', 'reorder-accounts', 'allocate-unassigned', 'data-refresh', 'open-tutorial',
+  'reorder-buckets', 'reorder-categories', 'reorder-accounts', 'allocate-unassigned', 'data-refresh', 'open-tutorial', 'open-vault-setup',
   'active-sheet-change', 'error'
 ]);
+
+const handleTakeTourAgain = () => {
+  console.log('[ONBOARDING DEBUG] "Take Tour Again" button clicked in SettingsView!');
+  emit('open-tutorial');
+};
 
 defineExpose({
   closeActiveSheet: () => {
@@ -2207,7 +2213,7 @@ const triggerHaptic = async () => {
   } catch (err) {}
 };
 
-const removePointerListeners = () => {
+function removePointerListeners() {
   if (typeof window !== 'undefined') {
     window.removeEventListener('pointermove', handleDragPointerMove);
     window.removeEventListener('pointerup', handleDragPointerUp);
@@ -2215,10 +2221,10 @@ const removePointerListeners = () => {
     window.removeEventListener('touchmove', handleDragPointerMove);
     window.removeEventListener('touchend', handleDragPointerUp);
   }
-};
+}
 
 // Start Pointer gesture on Drag Handle with 180ms Long-Press delay
-const handleDragPointerDown = (event, idx, type) => {
+function handleDragPointerDown(event, idx, type) {
   try {
     if (typeof window !== 'undefined' && window.getSelection) {
       window.getSelection().removeAllRanges();
@@ -2257,9 +2263,9 @@ const handleDragPointerDown = (event, idx, type) => {
     isDragActive.value = true;
     triggerHaptic();
   }, 180);
-};
+}
 
-const handleDragPointerMove = (event) => {
+function handleDragPointerMove(event) {
   if (activeDragIdx.value === null || !activeDragType.value) return;
 
   const clientY = event.touches ? event.touches[0].clientY : event.clientY;
@@ -2292,9 +2298,9 @@ const handleDragPointerMove = (event) => {
       dropTargetIdx.value = idx;
     }
   }
-};
+}
 
-const handleDragPointerUp = () => {
+function handleDragPointerUp() {
   if (pressTimer) {
     clearTimeout(pressTimer);
     pressTimer = null;
@@ -2335,7 +2341,7 @@ const handleDragPointerUp = () => {
       }
     });
   }
-};
+}
 
 // Calculate hardware-accelerated CSS translateY transform for surrounding rows
 const getItemTransform = (idx, type) => {
@@ -2376,7 +2382,6 @@ const loadBackupsList = async () => {
 
 onMounted(() => {
   loadBackupsList();
-  loadSettings();
 });
 
 watch(showPresetsModal, (val) => {

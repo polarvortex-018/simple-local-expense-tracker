@@ -90,6 +90,12 @@ CREATE TABLE IF NOT EXISTS allocation_preset_rules (
     FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL,
     FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS vault_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 `;
 
 export const DEFAULT_CATEGORIES = [

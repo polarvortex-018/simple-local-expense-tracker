@@ -52,10 +52,24 @@ export default defineConfig({
         skipWaiting: true,
         runtimeCaching: [
           {
-            urlPattern: ({ request }) => true,
-            handler: 'CacheFirst',
+            urlPattern: ({ request }) => request.destination === 'document' || request.destination === 'script',
+            handler: 'NetworkFirst',
             options: {
-              cacheName: 'cashbuddy-offline-runtime-v2',
+              cacheName: 'cashbuddy-offline-runtime-v3',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 31536000
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: ({ request }) => true,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'cashbuddy-offline-assets-v3',
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 31536000

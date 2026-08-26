@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { api } from './services/api';
 import { saveAccountOrder } from './utils/accountSorter.js';
 import Dashboard from './components/Dashboard.vue';
@@ -9,6 +9,10 @@ import DebtList from './components/DebtList.vue';
 import SettingsView from './components/SettingsView.vue';
 import VaultModal from './components/VaultModal.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
+import { loadCurrencyForActiveVault, setCurrency } from './utils/currency.js';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 // State
 const currentTab = ref('dashboard'); // 'dashboard', 'transactions', 'debts', or 'settings'
@@ -27,9 +31,16 @@ const onboardingStage = ref('setup');
 const checkOnboarding = async () => {
   try {
     const ob = await api.getOnboardingState();
+    console.log('[ONBOARDING DEBUG] checkOnboarding result:', ob, 'current showModal:', showOnboardingModal.value);
     if (!ob.setupComplete || !ob.tutorialComplete) {
-      onboardingStage.value = !ob.setupComplete ? 'setup' : 'tutorial';
-      showOnboardingModal.value = true;
+      if (!showOnboardingModal.value) {
+        onboardingStage.value = !ob.setupComplete ? 'setup' : 'tutorial';
+        showOnboardingModal.value = true;
+        console.log('[ONBOARDING DEBUG] Opening onboarding modal with stage:', onboardingStage.value);
+      }
+    } else {
+      showOnboardingModal.value = false;
+      console.log('[ONBOARDING DEBUG] Onboarding & Tutorial complete. Modal closed.');
     }
   } catch (err) {
     console.error('Check onboarding error:', err);
@@ -37,9 +48,18 @@ const checkOnboarding = async () => {
 };
 
 const openTutorial = () => {
+  console.log('[ONBOARDING DEBUG] openTutorial event received in App.vue! Opening tutorial stage.');
   onboardingStage.value = 'tutorial';
   showOnboardingModal.value = true;
 };
+
+const openVaultSetup = () => {
+  console.log('[ONBOARDING DEBUG] openVaultSetup event received in App.vue! Opening setup stage.');
+  onboardingStage.value = 'setup';
+  showOnboardingModal.value = true;
+};
+
+
 
 // Settings Component Ref
 const settingsViewRef = ref(null);
@@ -167,6 +187,7 @@ const refreshAll = async () => {
       fetchDebts(),
       loadVaults()
     ]);
+    await loadCurrencyForActiveVault(activeVault.value);
     dashboardTransactions.value = await api.getTransactions();
     await checkOnboarding();
   } catch (err) {
@@ -180,9 +201,10 @@ const refreshAll = async () => {
 // Vault Management Handlers
 const handleSwitchVault = async (filename) => {
   try {
-    await api.switchVault(filename);
-    await refreshAll();
     showVaultModal.value = false;
+    await api.switchVault(filename);
+    activeVault.value = filename;
+    await refreshAll();
     showSuccess('Switched vault');
   } catch (err) {
     showError(err.message || 'Failed to switch vault.');
@@ -191,9 +213,10 @@ const handleSwitchVault = async (filename) => {
 
 const handleCreateVault = async (name) => {
   try {
-    await api.createVault(name);
-    await refreshAll();
     showVaultModal.value = false;
+    const res = await api.createVault(name);
+    if (res && res.active_vault) activeVault.value = res.active_vault;
+    await refreshAll();
     showSuccess('Vault created');
   } catch (err) {
     showError(err.message || 'Failed to create vault.');
@@ -534,10 +557,6 @@ const handleDeleteDebt = async (id) => {
   }
 };
 
-import { Capacitor } from '@capacitor/core';
-import { App as CapApp } from '@capacitor/app';
-import { StatusBar, Style } from '@capacitor/status-bar';
-
 const isScrolling = ref(false);
 let scrollTimer = null;
 
@@ -763,6 +782,7 @@ onMounted(() => {
           :accounts="accounts"
           :categories="categories"
           :buckets="buckets"
+          :active-vault="activeVault"
           @active-sheet-change="isSettingsSubpageOpen = Boolean($event)"
           @error="showError"
           @create-account="handleCreateAccount"
@@ -780,8 +800,9 @@ onMounted(() => {
           @reorder-categories="handleReorderCategories"
           @reorder-accounts="handleReorderAccounts"
           @allocate-unassigned="handleAllocateUnassigned"
-          @data-refresh="handleDataRefresh"
+          @data-refresh="refreshAll"
           @open-tutorial="openTutorial"
+          @open-vault-setup="openVaultSetup"
         />
       </div>
     </main>
@@ -873,6 +894,7 @@ onMounted(() => {
     <OnboardingModal 
       :is-open="showOnboardingModal"
       :initial-stage="onboardingStage"
+      :active-vault="activeVault"
       @close="showOnboardingModal = false"
       @completed="refreshAll"
       @switch-tab="handleSwitchTabFromTour"

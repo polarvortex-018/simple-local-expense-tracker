@@ -1036,6 +1036,42 @@ export const api = {
     return { vaults: listVaults() };
   },
 
+  async getVaultCurrency() {
+    await ensureDB();
+    try {
+      execRun(`CREATE TABLE IF NOT EXISTS vault_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`, [], false);
+      const rows = execQuery("SELECT value FROM vault_settings WHERE key = 'currency'");
+      if (rows && rows.length > 0 && rows[0].value) {
+        return JSON.parse(rows[0].value);
+      }
+    } catch (e) {
+      console.warn("Failed to get vault currency from DB:", e);
+    }
+    return null;
+  },
+
+  async setVaultCurrency(curr) {
+    await ensureDB();
+    try {
+      execRun(`CREATE TABLE IF NOT EXISTS vault_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`, [], false);
+      const now = new Date().toISOString();
+      const valStr = JSON.stringify(curr);
+      execRun("INSERT OR REPLACE INTO vault_settings (key, value, updated_at) VALUES ('currency', ?, ?)", [valStr, now], false);
+      return curr;
+    } catch (e) {
+      console.error("Failed to save vault currency to DB:", e);
+      throw e;
+    }
+  },
+
   // ----------------------------------------------------
   // BACKUP & EXPORT (ON-PHONE & WEB)
   // ----------------------------------------------------
@@ -1203,25 +1239,29 @@ export const api = {
     const map = {};
     rows.forEach(r => { map[r.key] = r.value; });
 
-    let setupComplete = map['setup_complete'] === 'true';
-    let tutorialComplete = map['tutorial_complete'] === 'true';
+    const txCount = execQuery('SELECT COUNT(*) count FROM transactions')[0]?.count || 0;
 
-    // If setup_complete key is missing in app_metadata
-    if (map['setup_complete'] === undefined) {
-      const txCount = execQuery('SELECT COUNT(*) count FROM transactions')[0]?.count || 0;
-      const accCount = execQuery('SELECT COUNT(*) count FROM accounts')[0]?.count || 0;
-      const catCount = execQuery('SELECT COUNT(*) count FROM categories')[0]?.count || 0;
-
-      // Existing vaults with data or user customization are marked as complete
-      if (txCount > 0 || accCount > 2 || catCount > 9) {
-        setupComplete = true;
-        tutorialComplete = true;
-      } else {
-        setupComplete = false;
-        tutorialComplete = false;
-      }
+    let setupComplete = false;
+    if (map['setup_complete'] === 'true') {
+      setupComplete = true;
+    } else if (map['setup_complete'] === 'false') {
+      setupComplete = false;
+    } else {
+      // Legacy vault without setup_complete key: complete if txCount > 0
+      setupComplete = txCount > 0;
     }
 
+    let tutorialComplete = false;
+    if (map['tutorial_complete'] === 'true') {
+      tutorialComplete = true;
+    } else if (map['tutorial_complete'] === 'false') {
+      tutorialComplete = false;
+    } else {
+      // Legacy vault without tutorial_complete key: complete if txCount > 0
+      tutorialComplete = txCount > 0;
+    }
+
+    console.log('[ONBOARDING DEBUG] api.getOnboardingState():', { map, txCount, setupComplete, tutorialComplete });
     return { setupComplete, tutorialComplete };
   },
 

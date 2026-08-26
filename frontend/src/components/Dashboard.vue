@@ -406,41 +406,6 @@ const currentMonthTransactions = computed(() => {
   });
 });
 
-const animateNumberTicker = () => {
-  const start = performance.now();
-  const duration = 800;
-  const targetNW = netWorth.value;
-  const targetInc = totalIncome.value;
-  const targetExp = totalExpenses.value;
-  const initialNW = animatedNetWorth.value;
-  const initialInc = animatedIncome.value;
-  const initialExp = animatedExpenses.value;
-
-  const step = (now) => {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3);
-    
-    animatedNetWorth.value = initialNW + (targetNW - initialNW) * ease;
-    animatedIncome.value = initialInc + (targetInc - initialInc) * ease;
-    animatedExpenses.value = initialExp + (targetExp - initialExp) * ease;
-
-    if (progress < 1) {
-      requestAnimationFrame(step);
-    }
-  };
-
-  requestAnimationFrame(step);
-};
-
-onMounted(() => {
-  animateNumberTicker();
-});
-
-watch([netWorth, () => totalIncome.value, () => totalExpenses.value], () => {
-  animateNumberTicker();
-});
-
 const filteredCategoryExpenses = computed(() => {
   const map = {};
   currentMonthTransactions.value.forEach(t => {
@@ -503,6 +468,41 @@ const filteredCategoryIncome = computed(() => {
 
 const totalIncome = computed(() => {
   return filteredCategoryIncome.value.reduce((sum, c) => sum + c.total, 0);
+});
+
+const animateNumberTicker = () => {
+  const start = performance.now();
+  const duration = 800;
+  const targetNW = netWorth.value;
+  const targetInc = totalIncome.value;
+  const targetExp = totalExpenses.value;
+  const initialNW = animatedNetWorth.value;
+  const initialInc = animatedIncome.value;
+  const initialExp = animatedExpenses.value;
+
+  const step = (now) => {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    
+    animatedNetWorth.value = initialNW + (targetNW - initialNW) * ease;
+    animatedIncome.value = initialInc + (targetInc - initialInc) * ease;
+    animatedExpenses.value = initialExp + (targetExp - initialExp) * ease;
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  };
+
+  requestAnimationFrame(step);
+};
+
+onMounted(() => {
+  animateNumberTicker();
+});
+
+watch([netWorth, totalIncome, totalExpenses], () => {
+  animateNumberTicker();
 });
 
 const activeBuckets = computed(() => props.buckets.filter(bucket => {

@@ -186,6 +186,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { api } from '../services/api';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -245,8 +246,6 @@ const handleImport = () => {
     selectedFileName.value = '';
   }
 };
-
-import { api } from '../services/api';
 
 const handleSaveVaultToFolder = async (filename) => {
   try {

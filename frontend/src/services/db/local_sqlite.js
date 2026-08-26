@@ -607,7 +607,20 @@ export async function createBackupSnapshot() {
 }
 
 export async function listBackupSnapshots() {
-  return (await allRecords('backups')).map(({ encrypted, ...item }) => item).sort((a, b) => b.created_at - a.created_at);
+  const records = await allRecords('backups');
+  const baseName = activeVaultFilename.replace(/\.db$/, '');
+  return records
+    .filter(item => {
+      if (item.source_vault) {
+        return item.source_vault === activeVaultFilename;
+      }
+      if (item.filename && item.filename.includes(`backup_${baseName}_`)) {
+        return true;
+      }
+      return false;
+    })
+    .map(({ encrypted, ...item }) => item)
+    .sort((a, b) => b.created_at - a.created_at);
 }
 
 export async function restoreBackupSnapshot(filename) {

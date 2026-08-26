@@ -8,14 +8,61 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.05.05`** (or `v0.5.5`)
+## Current Version: **`v0.05.16`** (or `v0.5.16`)
 
 ---
 
 ## Version History Log
 
 ### **v0.05 — Multi-Currency System & Native Drag-and-Drop Polish**
-- **`v0.05.05`** *(Current)*
+- **`v0.05.16`** *(Current)*
+  - Resolved fatal uncaught console errors (`ReferenceError: loadSettings is not defined`, `ReferenceError: Cannot access 'x' before initialization`, `ReferenceError: Cannot access 'y' before initialization`) captured in diagnostic screenshot.
+  - Converted pointer/drag event handlers in `SettingsView.vue` to hoisted function declarations to eliminate Temporal Dead Zone (TDZ) minification crashes.
+  - Removed stale `loadSettings()` call from `SettingsView.vue`'s `onMounted()` hook to prevent component initialization failure.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.15`**
+  - Removed "Re-run Vault Setup Wizard" button from `SettingsView.vue` as requested.
+  - Fixed modal collision in `App.vue`: `handleCreateVault` and `handleSwitchVault` now immediately set `showVaultModal.value = false` before calling `refreshAll()`.
+  - The Quick Vault Setup wizard now pops up unhindered over the main application screen whenever a new vault is created or opened.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.14`**
+  - Fixed silent runtime crash (`ReferenceError: nextTick is not defined`) in `App.vue` by adding `nextTick` to the Vue imports.
+  - The **"Re-run Vault Setup Wizard"** button in Settings and new vault creation flow now trigger and open the setup modal cleanly.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.13`**
+  - Fixed onboarding modal toggle reactivity in `App.vue`: `checkOnboarding()` and `openVaultSetup()` now cleanly unmount and remount `showOnboardingModal` via `nextTick()`.
+  - Creating a new vault or switching vaults now reliably triggers the initial setup wizard starting at Step 1 every time.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.12`**
+  - Resolved onboarding loop issue in `api.js`: updated `getOnboardingState()` to check both explicit `app_metadata` (`setup_complete = 'true'`) and `txCount > 0`.
+  - Finishing or skipping the setup wizard now correctly saves `setup_complete = 'true'` to SQLite, allowing setup completion while ensuring brand new vaults (without transactions and without `setup_complete = 'true'`) mandatorily trigger setup.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.11`**
+  - Fixed new vault setup modal state initialization in `OnboardingModal.vue`: added immediate watchers on `props.isOpen` to reset `setupStep = 1` and `isSpotlightTour = false` when opening new vaults.
+  - Updated `handleCreateVault` and `handleSwitchVault` in `App.vue` to update `activeVault.value` state immediately.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.10`**
+  - Mandatory Vault Setup trigger: Simplified setup detection in `api.js` to strictly check `txCount === 0`.
+  - Any new or clean vault without transaction history automatically & mandatorily launches the Quick Vault Setup wizard.
+  - Added **"Re-run Vault Setup Wizard"** card under Settings (More Hub) to allow re-running setup anytime.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.09`**
+  - Vault-isolated backup filtering: updated `listBackupSnapshots()` in `local_sqlite.js` to filter snapshots by active vault filename (`source_vault`).
+  - Opening Backup & Export in Settings now lists ONLY backup snapshots belonging to the active vault.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.08`**
+  - Fixed initial setup modal trigger detection in `api.js`: resolved false `setupComplete = true` inference caused by default categories & accounts counts.
+  - Initial setup tour wizard now reliably opens for all new database vaults and fresh installs.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.07`**
+  - Isolated currency selection per vault database: added `vault_settings` table to WebAssembly SQLite engine.
+  - Changing currency in Vault A (e.g. `INR`) now leaves Vault B (e.g. `USD` / `SAR`) completely untouched and independent.
+  - Exporting or sharing a vault preserves its vault-specific currency setting.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.06`**
+  - Fixed blank Step 3 (Categories selection) in `OnboardingModal.vue` setup wizard caused by duplicate `setupStep === 2` directive.
+  - Re-synced and assembled Android debug APK.
+- **`v0.05.05`**
   - Polished Manage Accounts UI layout: responsive flex-wrapping title, zero text truncation for `Unallocated Funds`, compact `Shown`/`Hidden` dashboard toggle button.
   - Re-synced and assembled Android debug APK.
 - **`v0.05.04`**
