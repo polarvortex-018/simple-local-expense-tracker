@@ -24,7 +24,7 @@
           <span class="material-symbols-outlined text-base text-[#B3F5E1]">south_west</span>
         </div>
         <p class="mt-1 text-2xl font-bold text-[#f1f0f5] tabular-nums tracking-tight">
-          ₹{{ formatAmount(totalOwedToYou) }}
+          {{ currencySymbol }}{{ formatAmount(totalOwedToYou) }}
         </p>
         <p class="mt-0.5 text-[10px] text-[#9e9cae]">Money lent to others (Unsettled)</p>
       </div>
@@ -36,7 +36,7 @@
           <span class="material-symbols-outlined text-base text-[#FFD1B3]">north_east</span>
         </div>
         <p class="mt-1 text-2xl font-bold text-[#f1f0f5] tabular-nums tracking-tight">
-          ₹{{ formatAmount(totalYouOwe) }}
+          {{ currencySymbol }}{{ formatAmount(totalYouOwe) }}
         </p>
         <p class="mt-0.5 text-[10px] text-[#9e9cae]">Money borrowed from others (Unsettled)</p>
       </div>
@@ -47,7 +47,7 @@
           <span class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Net Position</span>
         </div>
         <p class="mt-1 text-2xl font-bold tabular-nums tracking-tight" :class="netPosition >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
-          ₹{{ formatAmount(netPosition) }}
+          {{ currencySymbol }}{{ formatAmount(netPosition) }}
         </p>
         <p class="mt-0.5 text-[10px] text-[#9e9cae]">
           {{ netPosition >= 0 ? 'Net surplus' : 'Net liability' }}
@@ -132,7 +132,7 @@
           <span
             class="text-xs font-bold tabular-nums shrink-0"
             :class="debt.type === 'lent' ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'"
-          >₹{{ formatAmount(debt.amount) }}</span>
+          >{{ currencySymbol }}{{ formatAmount(debt.amount) }}</span>
         </button>
       </div>
 
@@ -202,7 +202,7 @@
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT *</label>
               <div class="flex items-center gap-1 border-b border-[#1f202e] focus-within:border-[#D4BFFF] pb-1">
-                <span class="text-base font-bold text-[#9e9cae]">₹</span>
+                <span class="text-base font-bold text-[#9e9cae]">{{ currencySymbol }}</span>
                 <input 
                   v-model="newDebt.amount"
                   type="text"
@@ -274,49 +274,47 @@
           <div class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 overscroll-contain">
             <div v-if="settlingDebt" class="p-3.5 bg-[#0f1019] border border-[#1f202e] rounded-xl space-y-1">
               <p class="text-xs text-[#9e9cae]">Settling debt with <strong class="text-[#f1f0f5]">{{ settlingDebt.person_name }}</strong></p>
-              <p class="text-xl font-bold text-[#B3F5E1] tabular-nums">₹{{ formatAmount(settlingDebt.amount) }}</p>
+              <p class="text-xl font-bold text-[#B3F5E1] tabular-nums">{{ currencySymbol }}{{ formatAmount(settlingDebt.amount) }}</p>
               <p class="text-[11px] text-[#9e9cae] leading-tight">
                 {{ settlingDebt.type === 'lent' ? 'Repayment received from person → Deposits into selected account' : 'Repaid money back to person → Deducts from selected account' }}
               </p>
             </div>
 
-            <form @submit.prevent="submitSettleDebt" class="space-y-4">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">Target Account *</label>
-                <AccountGrid :accounts="accounts" v-model="settleAccountId" />
-              </div>
+            <!-- Target Account for Settlement -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">SETTLEMENT ACCOUNT *</label>
+              <AccountGrid :accounts="accounts" v-model="settleAccountId" />
+            </div>
 
-              <div class="pt-2 border-t border-[#1f202e]">
-                <button 
-                  type="submit" 
-                  :disabled="submitting"
-                  class="w-full py-3 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-bold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
-                  <span v-else class="material-symbols-outlined text-base">check</span>
-                  <span>{{ submitting ? 'Settling...' : 'Confirm Settlement' }}</span>
-                </button>
-              </div>
-            </form>
+            <button
+              @click="submitSettleDebt"
+              :disabled="submitting"
+              class="w-full py-3 bg-[#B3F5E1] hover:bg-[#86efac] text-[#0f0f15] font-bold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <span v-if="submitting" class="w-4 h-4 border-2 border-[#0f0f15] border-t-transparent rounded-full animate-spin"></span>
+              <span v-else class="material-symbols-outlined text-base">task_alt</span>
+              <span>Confirm & Mark Settled</span>
+            </button>
           </div>
         </div>
       </div>
     </Transition>
 
     <!-- Debt Detail Modal -->
-    <Transition name="modal-fade">
+    <Transition name="modal">
       <div v-if="selectedDebt" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#0c0d14]/95 backdrop-blur-md" @click.self="selectedDebt = null">
-        <div class="relative w-full sm:max-w-sm bg-[#0c0d14] border-t sm:border border-[#1f202e] sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden pb-6 sm:pb-0">
-
+        <div class="relative w-full max-w-md bg-[#0c0d14] border-t sm:border border-[#1f202e] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh]">
           <!-- Header -->
-          <div class="px-5 pt-4 pb-3 flex items-start justify-between border-b border-[#1f202e]">
-            <div class="flex items-center gap-3">
+          <div class="px-5 py-3.5 border-b border-[#1f202e] flex justify-between items-center bg-[#0c0d14] shrink-0">
+            <div class="flex items-center gap-2.5">
               <div
-                class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
-                :class="selectedDebt.type === 'lent' ? 'bg-[#B3F5E1]/20 text-[#B3F5E1] border border-[#B3F5E1]/30' : 'bg-[#FFD1B3]/20 text-[#FFD1B3] border border-[#FFD1B3]/30'"
-              >{{ selectedDebt.type === 'lent' ? '↗' : '↘' }}</div>
+                class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm"
+                :class="selectedDebt.type === 'lent' ? 'bg-[#B3F5E1]/15 text-[#B3F5E1]' : 'bg-[#FFD1B3]/15 text-[#FFD1B3]'"
+              >
+                <span class="material-symbols-outlined text-base">{{ selectedDebt.type === 'lent' ? 'south_west' : 'north_east' }}</span>
+              </div>
               <div>
-                <p class="text-sm font-black text-[#f1f0f5]">{{ selectedDebt.person_name }}</p>
+                <h3 class="text-sm font-bold text-[#f1f0f5]">{{ selectedDebt.person_name }}</h3>
                 <p class="text-[10px] text-[#9e9cae] mt-0.5">{{ selectedDebt.type === 'lent' ? 'Lent · Owed to you' : 'Borrowed · You owe' }}</p>
               </div>
             </div>
@@ -327,7 +325,7 @@
           <div class="px-5 py-4 space-y-3">
             <!-- Amount -->
             <div class="flex items-baseline gap-1.5">
-              <span class="text-[#9e9cae] text-sm font-bold">₹</span>
+              <span class="text-[#9e9cae] text-sm font-bold">{{ currencySymbol }}</span>
               <span class="text-3xl font-black tabular-nums tracking-tight" :class="selectedDebt.type === 'lent' ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">{{ formatAmount(selectedDebt.amount) }}</span>
               <span
                 class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
@@ -420,6 +418,7 @@ import { ref, computed } from 'vue';
 import BucketGrid from './BucketGrid.vue';
 import AccountGrid from './AccountGrid.vue';
 import { formatDateDDMMYYYY } from '../utils/dateUtils';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   debts: {

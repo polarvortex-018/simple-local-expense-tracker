@@ -73,7 +73,7 @@
                 <div v-if="acc.selected" class="pt-2 border-t border-[#1f202e]/60 flex items-center justify-between gap-3" @click.stop>
                   <label class="text-[10px] font-bold text-[#D4BFFF] uppercase tracking-wider">Starting Seed Balance:</label>
                   <div class="flex items-center gap-1 bg-[#0f1019] border border-[#1f202e] rounded-xl px-2.5 py-1 w-36">
-                    <span class="text-xs font-bold text-[#9e9cae]">₹</span>
+                    <span class="text-xs font-bold text-[#9e9cae]">{{ currencySymbol }}</span>
                     <input
                       v-model="acc.seedBalance"
                       type="text"
@@ -305,7 +305,7 @@
                 </div>
                 <div>
                   <h4 class="text-xs font-bold text-[#f1f0f5] leading-tight truncate">{{ b.name }}</h4>
-                  <p class="text-[10px] text-[#9e9cae] mt-0.5">₹0.00 allocated</p>
+                  <p class="text-[10px] text-[#9e9cae] mt-0.5">{{ currencySymbol }}0.00 allocated</p>
                 </div>
               </div>
             </div>
@@ -515,6 +515,7 @@ import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 import { api } from '../services/api.js';
 import IconPicker from './IconPicker.vue';
 import ColorPicker from './ColorPicker.vue';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   isOpen: {

@@ -23,7 +23,7 @@
             {{ selectedBucket ? selectedBucket.name : (placeholder || 'Select Bucket') }}
           </p>
           <p v-if="selectedBucket && selectedBucket.allocated_balance !== undefined" class="text-[10px] text-[#9e9cae] truncate">
-            ₹{{ formatAmount(selectedBucket.allocated_balance) }}
+            {{ currencySymbol }}{{ formatAmount(selectedBucket.allocated_balance) }}
           </p>
         </div>
       </div>
@@ -43,69 +43,59 @@
           <div class="flex justify-between items-center px-4 py-3 border-b border-[#29293a] bg-[#14141d] shrink-0">
             <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">{{ title || 'Select Bucket' }}</h3>
             <button 
-              type="button"
               @click="isOpen = false" 
-              class="w-8 h-8 flex items-center justify-center rounded-lg text-[#9e9cae] hover:text-[#f1f0f5] hover:bg-[#191924] transition text-sm cursor-pointer"
+              type="button" 
+              class="text-[#9e9cae] hover:text-[#f1f0f5] transition text-base font-semibold cursor-pointer p-1"
             >
               ✕
             </button>
           </div>
 
           <!-- Search Bar -->
-          <div class="p-3 border-b border-[#29293a]/60 bg-[#0f0f15] shrink-0">
-            <div class="relative">
-              <input 
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search buckets..."
-                class="w-full bg-[#14141d] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl px-3 py-2 text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none"
-              />
-              <span v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-2 text-xs text-[#9e9cae] cursor-pointer hover:text-[#f1f0f5]">✕</span>
-            </div>
+          <div class="p-3 bg-[#0f0f15] border-b border-[#29293a]">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search savings buckets..."
+              class="w-full px-3.5 py-2 bg-[#191924] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none"
+            />
           </div>
 
-          <!-- Bucket Options List -->
-          <div class="p-3 overflow-y-auto flex-1 space-y-1.5">
-            <!-- Unassigned Option -->
+          <!-- Bucket List -->
+          <div class="p-2 space-y-1 overflow-y-auto flex-1">
+            <!-- Unassigned option -->
             <button
-              v-if="showUnassigned && !searchQuery"
+              v-if="showUnassigned"
               type="button"
               @click="selectBucket(null)"
-              class="w-full flex items-center justify-between p-3 rounded-xl border text-left transition cursor-pointer"
-              :class="modelValue === null || modelValue === '' 
-                ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40' 
-                : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/40'"
+              class="w-full flex items-center justify-between p-3 rounded-xl transition cursor-pointer text-left"
+              :class="modelValue === null ? 'bg-[#D4BFFF]/15 border border-[#D4BFFF]' : 'hover:bg-[#191924] border border-transparent'"
             >
-              <div class="flex items-center gap-3 min-w-0 flex-1">
-                <div class="w-9 h-9 rounded-xl bg-[#191924] border border-[#29293a] flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-xl text-[#FFD1B3]">savings</span>
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-[#191924] border border-[#29293a] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base leading-none text-[#FFD1B3]">savings</span>
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                   <p class="text-xs font-bold text-[#f1f0f5] truncate">Unallocated Funds</p>
-                  <p class="text-[10px] text-[#9e9cae]">Pool (No bucket allocation)</p>
+                  <p class="text-[10px] text-[#9e9cae] truncate">General Pool</p>
                 </div>
               </div>
-              <span v-if="modelValue === null || modelValue === ''" class="text-xs font-bold text-[#D4BFFF] shrink-0 ml-2">✓</span>
+              <span v-if="modelValue === null" class="text-xs font-bold text-[#D4BFFF] shrink-0 ml-2">✓</span>
             </button>
 
-            <div v-if="filteredBuckets.length === 0 && !showUnassigned" class="py-8 text-center text-xs text-[#9e9cae]">
-              No buckets found.
-            </div>
-            
+            <!-- Savings Buckets -->
             <button
               v-for="b in filteredBuckets"
               :key="b.id"
               type="button"
               @click="selectBucket(b.id)"
-              class="w-full flex items-center justify-between p-3 rounded-xl border text-left transition cursor-pointer"
-              :class="modelValue === b.id 
-                ? 'bg-[#D4BFFF]/15 border-[#D4BFFF] ring-1 ring-[#D4BFFF]/40' 
-                : 'bg-[#0f0f15] border-[#29293a] hover:border-[#D4BFFF]/40'"
+              class="w-full flex items-center justify-between p-3 rounded-xl transition cursor-pointer text-left"
+              :class="modelValue === b.id ? 'bg-[#D4BFFF]/15 border border-[#D4BFFF]' : 'hover:bg-[#191924] border border-transparent'"
             >
               <div class="flex items-center gap-3 min-w-0 flex-1">
-                <div class="w-9 h-9 rounded-xl bg-[#191924] border border-[#29293a] flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-[#191924] border border-[#29293a] flex items-center justify-center shrink-0">
                   <span 
-                    class="material-symbols-outlined text-xl"
+                    class="material-symbols-outlined text-base leading-none"
                     :style="{ color: b.color || '#D4BFFF' }"
                   >
                     {{ resolveIcon(b.icon, 'savings') }}
@@ -113,7 +103,7 @@
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ b.name }}</p>
-                  <p class="text-[10px] font-semibold text-[#9e9cae] truncate">₹{{ formatAmount(b.allocated_balance) }}</p>
+                  <p class="text-[10px] font-semibold text-[#9e9cae] truncate">{{ currencySymbol }}{{ formatAmount(b.allocated_balance) }}</p>
                 </div>
               </div>
 
@@ -141,6 +131,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   buckets: { type: Array, required: true },

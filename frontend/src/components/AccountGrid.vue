@@ -18,7 +18,7 @@
       </div>
       <div class="min-w-0 flex-1">
         <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ account.name }}</p>
-        <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(account.balance) }}</p>
+        <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">{{ currencySymbol }}{{ formatAmount(account.balance) }}</p>
       </div>
     </button>
   </div>
@@ -26,6 +26,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   accounts: { type: Array, required: true },

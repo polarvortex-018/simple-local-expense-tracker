@@ -15,7 +15,7 @@
       </div>
       <div class="min-w-0 flex-1">
         <p class="text-xs font-bold text-[#f1f0f5] truncate">Unallocated Funds</p>
-        <p v-if="unassignedAmount !== null && unassignedAmount !== undefined" class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(unassignedAmount) }}</p>
+        <p v-if="unassignedAmount !== null && unassignedAmount !== undefined" class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">{{ currencySymbol }}{{ formatAmount(unassignedAmount) }}</p>
         <p v-else class="text-[10px] text-[#9e9cae] truncate mt-0.5">Pool</p>
       </div>
     </button>
@@ -36,7 +36,7 @@
       </div>
       <div class="min-w-0 flex-1">
         <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ bucket.name }}</p>
-        <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(bucket.allocated_balance) }}</p>
+        <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">{{ currencySymbol }}{{ formatAmount(bucket.allocated_balance) }}</p>
       </div>
     </button>
   </div>
@@ -45,6 +45,7 @@
 <script setup>
 import { computed } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   buckets: { type: Array, required: true },

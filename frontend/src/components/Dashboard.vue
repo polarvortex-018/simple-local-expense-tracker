@@ -11,7 +11,7 @@
       <div class="pt-1">
         <span class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">NET WORTH</span>
         <div class="text-3xl font-bold tabular-nums tracking-tight mt-0.5" :class="netWorth >= 0 ? 'text-[#f1f0f5]' : 'text-[#FFD1B3]'">
-          ₹{{ formatAmount(animatedNetWorth) }}
+          {{ currencySymbol }}{{ formatAmount(animatedNetWorth) }}
         </div>
       </div>
 
@@ -22,7 +22,7 @@
           <span class="material-symbols-outlined text-lg text-[#B3F5E1] animate-bounce-gentle shrink-0">north_east</span>
           <div class="min-w-0 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-[#B3F5E1] block truncate">INCOME ({{ currentMonthLabel }})</span>
-            <span class="text-sm font-bold text-[#B3F5E1] tabular-nums tracking-tight block truncate">₹{{ formatAmount(animatedIncome) }}</span>
+            <span class="text-sm font-bold text-[#B3F5E1] tabular-nums tracking-tight block truncate">{{ currencySymbol }}{{ formatAmount(animatedIncome) }}</span>
           </div>
         </div>
 
@@ -31,7 +31,7 @@
           <span class="material-symbols-outlined text-lg text-[#FFD1B3] animate-pulse-slow shrink-0">south_east</span>
           <div class="min-w-0 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-[#FFD1B3] block truncate">EXPENSE ({{ currentMonthLabel }})</span>
-            <span class="text-sm font-bold text-[#FFD1B3] tabular-nums tracking-tight block truncate">₹{{ formatAmount(animatedExpenses) }}</span>
+            <span class="text-sm font-bold text-[#FFD1B3] tabular-nums tracking-tight block truncate">{{ currencySymbol }}{{ formatAmount(animatedExpenses) }}</span>
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@
           <div class="min-w-0 flex-1">
             <p class="text-xs font-semibold text-[#f1f0f5] truncate leading-tight">{{ bucket.name }}</p>
             <p class="text-[11px] font-bold tabular-nums truncate mt-0.5 leading-tight" :class="Number(bucket.allocated_balance) >= 0 ? 'text-[#D4BFFF]' : 'text-[#FFD1B3]'">
-              ₹{{ formatAmount(bucket.allocated_balance) }}
+              {{ currencySymbol }}{{ formatAmount(bucket.allocated_balance) }}
             </p>
           </div>
         </div>
@@ -186,7 +186,7 @@
                 {{ activeHoveredCategoryInfo ? activeHoveredCategoryInfo.name : 'Total' }}
               </span>
               <div class="text-xl font-bold text-[#f1f0f5] tabular-nums tracking-tight mt-0.5">
-                ₹{{ formatAmount(activeHoveredCategoryInfo ? activeHoveredCategoryInfo.amount : totalFilteredCategoryExpense) }}
+                {{ currencySymbol }}{{ formatAmount(activeHoveredCategoryInfo ? activeHoveredCategoryInfo.amount : totalFilteredCategoryExpense) }}
               </div>
               <span v-if="activeHoveredCategoryInfo" class="text-[10px] font-semibold text-[#B3F5E1] mt-0.5">
                 {{ activeHoveredCategoryInfo.percentage }}%
@@ -220,7 +220,7 @@
             <div class="flex items-center gap-4 shrink-0 tabular-nums">
               <span class="text-[11px] text-[#9e9cae] font-medium w-10 text-right">{{ item.percentage }}%</span>
               <span class="text-xs font-bold text-[#f1f0f5] text-right min-w-[70px]">
-                ₹{{ formatAmount(item.amount) }}
+                {{ currencySymbol }}{{ formatAmount(item.amount) }}
               </span>
             </div>
           </div>
@@ -252,7 +252,7 @@
           <div class="overflow-hidden min-w-0 flex-1">
             <p class="text-xs font-semibold text-[#f1f0f5] truncate leading-tight">{{ acc.name }}</p>
             <p class="text-xs font-bold tracking-tight tabular-nums truncate leading-tight mt-0.5" :class="Number(acc.balance) >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'">
-              ₹{{ formatAmount(acc.balance) }}
+              {{ currencySymbol }}{{ formatAmount(acc.balance) }}
             </p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
@@ -279,6 +279,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { resolveIcon } from '../utils/iconResolver.js';
+import { currencySymbol } from '../utils/currency.js';
 import BlackHoleCanvas from './BlackHoleCanvas.vue';
 import AccountAdjustmentModal from './AccountAdjustmentModal.vue';
 

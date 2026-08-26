@@ -117,19 +117,35 @@
           </button>
         </div>
 
-        <!-- Row 4: Balance Audit Log -->
-        <div class="grid grid-cols-1">
+        <!-- Row 4: Balance Audit Log & Currency Settings -->
+        <div class="grid grid-cols-2 divide-x divide-[#1f202e]">
+          <!-- Balance Audit Log -->
           <button 
             type="button"
             @click="openAdjustmentAuditSheet"
-            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924] w-full"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
           >
             <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
               <span class="material-symbols-outlined text-base">history_edu</span>
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Balance Audit Log</h3>
-              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Adjustment trail & audit</p>
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Audit Log</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Adjustment trail</p>
+            </div>
+          </button>
+
+          <!-- Currency Settings -->
+          <button 
+            type="button"
+            @click="activeSheet = 'currency'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">payments</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight truncate">Currency</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">{{ currentCurrency.code }} ({{ currencySymbol }})</p>
             </div>
           </button>
         </div>
@@ -265,7 +281,7 @@
                     <p class="text-[10px] font-bold uppercase tracking-wider text-[#D4BFFF]">Total Allocated</p>
                     <span class="material-symbols-outlined text-base text-[#D4BFFF]">pie_chart</span>
                   </div>
-                  <p class="mt-1 text-lg sm:text-xl font-bold text-[#f1f0f5] tabular-nums">₹{{ formatAmount(totalAllocated) }}</p>
+                  <p class="mt-1 text-lg sm:text-xl font-bold text-[#f1f0f5] tabular-nums">{{ currencySymbol }}{{ formatAmount(totalAllocated) }}</p>
                 </div>
                 <p class="text-[10px] text-[#9e9cae] mt-2">Sum of all active goal bucket balances</p>
               </div>
@@ -281,7 +297,7 @@
                     class="mt-1 text-lg sm:text-xl font-bold tabular-nums"
                     :class="unassignedAmount < 0 ? 'text-rose-400' : 'text-[#FFD1B3]'"
                   >
-                    {{ unassignedAmount < 0 ? '-' : '' }}₹{{ formatAmount(Math.abs(unassignedAmount)) }}
+                    {{ unassignedAmount < 0 ? '-' : '' }}{{ currencySymbol }}{{ formatAmount(Math.abs(unassignedAmount)) }}
                   </p>
                 </div>
 
@@ -338,7 +354,7 @@
                       <span v-if="bucket.is_archived" class="px-1.5 py-0.2 text-[9px] font-semibold rounded bg-amber-950/60 text-amber-400 border border-amber-800/40 shrink-0">Archived</span>
                     </div>
                     <p class="text-[10px] text-[#9e9cae] font-medium mt-0.5">
-                      Allocated: <span class="text-[#D4BFFF] font-bold">₹{{ formatAmount(bucket.allocated_balance) }}</span>
+                      Allocated: <span class="text-[#D4BFFF] font-bold">{{ currencySymbol }}{{ formatAmount(bucket.allocated_balance) }}</span>
                     </p>
                   </div>
                 </div>
@@ -473,7 +489,7 @@
                       <p class="text-xs font-bold text-[#f1f0f5]">{{ account.name }}</p>
                       <p class="text-[10px] text-[#9e9cae] mt-0.5">
                         <span class="px-1.5 py-0.5 rounded bg-[#0f1019] border border-[#1f202e] text-[#9e9cae]">{{ account.type }}</span>
-                        <span class="ml-2 font-medium text-[#f1f0f5]">Balance: <span class="font-bold text-[#B3F5E1]">₹{{ formatAmount(account.balance) }}</span></span>
+                        <span class="ml-2 font-medium text-[#f1f0f5]">Balance: <span class="font-bold text-[#B3F5E1]">{{ currencySymbol }}{{ formatAmount(account.balance) }}</span></span>
                       </p>
                     </div>
                     <div class="flex gap-1">
@@ -979,12 +995,100 @@
                   class="font-bold tabular-nums text-xs shrink-0"
                   :class="log.adjustment_direction === 'subtract' ? 'text-[#FFD1B3]' : 'text-[#B3F5E1]'"
                 >
-                  {{ log.adjustment_direction === 'subtract' ? '-' : '+' }}₹{{ formatAmount(log.amount) }}
+                  {{ log.adjustment_direction === 'subtract' ? '-' : '+' }}{{ currencySymbol }}{{ formatAmount(log.amount) }}
                 </span>
               </div>
             </div>
             <div v-else class="text-center py-8 border-y border-[#1f202e] text-xs text-[#9e9cae]">
               No balance adjustment logs found for selected date filter.
+            </div>
+          </div>
+
+          <!-- 8. CURRENCY & FORMATTING SHEET -->
+          <div v-if="activeSheet === 'currency'" class="space-y-6">
+            <div>
+              <h3 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Currency & Formatting</h3>
+              <p class="text-xs text-[#9e9cae] mt-0.5">Set default app currency for displays, inputs, and reports (100% offline)</p>
+            </div>
+
+            <!-- Current Active Currency Card -->
+            <div class="p-4 bg-[#0f1019] border border-[#1f202e] rounded-2xl flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#D4BFFF]/15 border border-[#D4BFFF]/30 text-[#D4BFFF] flex items-center justify-center font-bold text-lg shrink-0">
+                  {{ currencySymbol }}
+                </div>
+                <div>
+                  <p class="text-[10px] text-[#9e9cae] font-semibold uppercase tracking-wider">Active Currency</p>
+                  <h4 class="text-sm font-bold text-[#f1f0f5]">{{ currentCurrency.name }}</h4>
+                </div>
+              </div>
+              <div class="px-3 py-1 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-full text-xs font-bold text-[#D4BFFF] shrink-0">
+                {{ currentCurrency.code }}
+              </div>
+            </div>
+
+            <!-- Search Currencies -->
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9e9cae] text-base">search</span>
+              <input
+                v-model="currencySearchQuery"
+                type="text"
+                placeholder="Search currency by name, 3-letter code (USD, EUR, SAR, INR...)"
+                class="w-full pl-10 pr-4 py-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none"
+              />
+            </div>
+
+            <!-- Currency Selection Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-80 overflow-y-auto pr-1">
+              <button
+                v-for="c in filteredCurrencies"
+                :key="c.code"
+                type="button"
+                @click="handleSelectCurrency(c)"
+                class="p-3 bg-[#0f1019] hover:bg-[#141520] border rounded-xl text-left transition cursor-pointer flex items-center justify-between group active:scale-[0.98]"
+                :class="currentCurrency.code === c.code ? 'border-[#D4BFFF] bg-[#D4BFFF]/10' : 'border-[#1f202e] hover:border-[#D4BFFF]/40'"
+              >
+                <div class="flex items-center gap-3 min-w-0">
+                  <div 
+                    class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0"
+                    :class="currentCurrency.code === c.code ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'bg-[#191924] border border-[#1f202e] text-[#f1f0f5]'"
+                  >
+                    {{ c.symbol || c.code }}
+                  </div>
+                  <div class="min-w-0 truncate">
+                    <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ c.name }}</p>
+                    <p class="text-[10px] text-[#9e9cae] mt-0.5">{{ c.code }}</p>
+                  </div>
+                </div>
+                <span v-if="currentCurrency.code === c.code" class="material-symbols-outlined text-base text-[#D4BFFF] shrink-0">check_circle</span>
+              </button>
+            </div>
+
+            <!-- Custom Currency Expander -->
+            <div class="p-4 bg-[#0f1019] border border-[#1f202e] rounded-2xl space-y-3">
+              <h4 class="text-xs font-bold text-[#f1f0f5]">Or Enter Custom Currency</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <input
+                  v-model="customCurrencyCode"
+                  type="text"
+                  placeholder="Code (e.g. BTC)"
+                  class="px-3 py-2 bg-[#141520] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none uppercase"
+                />
+                <input
+                  v-model="customCurrencySymbol"
+                  type="text"
+                  placeholder="Symbol (e.g. ₿ or leave blank)"
+                  class="px-3 py-2 bg-[#141520] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-xs text-[#f1f0f5] placeholder-[#9e9cae] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  @click="handleApplyCustomCurrency"
+                  :disabled="!customCurrencyCode.trim()"
+                  class="px-3 py-2 bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-40"
+                >
+                  Set Custom Currency
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1025,7 +1129,7 @@
 
               <!-- Amount Input -->
               <div>
-                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Allocate (₹) *</label>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Allocate ({{ currencySymbol }}) *</label>
                 <input 
                   v-model="allocateForm.amount"
                   type="text"
@@ -1097,7 +1201,7 @@
                 <BucketGrid :buckets="activeBuckets" v-model="transferForm.to_bucket_id" :show-unassigned="false" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move (₹) *</label>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount to Move ({{ currencySymbol }}) *</label>
                 <input 
                   v-model="transferForm.amount"
                   type="text"
@@ -1156,7 +1260,7 @@
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount (₹) *</label>
+                <label class="block text-xs font-semibold text-[#ccc3d8] mb-1">Amount ({{ currencySymbol }}) *</label>
                 <input v-model="accountTransferForm.amount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="0.00" required @focus="$event.target.scrollIntoView({ behavior: 'smooth', block: 'center' })" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition" />
               </div>
               <div>
@@ -1209,7 +1313,7 @@
                     class="py-1.5 text-xs font-bold rounded-lg transition cursor-pointer"
                     :class="editingPreset.mode === 'fixed' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
                   >
-                    ₹ Fixed Amounts
+                    {{ currencySymbol }} Fixed Amounts
                   </button>
                 </div>
               </div>
@@ -1224,7 +1328,7 @@
                 <div>
                   <p class="text-[9px] uppercase tracking-wider text-[#9e9cae] font-bold">Total Fixed Amount</p>
                   <p class="text-sm font-black mt-0.5 text-[#B3F5E1]">
-                    ₹{{ formatAmount(editingPresetTotalFixed) }}
+                    {{ currencySymbol }}{{ formatAmount(editingPresetTotalFixed) }}
                   </p>
                 </div>
               </div>
@@ -1288,10 +1392,10 @@
                         </div>
                         <div>
                           <label class="block text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider mb-1">
-                            {{ editingPreset.mode === 'percentage' ? 'Percentage Allocation (%)*' : 'Fixed Amount (₹)*' }}
+                            {{ editingPreset.mode === 'percentage' ? 'Percentage Allocation (%)*' : 'Fixed Amount (' + currencySymbol + ')*' }}
                           </label>
                           <div class="relative flex items-center">
-                            <span v-if="editingPreset.mode === 'fixed'" class="absolute left-3 text-xs font-bold text-[#9e9cae] pointer-events-none">₹</span>
+                            <span v-if="editingPreset.mode === 'fixed'" class="absolute left-3 text-xs font-bold text-[#9e9cae] pointer-events-none">{{ currencySymbol }}</span>
                             <input
                               v-model="rule.value"
                               type="text"
@@ -1326,7 +1430,7 @@
                   <p class="text-[10px] text-[#9e9cae] mt-0.5">Total unallocated cash in bank accounts</p>
                 </div>
                 <p class="text-sm font-black text-[#B3F5E1]">
-                  ₹{{ formatAmount(unassignedAmount) }}
+                  {{ currencySymbol }}{{ formatAmount(unassignedAmount) }}
                 </p>
               </div>
               <div class="p-3 bg-[#1a1030]/50 border border-[#D4BFFF]/15 rounded-xl">
@@ -1334,16 +1438,16 @@
                 <div class="flex flex-wrap gap-1.5 mt-1.5">
                   <span v-for="rule in applyingPreset.rules" :key="rule.id" class="text-[10px] px-2.5 py-1 rounded-lg bg-[#14141d] border border-[#29293a] text-[#9e9cae] inline-flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-xs shrink-0" :style="{ color: getCategoryColor(rule.category_id) }">{{ resolveIcon(getCategoryIcon(rule.category_id), 'category') }}</span>
-                    <span>{{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ applyingPreset.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}</span>
+                    <span>{{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ applyingPreset.mode === 'percentage' ? rule.value + '%' : currencySymbol + formatAmount(rule.value) }}</span>
                   </span>
                 </div>
               </div>
               <div class="p-3 bg-[#0f0f15] border border-[#29293a] rounded-xl text-xs text-[#9e9cae] flex items-center justify-between">
                 <span>Source Funds:</span>
-                <span class="font-bold text-[#f1f0f5]">Unallocated Pool (₹{{ formatAmount(unassignedAmount) }})</span>
+                <span class="font-bold text-[#f1f0f5]">Unallocated Pool ({{ currencySymbol }}{{ formatAmount(unassignedAmount) }})</span>
               </div>
               <div v-if="applyingPreset.mode === 'percentage'" class="space-y-1.5">
-                <label class="block text-xs font-semibold text-[#ccc3d8]">Enter Total Salary Deposit Amount (₹) *</label>
+                <label class="block text-xs font-semibold text-[#ccc3d8]">Enter Total Salary Deposit Amount ({{ currencySymbol }}) *</label>
                 <input v-model="presetBaseAmount" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="e.g. 50000" class="w-full px-3.5 py-2.5 bg-[#0f0f15] border border-[#29293a] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs focus:outline-none transition font-bold" />
               </div>
               <div class="flex justify-end gap-3 pt-2">
@@ -1380,7 +1484,7 @@
                       <div class="flex flex-wrap gap-1.5">
                         <span v-for="rule in preset.rules" :key="rule.id" class="text-[10px] px-2.5 py-1 rounded-lg bg-[#14141d] border border-[#29293a] text-[#dae2fd] inline-flex items-center gap-1.5">
                           <span class="material-symbols-outlined text-xs shrink-0" :style="{ color: getCategoryColor(rule.category_id) }">{{ resolveIcon(getCategoryIcon(rule.category_id), 'category') }}</span>
-                          <span>{{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : '₹' + formatAmount(rule.value) }}</span>
+                          <span>{{ getBucketName(rule.bucket_id) }} ({{ getAccountName(rule.account_id) }}) · {{ getCategoryName(rule.category_id) }} · {{ rule.mode === 'percentage' ? rule.value + '%' : currencySymbol + formatAmount(rule.value) }}</span>
                         </span>
                       </div>
                       <div class="flex justify-end gap-2.5 pt-1">
@@ -1431,13 +1535,48 @@ import BucketFormModal from './BucketFormModal.vue';
 import CategoryPicker from './CategoryPicker.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 import { api } from '../services/api';
+import { CURRENCIES, currentCurrency, currencySymbol, setCurrency } from '../utils/currency.js';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
-const activeSheet = ref(null); // null, 'quick_actions', 'buckets', 'accounts', 'categories', 'backup', 'faq', 'unassigned_audit'
+const activeSheet = ref(null); // null, 'quick_actions', 'buckets', 'accounts', 'categories', 'backup', 'faq', 'unassigned_audit', 'currency'
 const unassignedAuditLogs = ref([]);
 const auditDateFilter = ref('all');
 const customAuditMonth = ref('');
+
+const backupsList = ref([]);
+const creatingBackup = ref(false);
+
+const currencySearchQuery = ref('');
+const customCurrencyCode = ref('');
+const customCurrencySymbol = ref('');
+const customCurrencyName = ref('');
+
+const filteredCurrencies = computed(() => {
+  const q = currencySearchQuery.value.trim().toLowerCase();
+  if (!q) return CURRENCIES;
+  return CURRENCIES.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    c.code.toLowerCase().includes(q) ||
+    (c.symbol && c.symbol.toLowerCase().includes(q))
+  );
+});
+
+const handleSelectCurrency = (curr) => {
+  setCurrency(curr);
+};
+
+const handleApplyCustomCurrency = () => {
+  if (!customCurrencyCode.value.trim()) return;
+  setCurrency({
+    code: customCurrencyCode.value.trim().toUpperCase(),
+    symbol: customCurrencySymbol.value.trim(),
+    name: customCurrencyName.value.trim() || customCurrencyCode.value.trim().toUpperCase()
+  });
+  customCurrencyCode.value = '';
+  customCurrencySymbol.value = '';
+  customCurrencyName.value = '';
+};
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const auditPickerYear = ref(new Date().getFullYear());
@@ -1455,6 +1594,9 @@ const changeAuditPickerYear = (delta) => {
 
 watch(activeSheet, (val) => {
   emit('active-sheet-change', val);
+  if (val === 'backup') {
+    loadBackupsList();
+  }
 });
 
 const filteredAuditLogs = computed(() => {
@@ -1499,6 +1641,7 @@ const getSheetIcon = (sheet) => {
     case 'faq': return 'help_outline';
     case 'adjustment_audit':
     case 'unassigned_audit': return 'history_edu';
+    case 'currency': return 'payments';
     default: return 'widgets';
   }
 };
@@ -1513,6 +1656,7 @@ const getSheetTitle = (sheet) => {
     case 'faq': return 'FAQ & About';
     case 'adjustment_audit':
     case 'unassigned_audit': return 'Balance Adjustments & Audit Log';
+    case 'currency': return 'Currency & Formatting';
     default: return 'More';
   }
 };
@@ -1691,7 +1835,7 @@ const submitAllocateFromUnallocated = async () => {
     return;
   }
   if (amt > unassignedAmount.value) {
-    emit('error', `Allocation exceeds available unallocated funds (₹${unassignedAmount.value.toFixed(2)} available).`);
+    emit('error', `Allocation exceeds available unallocated funds (${currencySymbol.value}${unassignedAmount.value.toFixed(2)} available).`);
     return;
   }
 
@@ -1735,7 +1879,7 @@ const handleSaveBucket = (payload) => {
 
 const confirmDeleteBucket = (bucket) => {
   const allocation = formatAmount(bucket.allocated_balance);
-  const confirm = window.confirm(`Permanently delete the bucket "${bucket.name}" and remove its ₹${allocation} allocation? Transaction history will be kept, but it will no longer reference this bucket. This cannot be undone.`);
+  const confirm = window.confirm(`Permanently delete the bucket "${bucket.name}" and remove its ${currencySymbol.value}${allocation} allocation? Transaction history will be kept, but it will no longer reference this bucket. This cannot be undone.`);
   if (confirm) {
     emit('delete-bucket', bucket.id);
   }

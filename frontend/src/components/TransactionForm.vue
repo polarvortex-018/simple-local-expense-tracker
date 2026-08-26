@@ -77,7 +77,7 @@
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ b.name }}</p>
-                    <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(b.allocated_balance) }}</p>
+                    <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">{{ currencySymbol }}{{ formatAmount(b.allocated_balance) }}</p>
                   </div>
                 </button>
               </div>
@@ -121,7 +121,7 @@
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ acc.name }}</p>
-                    <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">₹{{ formatAmount(acc.balance) }}</p>
+                    <p class="text-[10px] font-bold text-[#9e9cae] truncate mt-0.5 tabular-nums">{{ currencySymbol }}{{ formatAmount(acc.balance) }}</p>
                   </div>
                 </button>
               </div>
@@ -227,7 +227,7 @@
               <div class="space-y-1">
                 <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">AMOUNT *</label>
                 <div class="flex items-center gap-1.5 border-b border-[#1f202e] focus-within:border-[#D4BFFF] pb-1">
-                  <span class="text-base font-bold text-[#9e9cae]">₹</span>
+                  <span class="text-base font-bold text-[#9e9cae]">{{ currencySymbol }}</span>
                   <input 
                     ref="amountInputRef"
                     v-model="form.amount"
@@ -353,6 +353,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import CategoryPicker from './CategoryPicker.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   transaction: {

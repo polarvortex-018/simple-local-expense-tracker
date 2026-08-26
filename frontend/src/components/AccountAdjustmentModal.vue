@@ -33,7 +33,7 @@
         <div class="p-3.5 bg-[#0f1019] border border-[#1f202e] rounded-xl space-y-3">
           <div class="flex justify-between items-center text-xs">
             <span class="text-[#9e9cae] font-semibold">App Current Balance:</span>
-            <span class="font-bold text-[#f1f0f5] tabular-nums">₹{{ formatAmount(currentBalance) }}</span>
+            <span class="font-bold text-[#f1f0f5] tabular-nums">{{ currencySymbol }}{{ formatAmount(currentBalance) }}</span>
           </div>
 
           <div>
@@ -41,7 +41,7 @@
               Actual Real-Life Balance *
             </label>
             <div class="flex items-center gap-1.5 border-b border-[#1f202e] focus-within:border-[#D4BFFF] pb-1">
-              <span class="text-base font-bold text-[#9e9cae]">₹</span>
+              <span class="text-base font-bold text-[#9e9cae]">{{ currencySymbol }}</span>
               <input 
                 ref="realInputRef"
                 v-model="realBalanceInput" 
@@ -62,7 +62,7 @@
               class="font-bold tabular-nums text-sm"
               :class="calculatedDiff >= 0 ? 'text-[#B3F5E1]' : 'text-[#FFD1B3]'"
             >
-              {{ calculatedDiff >= 0 ? '+' : '' }}₹{{ formatAmount(calculatedDiff) }}
+              {{ calculatedDiff >= 0 ? '+' : '' }}{{ currencySymbol }}{{ formatAmount(calculatedDiff) }}
             </span>
           </div>
         </div>
@@ -149,6 +149,7 @@
 import { ref, computed, watch, nextTick } from 'vue';
 import { api } from '../services/api.js';
 import { resolveIcon } from '../utils/iconResolver.js';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
@@ -165,11 +166,11 @@ const targetBucketId = ref('');
 const submitting = ref(false);
 const error = ref('');
 
-const currentBalance = computed(() => Number(props.account?.balance) || 0);
+const currentBalance = computed(() => Math.round((Number(props.account?.balance) || 0) * 100) / 100);
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
 
 const calculatedDiff = computed(() => {
-  if (!realBalanceInput.value && realBalanceInput.value !== 0) return null;
+  if (realBalanceInput.value === '' || realBalanceInput.value === null || realBalanceInput.value === undefined) return null;
   const parsed = parseFloat(String(realBalanceInput.value).replace(',', '.'));
   if (isNaN(parsed)) return null;
   return Math.round((parsed - currentBalance.value) * 100) / 100;
@@ -179,7 +180,8 @@ watch(() => props.isOpen, (open) => {
   if (open) {
     error.value = '';
     submitting.value = false;
-    realBalanceInput.value = currentBalance.value.toString();
+    const rounded = Math.round(currentBalance.value * 100) / 100;
+    realBalanceInput.value = rounded.toString();
     showOnChart.value = true;
     targetBucketId.value = 'bucket_unassigned';
     nextTick(() => {
@@ -195,7 +197,9 @@ const close = () => {
 
 const formatAmount = (val) => {
   const num = Number(val);
-  return isNaN(num) ? '0.00' : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (isNaN(num)) return '0.00';
+  const rounded = Math.round(num * 100) / 100;
+  return rounded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const handleAdjust = async () => {

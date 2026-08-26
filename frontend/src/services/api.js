@@ -257,7 +257,7 @@ export const api = {
       if (accRows.length) {
         const currentAccBalance = Number(accRows[0].balance) || 0;
         const multiplier = transactionMultiplier(type, payload.adjustment_direction);
-        const newAccBalance = currentAccBalance + (amount * multiplier);
+        const newAccBalance = Math.round((currentAccBalance + (amount * multiplier)) * 100) / 100;
         execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [newAccBalance, now, accountId], false);
       }
     }
@@ -268,7 +268,7 @@ export const api = {
       if (bucketRows.length) {
         const currentBucketAlloc = Number(bucketRows[0].allocated_balance) || 0;
         const multiplier = transactionMultiplier(type, payload.adjustment_direction);
-        const newBucketAlloc = currentBucketAlloc + (amount * multiplier);
+        const newBucketAlloc = Math.round((currentBucketAlloc + (amount * multiplier)) * 100) / 100;
         execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [newBucketAlloc, now, payload.bucket_id], false);
       }
     }
@@ -313,7 +313,7 @@ export const api = {
       const oldAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [oldTx.account_id]);
       if (oldAccRows.length) {
         const bal = Number(oldAccRows[0].balance);
-        const revertedBal = bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
+        const revertedBal = Math.round((bal - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction))) * 100) / 100;
         execRun('UPDATE accounts SET balance = ? WHERE id = ?', [revertedBal, oldTx.account_id], false);
       }
     }
@@ -322,7 +322,7 @@ export const api = {
       const oldBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [oldTx.bucket_id]);
       if (oldBucketRows.length) {
         const alloc = Number(oldBucketRows[0].allocated_balance);
-        const revertedAlloc = alloc - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction));
+        const revertedAlloc = Math.round((alloc - (oldAmount * transactionMultiplier(oldType, oldTx.adjustment_direction))) * 100) / 100;
         execRun('UPDATE savings_buckets SET allocated_balance = ? WHERE id = ?', [revertedAlloc, oldTx.bucket_id], false);
       }
     }
@@ -335,7 +335,7 @@ export const api = {
       const newAccRows = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId]);
       if (newAccRows.length) {
         const bal = Number(newAccRows[0].balance);
-        const appliedBal = bal + (newAmount * transactionMultiplier(newType, payload.adjustment_direction));
+        const appliedBal = Math.round((bal + (newAmount * transactionMultiplier(newType, payload.adjustment_direction))) * 100) / 100;
         execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [appliedBal, now, accountId], false);
       }
     }
@@ -344,7 +344,7 @@ export const api = {
       const newBucketRows = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [payload.bucket_id]);
       if (newBucketRows.length) {
         const alloc = Number(newBucketRows[0].allocated_balance);
-        const appliedAlloc = alloc + (newAmount * transactionMultiplier(newType, payload.adjustment_direction));
+        const appliedAlloc = Math.round((alloc + (newAmount * transactionMultiplier(newType, payload.adjustment_direction))) * 100) / 100;
         execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [appliedAlloc, now, payload.bucket_id], false);
       }
     }
@@ -685,9 +685,9 @@ export const api = {
 
     return runInTransaction(async () => {
       // Deduct from source account
-      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Number(fromAcc.balance) - transferAmt, now, from_account_id], false);
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Math.round((Number(fromAcc.balance) - transferAmt) * 100) / 100, now, from_account_id], false);
       // Add to destination account
-      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Number(toAcc.balance) + transferAmt, now, to_account_id], false);
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Math.round((Number(toAcc.balance) + transferAmt) * 100) / 100, now, to_account_id], false);
 
       // Bucket impact — the money stays allocated to the same bucket, just moves accounts
       // We record two transfer transactions for full ledger traceability
@@ -890,8 +890,8 @@ export const api = {
     const now = new Date().toISOString();
     const amount = Number(payload.amount);
     return runInTransaction(async () => {
-      const nextBalance = debtType === 'lent' ? Number(account.balance) - amount : Number(account.balance) + amount;
-      const nextAllocation = debtType === 'lent' ? Number(bucket.allocated_balance) - amount : Number(bucket.allocated_balance) + amount;
+      const nextBalance = Math.round((debtType === 'lent' ? Number(account.balance) - amount : Number(account.balance) + amount) * 100) / 100;
+      const nextAllocation = Math.round((debtType === 'lent' ? Number(bucket.allocated_balance) - amount : Number(bucket.allocated_balance) + amount) * 100) / 100;
       execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [nextBalance, now, account.id], false);
       execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [nextAllocation, now, bucket.id], false);
       execRun(
@@ -956,12 +956,12 @@ export const api = {
     const now = new Date().toISOString();
     return runInTransaction(async () => {
       const amount = Number(debt.amount);
-      const nextBalance = debt.debt_type === 'lent' ? Number(account.balance) + amount : Number(account.balance) - amount;
+      const nextBalance = Math.round((debt.debt_type === 'lent' ? Number(account.balance) + amount : Number(account.balance) - amount) * 100) / 100;
       execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [nextBalance, now, account.id], false);
       if (debt.bucket_id) {
         const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [debt.bucket_id])[0];
         if (bucket) {
-          const nextAllocation = debt.debt_type === 'lent' ? Number(bucket.allocated_balance) + amount : Number(bucket.allocated_balance) - amount;
+          const nextAllocation = Math.round((debt.debt_type === 'lent' ? Number(bucket.allocated_balance) + amount : Number(bucket.allocated_balance) - amount) * 100) / 100;
           execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [nextAllocation, now, bucket.id], false);
         }
       }

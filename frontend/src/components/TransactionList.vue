@@ -584,7 +584,7 @@
                     {{ activeHoveredExpenseInfo ? activeHoveredExpenseInfo.name : 'Total Spent' }}
                   </span>
                   <div class="text-xl sm:text-2xl font-black text-[#f1f0f5] tabular-nums tracking-tight mt-0.5">
-                    <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredExpenseInfo ? activeHoveredExpenseInfo.amount : (isChartLoading ? animatedExpenseAmount : totalFilteredCategoryExpense)) }}
+                    <span class="text-sm text-[#9e9cae] font-bold">{{ currencySymbol }}</span>{{ formatAmount(activeHoveredExpenseInfo ? activeHoveredExpenseInfo.amount : (isChartLoading ? animatedExpenseAmount : totalFilteredCategoryExpense)) }}
                   </div>
                   <span v-if="activeHoveredExpenseInfo" class="text-xs font-bold text-[#FFD1B3] mt-0.5 px-2 py-0.5 rounded-full bg-[#FFD1B3]/10 border border-[#FFD1B3]/20">
                     {{ activeHoveredExpenseInfo.percentage }}% of total
@@ -625,7 +625,7 @@
                 <div class="flex items-center gap-2.5 shrink-0 tabular-nums">
                   <span class="text-[10px] font-bold text-[#9e9cae] bg-[#141520] px-2 py-0.5 rounded-md border border-[#1f202e]">{{ item.percentage }}%</span>
                   <span class="text-xs sm:text-sm font-bold text-[#f1f0f5]">
-                    ₹{{ formatAmount(item.amount) }}
+                    {{ currencySymbol }}{{ formatAmount(item.amount) }}
                   </span>
                 </div>
               </div>
@@ -719,7 +719,7 @@
                     {{ activeHoveredIncomeInfo ? activeHoveredIncomeInfo.name : 'Income' }}
                   </span>
                   <div class="text-xl sm:text-2xl font-bold text-[#B3F5E1] tabular-nums tracking-tight mt-0.5">
-                    <span class="text-sm text-[#9e9cae] font-bold">₹</span>{{ formatAmount(activeHoveredIncomeInfo ? activeHoveredIncomeInfo.amount : (isChartLoading ? animatedIncomeAmount : totalFilteredCategoryIncome)) }}
+                    <span class="text-sm text-[#9e9cae] font-bold">{{ currencySymbol }}</span>{{ formatAmount(activeHoveredIncomeInfo ? activeHoveredIncomeInfo.amount : (isChartLoading ? animatedIncomeAmount : totalFilteredCategoryIncome)) }}
                   </div>
                   <span v-if="activeHoveredIncomeInfo" class="text-xs font-bold text-[#B3F5E1] mt-0.5 px-2 py-0.5 rounded-full bg-[#B3F5E1]/10 border border-[#B3F5E1]/20">
                     {{ activeHoveredIncomeInfo.percentage }}% of total
@@ -760,7 +760,7 @@
                 <div class="flex items-center gap-2 shrink-0 tabular-nums">
                   <span class="text-[10px] font-semibold text-[#9e9cae] bg-[#141520] px-1.5 py-0.2 rounded-md border border-[#1f202e]">{{ item.percentage }}%</span>
                   <span class="text-xs font-bold text-[#B3F5E1]">
-                    ₹{{ formatAmount(item.amount) }}
+                    {{ currencySymbol }}{{ formatAmount(item.amount) }}
                   </span>
                 </div>
               </div>
@@ -783,8 +783,8 @@
         <div class="flex items-center justify-between px-1 py-2 border-b border-[#1f202e] text-xs font-semibold sticky top-13 z-10 bg-[#0c0d14]/95 backdrop-blur-md">
           <span class="text-[#f1f0f5] font-bold tracking-tight">{{ formatDateHeader(group.dateStr) }}</span>
           <div class="flex items-center gap-2 tabular-nums text-xs font-semibold">
-            <span v-if="group.totalExpense > 0" class="text-[#9e9cae]">Spent: <span class="text-[#f1f0f5]">₹{{ formatAmount(group.totalExpense) }}</span></span>
-            <span v-if="group.totalIncome > 0" class="text-[#B3F5E1]">Income: ₹{{ formatAmount(group.totalIncome) }}</span>
+            <span v-if="group.totalExpense > 0" class="text-[#9e9cae]">Spent: <span class="text-[#f1f0f5]">{{ currencySymbol }}{{ formatAmount(group.totalExpense) }}</span></span>
+            <span v-if="group.totalIncome > 0" class="text-[#B3F5E1]">Income: {{ currencySymbol }}{{ formatAmount(group.totalIncome) }}</span>
           </div>
         </div>
 
@@ -819,7 +819,7 @@
             <!-- Right: Amount & Actions -->
             <div class="flex items-center gap-2 shrink-0 text-right">
               <span class="text-xs sm:text-sm font-bold block tabular-nums" :class="transactionAmountClass(tx)">
-                {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
+                {{ transactionSign(tx) }}{{ currencySymbol }}{{ formatAmount(tx.amount) }}
               </span>
 
               <!-- Desktop Action Buttons -->
@@ -900,7 +900,7 @@
                 class="py-2.5 px-3 text-right text-xs font-bold whitespace-nowrap tabular-nums"
                 :class="transactionAmountClass(tx)"
               >
-                {{ transactionSign(tx) }}₹{{ formatAmount(tx.amount) }}
+                {{ transactionSign(tx) }}{{ currencySymbol }}{{ formatAmount(tx.amount) }}
               </td>
 
               <td class="py-2.5 px-3 pr-4 text-center whitespace-nowrap">
@@ -975,7 +975,7 @@
                 class="text-2xl font-bold tabular-nums tracking-tight"
                 :class="transactionAmountClass(selectedTransactionForView)"
               >
-                {{ transactionSign(selectedTransactionForView) }}₹{{ formatAmount(selectedTransactionForView.amount) }}
+                {{ transactionSign(selectedTransactionForView) }}{{ currencySymbol }}{{ formatAmount(selectedTransactionForView.amount) }}
               </div>
               <p class="text-xs font-bold text-[#f1f0f5] break-words pt-1">
                 {{ selectedTransactionForView.description || 'No Description' }}
@@ -1228,6 +1228,7 @@
 import { ref, computed, watch, nextTick } from 'vue';
 import CategoryPicker from './CategoryPicker.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
+import { currencySymbol } from '../utils/currency.js';
 
 const props = defineProps({
   transactions: {
