@@ -54,7 +54,7 @@
         <!-- Smooth Step Slide Container -->
         <Transition :name="slideDirection === 'next' ? 'step-next' : 'step-prev'" mode="out-in">
           <!-- STEP 1: Bucket & Account Selection -->
-          <div v-if="currentStep === 1" key="step-1" class="space-y-3">
+          <div v-if="currentStep === 1" key="step-1" data-tour="step-1-form" class="space-y-3">
             
             <!-- 1. Select Bucket Section (2-Column Mobile Grid) -->
             <div class="space-y-1.5">

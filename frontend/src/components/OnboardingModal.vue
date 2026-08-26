@@ -680,7 +680,7 @@ const SPOTLIGHT_STEPS = [
     tab: 'dashboard',
     title: 'Savings Buckets',
     icon: 'savings',
-    description: 'Enforce virtual envelope budgeting for specific financial goals (e.g. Emergency Fund, Travel, Bills).'
+    description: 'Enforce virtual envelope budgeting using savings buckets to keep your money organized (e.g. Emergency Fund, Travel, Bills).'
   },
   {
     target: 'accounts-grid',
@@ -694,59 +694,62 @@ const SPOTLIGHT_STEPS = [
     tab: 'dashboard',
     title: 'Salary Allocation Engine',
     icon: 'payments',
-    description: 'Automate salary distribution across your buckets in one tap when monthly income arrives.'
+    description: 'Automate salary distribution across your savings buckets in one tap when monthly income arrives.'
   },
   {
     target: 'add-tx-btn',
+    altTarget: 'add-tx-btn-mobile',
     tab: 'dashboard',
     title: 'Instant Transaction Entry',
     icon: 'add_circle',
     description: 'Tap + anywhere to quickly log Income, Expense, Transfers, or Balance Adjustments.'
   },
   {
-    target: 'step-1-type',
+    target: 'step-1-form',
     openFormStep: 1,
     tab: 'dashboard',
-    title: 'Transaction Form: Type & Amount',
+    title: 'Transaction Form: Select Bucket & Account',
     icon: 'tune',
-    description: 'Select Income, Expense, Transfer, or Adjustment. Enter amounts in your preferred vault currency.'
+    description: 'Select which Savings Bucket and Storage Account to allocate transactions toward.'
   },
   {
-    target: 'step-2-[#D4BFFF]',
+    target: 'step-2-form',
     openFormStep: 2,
     tab: 'dashboard',
-    title: 'Transaction Form: Mandate & Bucket Assignment',
+    title: 'Transaction Form: Amount & Details',
     icon: 'account_tree',
-    description: 'Assign transactions to physical Storage Accounts and Savings Buckets with automatic mandate validation.'
+    description: 'Select Income, Expense, Transfer, or Adjustment. Enter amounts in your active vault currency.'
   },
   {
-    target: 'nav-transactions',
+    target: 'history-tab',
+    altTarget: 'history-filters',
     closeForm: true,
     tab: 'transactions',
-    title: 'Transactions History',
+    title: 'Transactions History & Breakdown',
     icon: 'receipt_long',
-    description: 'View full history, search transactions, filter by month/date range, and inspect category breakdown donut charts.'
+    description: 'This is where your full transaction history and category breakdown donut charts will come. Filter by month, search records, or inspect category totals.'
   },
   {
-    target: 'nav-settings',
+    target: 'categories-tile',
+    altTarget: 'settings-tab',
     tab: 'settings',
-    title: 'More Directory Grid (Categories & Buckets)',
+    title: 'Categories & Directory Grid',
     icon: 'category',
-    description: 'Browse the 2-column hairline grid under More. Manage accounts, goal buckets, categories, icons, and colors anytime.'
+    description: 'This highlights all your categories! Manage storage accounts, savings buckets to keep your money organized, categories, icons, and colors anytime under More.'
   },
   {
     target: 'backup-tile',
     tab: 'settings',
-    title: 'Local Backups & Export',
+    title: 'Local Encrypted Backups',
     icon: 'database',
     description: 'Create encrypted local database backups, export snapshots, and manage app preferences securely.'
   },
   {
     target: null,
     tab: 'settings',
-    title: 'Need Further Help? Check FAQ & Guides',
-    icon: 'help',
-    description: 'If you ever have any questions or doubts about how Cash Buddy works, simply tap Settings → FAQ & Guides anytime to re-run this tour or read detailed guides!'
+    title: 'Thank You from Cash Buddy! ❤️',
+    icon: 'favorite',
+    description: 'Thank you for using Cash Buddy! We love having you with us. Remember, if you ever have any questions or doubts, you can tap Settings → FAQ & Guides anytime to re-run this tour or read detailed guides!'
   }
 ];
 
@@ -778,9 +781,15 @@ function updateSpotlightStep() {
 
   nextTick(() => {
     setTimeout(() => {
-      let el = step.target ? (document.querySelector(`[data-tour="${step.target}"]`) || document.querySelector(`[data-tour-target="${step.target}"]`)) : null;
+      let el = null;
+      if (step.target) {
+        el = document.querySelector(`[data-tour="${step.target}"]`) || document.querySelector(`[data-tour-target="${step.target}"]`);
+      }
+      if (!el && step.altTarget) {
+        el = document.querySelector(`[data-tour="${step.altTarget}"]`) || document.querySelector(`[data-tour-target="${step.altTarget}"]`);
+      }
 
-      if (el && step.target) {
+      if (el) {
         const rect = el.getBoundingClientRect();
         if (rect.width > 0 && rect.height > 0) {
           spotlightRect.value = {
@@ -790,27 +799,36 @@ function updateSpotlightStep() {
             height: rect.height + 12
           };
 
-          const spaceBelow = window.innerHeight - rect.bottom;
-          const spaceAbove = rect.top;
-
-          if (spaceBelow >= 240) {
+          if (step.openFormStep) {
+            // For modal form steps, place tooltip floating neatly at top or bottom to avoid covering the form
             tooltipStyle.value = { 
-              top: (rect.bottom + 14) + 'px', 
-              left: '50%', 
-              transform: 'translateX(-50%)' 
-            };
-          } else if (spaceAbove >= 240) {
-            tooltipStyle.value = { 
-              top: Math.max(54, rect.top - 210) + 'px', 
+              bottom: 'max(16px, env(safe-area-inset-bottom))', 
               left: '50%', 
               transform: 'translateX(-50%)' 
             };
           } else {
-            tooltipStyle.value = { 
-              bottom: 'max(24px, env(safe-area-inset-bottom))', 
-              left: '50%', 
-              transform: 'translateX(-50%)' 
-            };
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            if (spaceBelow >= 240) {
+              tooltipStyle.value = { 
+                top: (rect.bottom + 14) + 'px', 
+                left: '50%', 
+                transform: 'translateX(-50%)' 
+              };
+            } else if (spaceAbove >= 240) {
+              tooltipStyle.value = { 
+                top: Math.max(54, rect.top - 210) + 'px', 
+                left: '50%', 
+                transform: 'translateX(-50%)' 
+              };
+            } else {
+              tooltipStyle.value = { 
+                bottom: 'max(24px, env(safe-area-inset-bottom))', 
+                left: '50%', 
+                transform: 'translateX(-50%)' 
+              };
+            }
           }
         } else {
           spotlightRect.value = null;

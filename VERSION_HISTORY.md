@@ -8,14 +8,30 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.05.16`** (or `v0.5.16`)
+## Current Version: **`v0.05.20`** (or `v0.5.20`)
 
 ---
 
 ## Version History Log
 
 ### **v0.05 — Multi-Currency System & Native Drag-and-Drop Polish**
-- **`v0.05.16`** *(Current)*
+- **`v0.05.20`** *(Current)*
+  - Rebuilt the **Initial Quick Vault Setup Wizard** & **Interactive Spotlight Tour** system from scratch with robust architecture and zero runtime errors.
+  - **Setup Wizard (5 Steps)**: Step 1 (Currency Picker with live search and polymorphic code/object handling), Step 2 (Storage Accounts & Custom Creator with seed balances), Step 3 (Savings Buckets to keep money organized), Step 4 (Expense & Income Categories), Step 5 (Architecture Feature Rundown & Overview).
+  - **Interactive Spotlight Tour (12 Steps)**: Cutout highlight overlay with mobile/desktop selector fallback (`add-tx-btn` / `add-tx-btn-mobile`), step-specific floating tooltip positioning to prevent modal overlap, re-worded savings buckets terminology, and a heartfelt Thank You message (`Thank You from Cash Buddy! ❤️`).
+  - Added **"Take Tour Again"** banner card to **Settings $\rightarrow$ FAQ & Guides**.
+  - Re-synced and assembled Android debug APK (`BUILD SUCCESSFUL in 8s`).
+- **`v0.05.19`**
+  - Fixed currency selection handler in `utils/currency.js` and `OnboardingModal.vue`: updated `setCurrency()` to be polymorphic, accepting both string codes (`'USD'`, `'EUR'`, `'INR'`) and currency objects.
+  - Resolved issue where tapping currency cards on Step 1 of the setup wizard failed to apply.
+- **`v0.05.18`**
+  - Resolved Temporal Dead Zone (TDZ) initialization crash in `Dashboard.vue`: moved `filteredCategoryExpenses`, `totalExpenses`, `filteredCategoryIncome`, and `totalIncome` computed variables above `animateNumberTicker()` and `watch([netWorth, totalIncome, totalExpenses])`.
+  - Fixed `ReferenceError: Cannot access 'x' before initialization` and `ReferenceError: Cannot access 'y' before initialization` that crashed Vue reactivity on component mount.
+- **`v0.05.17`**
+  - Fixed race condition in `OnboardingModal.vue` stage watchers: consolidated `watch([() => props.isOpen, () => props.initialStage])` to guarantee spotlight DOM elements mount before calculating bounding rect coordinates.
+  - Streamlined `openTutorial()` in `App.vue` for atomic stage updates.
+  - Service worker caching strategy updated to `NetworkFirst` / `StaleWhileRevalidate` in `vite.config.js` to ensure fresh JS bundle delivery.
+- **`v0.05.16`**
   - Resolved fatal uncaught console errors (`ReferenceError: loadSettings is not defined`, `ReferenceError: Cannot access 'x' before initialization`, `ReferenceError: Cannot access 'y' before initialization`) captured in diagnostic screenshot.
   - Converted pointer/drag event handlers in `SettingsView.vue` to hoisted function declarations to eliminate Temporal Dead Zone (TDZ) minification crashes.
   - Removed stale `loadSettings()` call from `SettingsView.vue`'s `onMounted()` hook to prevent component initialization failure.
