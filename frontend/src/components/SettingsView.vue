@@ -519,20 +519,32 @@
 
                     <!-- Normal Mode -->
                     <div v-else class="min-w-0 flex-1">
-                      <div class="flex items-center gap-2">
-                        <p class="text-xs font-bold text-[#f1f0f5] truncate">{{ account.name }}</p>
-                        <span v-if="account.id === 'acc_unallocated_funds'" class="px-1.5 py-0.2 rounded bg-[#FFD1B3]/15 text-[#FFD1B3] text-[9px] font-bold uppercase tracking-wider border border-[#FFD1B3]/30">System Default</span>
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <p class="text-xs font-bold text-[#f1f0f5] leading-tight">{{ account.name }}</p>
+                        <span v-if="account.id === 'acc_unallocated_funds'" class="px-1.5 py-0.2 rounded bg-[#FFD1B3]/15 text-[#FFD1B3] text-[8px] font-bold uppercase tracking-wider border border-[#FFD1B3]/30 shrink-0">System Default</span>
                       </div>
-                      <p class="text-[10px] text-[#9e9cae] mt-0.5">
-                        <span class="px-1.5 py-0.5 rounded bg-[#0f1019] border border-[#1f202e] text-[#9e9cae]">{{ account.type || 'System Pool' }}</span>
-                        <span class="ml-2 font-medium text-[#f1f0f5]">Balance: <span class="font-bold text-[#B3F5E1]">{{ currencySymbol }}{{ formatAmount(account.id === 'acc_unallocated_funds' ? unassignedAmount : account.balance) }}</span></span>
-                      </p>
+                      <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span class="px-1.5 py-0.5 rounded bg-[#0f1019] border border-[#1f202e] text-[#9e9cae] text-[9px] font-medium">{{ account.type || 'Unallocated' }}</span>
+                        <span class="text-[10px] font-medium text-[#9e9cae]">Balance: <span class="font-bold text-[#B3F5E1]">{{ currencySymbol }}{{ formatAmount(account.id === 'acc_unallocated_funds' ? unassignedAmount : account.balance) }}</span></span>
+                      </div>
                     </div>
                   </div>
 
                   <!-- Actions -->
                   <div class="flex items-center gap-1.5 shrink-0 ml-2">
-                    <template v-if="account.id !== 'acc_unallocated_funds' && editingAccountId !== account.id">
+                    <template v-if="account.id === 'acc_unallocated_funds'">
+                      <button
+                        type="button"
+                        @click="toggleHideUnallocatedDashboard"
+                        class="px-2 py-1.5 rounded-lg border text-[10px] font-bold transition cursor-pointer flex items-center gap-1 shrink-0 select-none"
+                        :class="hideUnallocatedDashboard ? 'bg-[#141520] border-[#1f202e] text-[#9e9cae] hover:text-[#f1f0f5]' : 'bg-[#D4BFFF]/15 border-[#D4BFFF]/30 text-[#D4BFFF] hover:bg-[#D4BFFF]/25'"
+                        :title="hideUnallocatedDashboard ? 'Click to show on Dashboard' : 'Click to hide from Dashboard'"
+                      >
+                        <span class="material-symbols-outlined text-xs">{{ hideUnallocatedDashboard ? 'visibility_off' : 'visibility' }}</span>
+                        <span>{{ hideUnallocatedDashboard ? 'Hidden' : 'Shown' }}</span>
+                      </button>
+                    </template>
+                    <template v-else-if="editingAccountId !== account.id">
                       <button 
                         @click="startEditAccount(account)"
                         class="text-[#9e9cae] hover:text-[#D4BFFF] hover:bg-[#141520] p-1.5 rounded-lg transition cursor-pointer text-xs"
