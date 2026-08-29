@@ -790,14 +790,15 @@ function updateSpotlightStep() {
       }
 
       if (el) {
-        // Scroll target element into view centered on screen before measuring rect
+        // Instant scroll target element into view center
         try {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.scrollIntoView({ behavior: 'auto', block: 'center' });
         } catch (e) {}
 
-        setTimeout(() => {
-          positionSpotlightForElement(el, step);
-        }, 150);
+        // Immediate calculation + multi-frame recalculation for 100% position accuracy
+        positionSpotlightForElement(el, step);
+        setTimeout(() => positionSpotlightForElement(el, step), 80);
+        setTimeout(() => positionSpotlightForElement(el, step), 250);
       } else {
         spotlightRect.value = null;
         tooltipStyle.value = { 
@@ -806,45 +807,58 @@ function updateSpotlightStep() {
           transform: 'translate(-50%, -50%)' 
         };
       }
-    }, 180);
+    }, 120);
   });
 }
 
 function positionSpotlightForElement(el, step) {
-  if (!el) return;
+  if (!el) {
+    spotlightRect.value = null;
+    tooltipStyle.value = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+    return;
+  }
+
   const rect = el.getBoundingClientRect();
-  if (rect.width > 0 && rect.height > 0) {
-    spotlightRect.value = {
-      top: Math.max(8, rect.top - 6),
-      left: Math.max(8, rect.left - 6),
-      width: rect.width + 12,
-      height: rect.height + 12
-    };
+  const vh = window.innerHeight;
+  const vw = window.innerWidth;
+
+  if (rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < vh) {
+    // Clamp spotlight rectangle bounds to safe screen area
+    const top = Math.max(12, Math.min(rect.top - 6, vh - 60));
+    const left = Math.max(8, Math.min(rect.left - 6, vw - 40));
+    const width = Math.min(rect.width + 12, vw - left - 8);
+    const height = Math.min(rect.height + 12, vh - top - 80);
+
+    spotlightRect.value = { top, left, width, height };
 
     if (step && step.openFormStep) {
-      // For modal form steps, place tooltip floating neatly at bottom to avoid covering the form
+      // For modal form steps, place tooltip floating neatly at bottom
       tooltipStyle.value = { 
         bottom: 'max(16px, env(safe-area-inset-bottom))', 
         left: '50%', 
         transform: 'translateX(-50%)' 
       };
     } else {
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
+      const targetBottom = top + height;
+      const spaceBelow = vh - targetBottom;
+      const spaceAbove = top;
 
-      if (spaceBelow >= 240) {
+      if (spaceBelow >= 220 && targetBottom + 210 <= vh) {
+        // Place neatly below the target
         tooltipStyle.value = { 
-          top: (rect.bottom + 14) + 'px', 
+          top: (targetBottom + 12) + 'px', 
           left: '50%', 
           transform: 'translateX(-50%)' 
         };
-      } else if (spaceAbove >= 240) {
+      } else if (spaceAbove >= 220) {
+        // Place neatly above the target
         tooltipStyle.value = { 
-          top: Math.max(54, rect.top - 210) + 'px', 
+          top: Math.max(16, top - 210) + 'px', 
           left: '50%', 
           transform: 'translateX(-50%)' 
         };
       } else {
+        // Fallback: floating anchored at safe bottom viewport
         tooltipStyle.value = { 
           bottom: 'max(24px, env(safe-area-inset-bottom))', 
           left: '50%', 
