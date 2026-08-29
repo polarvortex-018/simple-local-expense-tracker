@@ -1190,10 +1190,11 @@ export const api = {
     return URL.createObjectURL(blob);
   },
 
-  async shareBackupFile(filename) {
-    const passphrase = prompt('Create a passphrase (at least 8 characters) for this portable encrypted backup:');
-    if (passphrase === null) throw new Error('Backup sharing cancelled.');
-    const binary = await exportBackupBytes(filename, passphrase || 'default_cashbuddy_pass');
+  async shareBackupFile(filename, passphrase) {
+    if (!passphrase || passphrase.length < 8) {
+      throw new Error('Passphrase must be at least 8 characters long.');
+    }
+    const binary = await exportBackupBytes(filename, passphrase);
     if (!binary) throw new Error("Backup file not found");
 
     if (Capacitor.isNativePlatform()) {

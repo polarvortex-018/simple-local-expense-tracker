@@ -8,14 +8,23 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.06.01`**
+## Current Version: **`v0.06.03`**
 
 ---
 
 ## Version History Log
 
 ### **v0.06 — Multi-Theme Engine & Semantic Token System**
-- **`v0.06.01`** *(Current)*
+- **`v0.06.03`** *(Current)*
+  - **In-App Encrypted Backup Passphrase Modal**: Replaced raw browser `prompt()` dialog with a dark glassmorphic modal in `SettingsView.vue` (`#0f1019` container, `#1f202e` borders, `backdrop-blur-md`), featuring target filename banner, password visibility eye toggle button, 8-character validation, and sleek action buttons (`Cancel` and `Encrypt & Share`).
+  - **Floating Glassmorphic Island Nav Dock**: Mobile bottom navigation in `App.vue` styled as a floating capsule island (`bottom-3 rounded-3xl backdrop-blur-xl bg-[#0c0d14]/90 border border-[#1f202e] shadow-2xl`) with active tab glow pills.
+  - **Ambient Radial Breathing Pie Chart Glow**: Multi-stop `<radialGradient>` and smooth 3.5s breathing pulse animation (`animate-breathe-glow`) on both Home (`Dashboard.vue`) and History (`TransactionList.vue`) charts.
+  - **Android Production Build**: Rebuilt Capacitor Android assets and compiled debug APK (`BUILD SUCCESSFUL in 9s`).
+- **`v0.06.02`**
+  - **Ambient Radial Breathing Pie Chart Glow**: Replaced flat SVG blur circles with a multi-stop `<radialGradient>` and smooth 3.5s breathing pulse animation (`animate-breathe-glow`) on both Home (`Dashboard.vue`) and History (`TransactionList.vue`) charts.
+  - **Floating Glassmorphic Island Nav Dock**: Transformed mobile bottom navigation bar in `App.vue` into a floating capsule island dock (`bottom-3 rounded-3xl backdrop-blur-xl bg-[#0c0d14]/90 border border-[#1f202e]`) with glowing active tab capsule highlights and an elevated center `+` FAB button.
+  - **Native Backup Direct Save & WhatsApp Attachment Fix**: Fixed Android Capacitor file sharing bug in `services/api.js` by omitting text body strings so WhatsApp attaches actual `.sqlite3`/`.db`/`.json` file binaries. Created `saveNativeFile()` helper to save backup files directly to device `Documents` folder without popping up the native share sheet.
+- **`v0.06.01`**
   - Expanded **Multi-Theme Engine** to 7 theme presets with light theme variants: `nordic-light` (Frost Blue `#0284c7`) and `emerald-light` (Forest Mint `#059669`).
   - **High-Contrast Light Mode Overrides**: Resolved text contrast bugs, mapped arbitrary Tailwind hex utilities (`bg-[#...]`, `text-[#...]`, `border-[#...]`, `hover:bg-[#...]`) to semantic CSS variable tokens.
   - **Card Hover & Active State Fixes**: Replaced pitch-black hover boxes (`hover:bg-[#141520]`) with dynamic container highlights (`var(--bg-container-high)`).

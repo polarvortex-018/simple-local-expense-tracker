@@ -261,6 +261,7 @@ const handleRenameVault = async ({ filename, name }) => {
 
 // Form Open/Close Handlers
 const transactionFormStep = ref(1);
+const showArcMenu = ref(false);
 
 const openAddTransaction = (opts = {}) => {
   editingTransaction.value = null;
@@ -810,60 +811,62 @@ onMounted(() => {
       </div>
     </main>
 
-    <!-- BottomNavBar -->
-    <nav class="bg-[#0c0d14]/95 backdrop-blur-md border-t border-[#1f202e] fixed bottom-0 w-full z-40 flex justify-around items-center h-15 px-2 sm:hidden safe-area-pb">
-      <button 
-        @click="currentTab = 'dashboard'"
-        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
-        :class="currentTab === 'dashboard' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-      >
-        <span v-if="currentTab === 'dashboard'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
-        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">dashboard</span>
-        <span class="text-[10px] leading-none relative z-10">Home</span>
-      </button>
-
-      <button 
-        @click="currentTab = 'transactions'"
-        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
-        :class="currentTab === 'transactions' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-      >
-        <span v-if="currentTab === 'transactions'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
-        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">receipt_long</span>
-        <span class="text-[10px] leading-none relative z-10">History</span>
-      </button>
-
-      <!-- Center Quick Log Action Button -->
-      <div class="relative -mt-5 flex items-center justify-center shrink-0 w-12 h-12">
+    <!-- Floating Island Glassmorphic Bottom Navigation Dock -->
+    <div class="fixed bottom-3 left-0 right-0 z-40 flex justify-center px-4 sm:hidden pointer-events-none safe-area-pb">
+      <nav class="pointer-events-auto bg-[#0c0d14]/90 backdrop-blur-xl border border-[#1f202e] shadow-2xl rounded-3xl h-14 px-3 flex items-center justify-between w-full max-w-sm">
         <button 
-          data-tour="add-tx-btn-mobile"
-          @click="openAddTransaction()"
-          class="relative w-11 h-11 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center shadow-xl transition active:scale-95 cursor-pointer border-2 border-[#0f0f15] z-10"
-          title="Add Transaction"
+          @click="currentTab = 'dashboard'"
+          class="relative flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer min-w-[54px]"
+          :class="currentTab === 'dashboard' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
         >
-          <span class="material-symbols-outlined text-2xl leading-none font-bold">add</span>
+          <span v-if="currentTab === 'dashboard'" class="absolute inset-0 bg-[#D4BFFF]/15 border border-[#D4BFFF]/30 rounded-2xl pointer-events-none transition-all duration-300 shadow-[0_0_12px_rgba(212,191,255,0.15)]"></span>
+          <span class="material-symbols-outlined text-lg mb-0.5 relative z-10 transition-transform duration-200" :class="{ 'scale-110': currentTab === 'dashboard' }">dashboard</span>
+          <span class="text-[10px] leading-none relative z-10">Home</span>
         </button>
-      </div>
 
-      <button 
-        @click="currentTab = 'debts'"
-        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
-        :class="currentTab === 'debts' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-      >
-        <span v-if="currentTab === 'debts'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
-        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">account_balance_wallet</span>
-        <span class="text-[10px] leading-none relative z-10">Debts</span>
-      </button>
+        <button 
+          @click="currentTab = 'transactions'"
+          class="relative flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer min-w-[54px]"
+          :class="currentTab === 'transactions' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+        >
+          <span v-if="currentTab === 'transactions'" class="absolute inset-0 bg-[#D4BFFF]/15 border border-[#D4BFFF]/30 rounded-2xl pointer-events-none transition-all duration-300 shadow-[0_0_12px_rgba(212,191,255,0.15)]"></span>
+          <span class="material-symbols-outlined text-lg mb-0.5 relative z-10 transition-transform duration-200" :class="{ 'scale-110': currentTab === 'transactions' }">receipt_long</span>
+          <span class="text-[10px] leading-none relative z-10">History</span>
+        </button>
 
-      <button 
-        @click="currentTab = 'settings'"
-        class="relative flex flex-col items-center justify-center py-1.5 px-3.5 rounded-xl transition cursor-pointer min-w-[60px]"
-        :class="currentTab === 'settings' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
-      >
-        <span v-if="currentTab === 'settings'" class="absolute inset-0 bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 rounded-xl pointer-events-none transition-all duration-300"></span>
-        <span class="material-symbols-outlined text-xl mb-0.5 relative z-10">widgets</span>
-        <span class="text-[10px] leading-none relative z-10">More</span>
-      </button>
-    </nav>
+        <!-- Elevated Center Quick Add FAB -->
+        <div class="relative flex items-center justify-center shrink-0 w-11 h-11 -mt-5">
+          <button 
+            data-tour="add-tx-btn-mobile"
+            @click="openAddTransaction()"
+            class="relative w-11 h-11 rounded-full bg-[#D4BFFF] hover:bg-[#c099fb] text-[#0f0f15] flex items-center justify-center shadow-xl transition-all duration-200 active:scale-90 cursor-pointer border-2 border-[#0c0d14] ring-2 ring-[#D4BFFF]/40 z-10"
+            title="Add Transaction"
+          >
+            <span class="material-symbols-outlined text-2xl leading-none font-bold">add</span>
+          </button>
+        </div>
+
+        <button 
+          @click="currentTab = 'debts'"
+          class="relative flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer min-w-[54px]"
+          :class="currentTab === 'debts' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+        >
+          <span v-if="currentTab === 'debts'" class="absolute inset-0 bg-[#D4BFFF]/15 border border-[#D4BFFF]/30 rounded-2xl pointer-events-none transition-all duration-300 shadow-[0_0_12px_rgba(212,191,255,0.15)]"></span>
+          <span class="material-symbols-outlined text-lg mb-0.5 relative z-10 transition-transform duration-200" :class="{ 'scale-110': currentTab === 'debts' }">account_balance_wallet</span>
+          <span class="text-[10px] leading-none relative z-10">Debts</span>
+        </button>
+
+        <button 
+          @click="currentTab = 'settings'"
+          class="relative flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 cursor-pointer min-w-[54px]"
+          :class="currentTab === 'settings' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
+        >
+          <span v-if="currentTab === 'settings'" class="absolute inset-0 bg-[#D4BFFF]/15 border border-[#D4BFFF]/30 rounded-2xl pointer-events-none transition-all duration-300 shadow-[0_0_12px_rgba(212,191,255,0.15)]"></span>
+          <span class="material-symbols-outlined text-lg mb-0.5 relative z-10 transition-transform duration-200" :class="{ 'scale-110': currentTab === 'settings' }">widgets</span>
+          <span class="text-[10px] leading-none relative z-10">More</span>
+        </button>
+      </nav>
+    </div>
 
     <!-- Slide-over / Modal Form -->
     <Transition name="modal">
