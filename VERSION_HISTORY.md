@@ -8,14 +8,29 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.05.20`** (or `v0.5.20`)
+## Current Version: **`v0.06.00`** (or `v0.6.00`)
 
 ---
 
 ## Version History Log
 
+### **v0.06 — Multi-Theme Engine & Semantic Token System**
+- **`v0.06.00`** *(Current)*
+  - Implemented the **Multi-Theme Engine** with 5 customizable visual presets:
+    1. 🌙 **Pastel Dark** (Material 3 Dark Pastel default)
+    2. 🖤 **OLED Pitch Black** (Pure `#000000` AMOLED screen battery saver)
+    3. ❄️ **Nordic Slate** (Deep arctic slate blue & cyan accent)
+    4. 🌲 **Emerald Midnight** (Deep forest green & mint accent)
+    5. ☀️ **Pastel Light** (Soft warm light theme)
+  - Created theme utility module (`utils/theme.js`) and added `[data-theme="..."]` CSS custom property token definitions to `style.css`.
+  - Vault-isolated persistence: Theme preferences are saved per vault database in the SQLite `vault_settings` table (`vault_theme`).
+  - Added interactive **"App Theme & Appearance"** launcher modal (`ThemeModal.vue`) under Settings.
+  - Web production build compiled cleanly (`✓ built in 1.36s`).
+
+---
+
 ### **v0.05 — Multi-Currency System & Native Drag-and-Drop Polish**
-- **`v0.05.20`** *(Current)*
+- **`v0.05.20`**
   - Rebuilt the **Initial Quick Vault Setup Wizard** & **Interactive Spotlight Tour** system from scratch with robust architecture and zero runtime errors.
   - **Setup Wizard (5 Steps)**: Step 1 (Currency Picker with live search and polymorphic code/object handling), Step 2 (Storage Accounts & Custom Creator with seed balances), Step 3 (Savings Buckets to keep money organized), Step 4 (Expense & Income Categories), Step 5 (Architecture Feature Rundown & Overview).
   - **Interactive Spotlight Tour (12 Steps)**: Cutout highlight overlay with mobile/desktop selector fallback (`add-tx-btn` / `add-tx-btn-mobile`), step-specific floating tooltip positioning to prevent modal overlap, re-worded savings buckets terminology, and a heartfelt Thank You message (`Thank You from Cash Buddy! ❤️`).

@@ -43,7 +43,7 @@
             </div>
             <div class="min-w-0 flex-1">
               <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Savings Buckets</h3>
-              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Goal buckets</p>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Virtual divisions of money</p>
             </div>
           </button>
         </div>
@@ -56,11 +56,11 @@
             @click="activeSheet = 'accounts'"
             class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
           >
-            <div class="w-8.5 h-8.5 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
               <span class="material-symbols-outlined text-base">account_balance</span>
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight truncate">Manage Accounts</h3>
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Manage Accounts</h3>
               <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Bank accounts</p>
             </div>
           </button>
@@ -72,11 +72,11 @@
             @click="activeSheet = 'categories'"
             class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
           >
-            <div class="w-8.5 h-8.5 rounded-xl bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 text-[#FFD1B3] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
               <span class="material-symbols-outlined text-base">category</span>
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#FFD1B3] transition leading-tight truncate">Manage Categories</h3>
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Manage Categories</h3>
               <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Categories & icons</p>
             </div>
           </button>
@@ -107,11 +107,11 @@
             @click="activeSheet = 'faq'"
             class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
           >
-            <div class="w-8.5 h-8.5 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
               <span class="material-symbols-outlined text-base">help_outline</span>
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight truncate">FAQ & About</h3>
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">FAQ & About</h3>
               <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">App guide & note</p>
             </div>
           </button>
@@ -140,13 +140,33 @@
             @click="activeSheet = 'currency'"
             class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
           >
-            <div class="w-8.5 h-8.5 rounded-xl bg-[#B3F5E1]/10 border border-[#B3F5E1]/20 text-[#B3F5E1] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
               <span class="material-symbols-outlined text-base">payments</span>
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#B3F5E1] transition leading-tight truncate">Currency</h3>
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Currency</h3>
               <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">{{ currentCurrency?.code || 'INR' }} ({{ currencySymbol }})</p>
             </div>
+          </button>
+        </div>
+
+        <!-- Row 5: App Theme & Appearance -->
+        <div class="border-t border-[#1f202e]">
+          <button 
+            type="button"
+            @click="showThemeModal = true"
+            class="w-full p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center justify-between gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <span class="material-symbols-outlined text-base">palette</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">App Theme & Appearance</h3>
+                <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Pastel Dark, OLED Pitch Black, Nordic Slate, Emerald & Light</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-[#9e9cae] text-sm group-hover:text-[#f1f0f5] transition">chevron_right</span>
           </button>
         </div>
       </div>
@@ -247,7 +267,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
               <div>
                 <h3 class="text-lg font-bold text-[#f1f0f5] tracking-tight">Savings Buckets</h3>
-                <p class="text-xs text-[#9e9cae]">Allocate purposes for your money</p>
+                <p class="text-xs text-[#9e9cae]">Virtual divisions of money</p>
               </div>
               <div class="flex flex-wrap items-center gap-2 shrink-0">
                 <button 
@@ -283,7 +303,7 @@
                   </div>
                   <p class="mt-1 text-lg sm:text-xl font-bold text-[#f1f0f5] tabular-nums">{{ currencySymbol }}{{ formatAmount(totalAllocated) }}</p>
                 </div>
-                <p class="text-[10px] text-[#9e9cae] mt-2">Sum of all active goal bucket balances</p>
+                <p class="text-[10px] text-[#9e9cae] mt-2">Sum of all active bucket balances (virtual subdivisions of account funds)</p>
               </div>
 
               <!-- Unallocated Funds Pool Card -->
@@ -323,13 +343,13 @@
 
             <div 
               v-if="localBuckets.length > 0" 
-              class="divide-y divide-[#1f202e]/60 border-y border-[#1f202e]/60 relative"
+              class="divide-y divide-[#1f202e] border border-[#1f202e] rounded-xl overflow-hidden bg-[#0f1019] relative"
             >
               <div 
                 v-for="(bucket, idx) in localBuckets" 
                 :key="bucket.id"
                 :data-drag-idx="idx"
-                class="py-2.5 px-2 hover:bg-[#141520] flex items-center justify-between group rounded-lg select-none relative bg-[#0c0d14]"
+                class="py-2.5 px-3 hover:bg-[#141520] flex items-center justify-between group select-none relative bg-[#0f1019]"
                 :class="{
                   'z-50 shadow-2xl scale-[1.02] bg-[#1a1b2a] border border-[#D4BFFF]/80 text-white rounded-xl ring-2 ring-[#D4BFFF]/30': isDragActive && activeDragType === 'buckets' && activeDragIdx === idx,
                   'border-t-2 border-[#D4BFFF]': isDragActive && activeDragType === 'buckets' && dropTargetIdx === idx && activeDragIdx !== idx
@@ -383,7 +403,7 @@
                   </button>
                   <button 
                     @click="confirmDeleteBucket(bucket)"
-                    class="text-[#9e9cae] hover:text-rose-400 hover:bg-rose-950/20 p-1.5 rounded-lg transition cursor-pointer text-xs"
+                    class="text-[#9e9cae] hover:text-rose-500 hover:bg-rose-500/10 p-1.5 rounded-lg transition cursor-pointer text-xs"
                     title="Delete / Archive Bucket"
                   >
                     <span class="material-symbols-outlined text-sm">delete</span>
@@ -449,13 +469,13 @@
             <div>
               <div 
                 v-if="localAccounts.length > 0" 
-                class="divide-y divide-[#1f202e]/60 border-y border-[#1f202e]/60 relative"
+                class="divide-y divide-[#1f202e] border border-[#1f202e] rounded-xl overflow-hidden bg-[#0f1019] relative"
               >
                 <div 
                   v-for="(account, idx) in localAccounts" 
                   :key="account.id"
                   :data-drag-idx="idx"
-                  class="py-2.5 px-2 hover:bg-[#141520] flex items-center justify-between group rounded-lg select-none relative bg-[#0c0d14]"
+                  class="py-2.5 px-3 hover:bg-[#141520] flex items-center justify-between group select-none relative bg-[#0f1019]"
                   :class="{
                     'z-50 shadow-2xl scale-[1.02] bg-[#1a1b2a] border border-[#D4BFFF]/80 text-white rounded-xl ring-2 ring-[#D4BFFF]/30': isDragActive && activeDragType === 'accounts' && activeDragIdx === idx,
                     'border-t-2 border-[#D4BFFF]': isDragActive && activeDragType === 'accounts' && dropTargetIdx === idx && activeDragIdx !== idx
@@ -586,13 +606,13 @@
 
             <div 
               v-if="localCategories.length > 0" 
-              class="divide-y divide-[#1f202e]/60 border-y border-[#1f202e]/60 relative"
+              class="divide-y divide-[#1f202e] border border-[#1f202e] rounded-xl overflow-hidden bg-[#0f1019] relative"
             >
               <div 
                 v-for="(category, idx) in localCategories" 
                 :key="category.id"
                 :data-drag-idx="idx"
-                class="py-2.5 px-2 hover:bg-[#141520] flex items-center justify-between gap-2 group rounded-lg select-none relative bg-[#0c0d14]"
+                class="py-2.5 px-3 hover:bg-[#141520] flex items-center justify-between gap-2 group select-none relative bg-[#0f1019]"
                 :class="{
                   'z-50 shadow-2xl scale-[1.02] bg-[#1a1b2a] border border-[#D4BFFF]/80 text-white rounded-xl ring-2 ring-[#D4BFFF]/30': isDragActive && activeDragType === 'categories' && activeDragIdx === idx,
                   'border-t-2 border-[#D4BFFF]': isDragActive && activeDragType === 'categories' && dropTargetIdx === idx && activeDragIdx !== idx
@@ -1584,6 +1604,11 @@
       @close="showBucketModal = false"
       @save="handleSaveBucket"
     />
+
+    <ThemeModal 
+      :isOpen="showThemeModal"
+      @close="showThemeModal = false"
+    />
   </div>
 </template>
 
@@ -1594,6 +1619,7 @@ import AccountGrid from './AccountGrid.vue';
 import CategoryFormModal from './CategoryFormModal.vue';
 import BucketFormModal from './BucketFormModal.vue';
 import CategoryPicker from './CategoryPicker.vue';
+import ThemeModal from './ThemeModal.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 import { api } from '../services/api';
 import { CURRENCIES, currentCurrency, currencySymbol, setCurrency } from '../utils/currency.js';
@@ -1602,6 +1628,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
+const showThemeModal = ref(false);
 const activeSheet = ref(null); // null, 'quick_actions', 'buckets', 'accounts', 'categories', 'backup', 'faq', 'unassigned_audit', 'currency'
 const unassignedAuditLogs = ref([]);
 const auditDateFilter = ref('all');
@@ -2258,11 +2285,19 @@ function handleDragPointerDown(event, idx, type) {
     window.addEventListener('touchend', handleDragPointerUp);
   }
 
-  // 180ms long press timer for fast responsive card pickup with native haptic vibration
-  pressTimer = setTimeout(() => {
+  const isMouse = event.pointerType === 'mouse' || (!event.touches && event.button === 0);
+
+  if (isMouse) {
+    // Mouse drag starts immediately for fast responsive PC drag-and-drop
     isDragActive.value = true;
     triggerHaptic();
-  }, 180);
+  } else {
+    // Touch drag uses 180ms long-press timer to allow touch scrolling
+    pressTimer = setTimeout(() => {
+      isDragActive.value = true;
+      triggerHaptic();
+    }, 180);
+  }
 }
 
 function handleDragPointerMove(event) {

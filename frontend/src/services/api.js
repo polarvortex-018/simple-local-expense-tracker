@@ -25,6 +25,7 @@ import {
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { applyTheme } from '../utils/theme.js';
 
 function uint8ToBase64(uint8) {
   let binary = '';
@@ -1068,6 +1069,42 @@ export const api = {
       return curr;
     } catch (e) {
       console.error("Failed to save vault currency to DB:", e);
+      throw e;
+    }
+  },
+
+  async getVaultTheme() {
+    await ensureDB();
+    try {
+      execRun(`CREATE TABLE IF NOT EXISTS vault_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`, [], false);
+      const rows = execQuery("SELECT value FROM vault_settings WHERE key = 'theme'");
+      if (rows && rows.length > 0 && rows[0].value) {
+        return rows[0].value;
+      }
+    } catch (e) {
+      console.warn("Failed to get vault theme from DB:", e);
+    }
+    return 'pastel-dark';
+  },
+
+  async setVaultTheme(themeId) {
+    await ensureDB();
+    try {
+      execRun(`CREATE TABLE IF NOT EXISTS vault_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`, [], false);
+      const now = new Date().toISOString();
+      execRun("INSERT OR REPLACE INTO vault_settings (key, value, updated_at) VALUES ('theme', ?, ?)", [themeId, now], false);
+      applyTheme(themeId);
+      return themeId;
+    } catch (e) {
+      console.error("Failed to save vault theme to DB:", e);
       throw e;
     }
   },

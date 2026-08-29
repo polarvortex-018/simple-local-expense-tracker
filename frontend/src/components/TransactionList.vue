@@ -1145,7 +1145,7 @@
             </button>
             <button 
               @click="deleteFromModal" 
-              class="h-9 px-3 rounded-xl bg-rose-950/30 border border-rose-800/40 text-rose-300 text-xs font-bold hover:bg-rose-900/40 transition flex items-center justify-center gap-1.5 cursor-pointer"
+              class="h-9 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:bg-rose-950/30 dark:border-rose-800/40 dark:text-rose-300 dark:hover:bg-rose-900/40 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span class="material-symbols-outlined text-sm">delete</span>
               <span>Delete</span>
@@ -1156,7 +1156,7 @@
           <div v-else class="flex items-center justify-between gap-2 p-3.5 bg-[#0c0d14] border-t border-[#1f202e]">
             <button 
               @click="deleteFromModal" 
-              class="h-8 px-2.5 rounded-lg bg-rose-950/30 border border-rose-800/40 text-rose-300 text-xs font-bold hover:bg-rose-900/40 transition flex items-center justify-center gap-1 cursor-pointer"
+              class="h-8 px-2.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:bg-rose-950/30 dark:border-rose-800/40 dark:text-rose-300 dark:hover:bg-rose-900/40 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
             >
               <span class="material-symbols-outlined text-sm">delete</span>
               <span>Delete</span>

@@ -10,6 +10,7 @@ import SettingsView from './components/SettingsView.vue';
 import VaultModal from './components/VaultModal.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
 import { loadCurrencyForActiveVault, setCurrency } from './utils/currency.js';
+import { applyTheme } from './utils/theme.js';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -188,6 +189,8 @@ const refreshAll = async () => {
       loadVaults()
     ]);
     await loadCurrencyForActiveVault(activeVault.value);
+    const activeTheme = await api.getVaultTheme();
+    applyTheme(activeTheme);
     dashboardTransactions.value = await api.getTransactions();
     await checkOnboarding();
   } catch (err) {
