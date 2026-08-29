@@ -88,14 +88,23 @@
         <div class="flex items-center justify-center py-2">
           <div class="relative w-56 h-56 flex items-center justify-center shrink-0">
             <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
-              <!-- Glowing Background Aura for Active Category -->
+              <defs>
+                <!-- Smooth Ambient Radial Gradient Glow for Active Category -->
+                <radialGradient v-if="activeHoveredCategoryInfo" id="dashboard-radial-glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" :stop-color="activeHoveredCategoryInfo.color" stop-opacity="0.4" />
+                  <stop offset="60%" :stop-color="activeHoveredCategoryInfo.color" stop-opacity="0.15" />
+                  <stop offset="100%" :stop-color="activeHoveredCategoryInfo.color" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+
+              <!-- Ambient Breathing Radial Glow Aura for Active Category -->
               <circle
                 v-if="activeHoveredCategoryInfo"
                 cx="100"
                 cy="100"
-                r="85"
-                :fill="activeHoveredCategoryInfo.color"
-                class="opacity-20 blur-2xl transition-all duration-500 pointer-events-none"
+                r="90"
+                fill="url(#dashboard-radial-glow)"
+                class="animate-breathe-glow transition-all duration-700 pointer-events-none origin-[100px_100px]"
               />
 
               <!-- Floating Orbiting Sparkle Particles -->

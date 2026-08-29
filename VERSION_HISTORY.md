@@ -8,14 +8,22 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.06.00`** (or `v0.6.00`)
+## Current Version: **`v0.06.01`**
 
 ---
 
 ## Version History Log
 
 ### **v0.06 — Multi-Theme Engine & Semantic Token System**
-- **`v0.06.00`** *(Current)*
+- **`v0.06.01`** *(Current)*
+  - Expanded **Multi-Theme Engine** to 7 theme presets with light theme variants: `nordic-light` (Frost Blue `#0284c7`) and `emerald-light` (Forest Mint `#059669`).
+  - **High-Contrast Light Mode Overrides**: Resolved text contrast bugs, mapped arbitrary Tailwind hex utilities (`bg-[#...]`, `text-[#...]`, `border-[#...]`, `hover:bg-[#...]`) to semantic CSS variable tokens.
+  - **Card Hover & Active State Fixes**: Replaced pitch-black hover boxes (`hover:bg-[#141520]`) with dynamic container highlights (`var(--bg-container-high)`).
+  - **Interactive Spotlight Tour Auto-Centering**: Fixed off-screen tour element bugs by adding instant centered scrolling (`scrollIntoView({ behavior: 'auto', block: 'center' })`), multi-frame coordinate passes, and strict viewport clamping for tour highlight cutouts and tooltips.
+  - **Responsive PC Mouse Drag-and-Drop**: Updated `handleDragPointerDown()` in `SettingsView.vue` so PC mouse users drag instantly on `pointerdown` while maintaining 180ms long-press delays for mobile touch scrolling.
+  - **Light Mode UI & Divider Refinements**: Redesigned Delete buttons with high-contrast light-red containers (`bg-rose-500/10 text-rose-600`), standardized uniform 1px list dividers (`divide-y divide-[#1f202e] border border-[#1f202e] rounded-xl overflow-hidden`), unified directory tile icon colors in More Hub, and updated Savings Buckets descriptions to *"Virtual divisions of money"*.
+  - **Android Production Build**: Rebuilt Capacitor Android project and compiled fresh APK (`app-debug.apk`, `BUILD SUCCESSFUL in 9s`).
+- **`v0.06.00`**
   - Implemented the **Multi-Theme Engine** with 5 customizable visual presets:
     1. 🌙 **Pastel Dark** (Material 3 Dark Pastel default)
     2. 🖤 **OLED Pitch Black** (Pure `#000000` AMOLED screen battery saver)

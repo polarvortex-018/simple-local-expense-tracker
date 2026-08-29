@@ -516,17 +516,14 @@
             <div class="md:col-span-6 flex items-center justify-center">
               <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
                 <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
-                  <!-- Glowing Background Aura for Active Category -->
-                  <circle
-                    v-if="activeHoveredExpenseInfo"
-                    cx="100"
-                    cy="100"
-                    r="85"
-                    :fill="activeHoveredExpenseInfo.color"
-                    class="opacity-20 blur-2xl transition-all duration-500 pointer-events-none"
-                  />
-
                   <defs>
+                    <!-- Smooth Ambient Radial Gradient Glow for Active Category -->
+                    <radialGradient v-if="activeHoveredExpenseInfo" id="expense-radial-glow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" :stop-color="activeHoveredExpenseInfo.color" stop-opacity="0.4" />
+                      <stop offset="60%" :stop-color="activeHoveredExpenseInfo.color" stop-opacity="0.15" />
+                      <stop offset="100%" :stop-color="activeHoveredExpenseInfo.color" stop-opacity="0" />
+                    </radialGradient>
+
                     <!-- Option A Clockwise Radial Sweep Mask -->
                     <mask id="expense-donut-mask">
                       <circle
@@ -543,6 +540,16 @@
                       />
                     </mask>
                   </defs>
+
+                  <!-- Ambient Breathing Radial Glow Aura for Active Category -->
+                  <circle
+                    v-if="activeHoveredExpenseInfo"
+                    cx="100"
+                    cy="100"
+                    r="90"
+                    fill="url(#expense-radial-glow)"
+                    class="animate-breathe-glow transition-all duration-700 pointer-events-none origin-[100px_100px]"
+                  />
 
                   <!-- Donut Slices Group with Snap-to-Top Rotation -->
                   <g 
@@ -605,8 +612,8 @@
                 @mouseenter="hoveredExpenseIndex = item.originalIndex"
                 @mouseleave="hoveredExpenseIndex = null"
                 @click="toggleSelectExpenseCategory(item.originalIndex)"
-                class="flex items-center justify-between py-2 px-2.5 rounded-xl border border-transparent transition-all duration-200 cursor-pointer hover:bg-[#141520] hover:border-[#1f202e]"
-                :class="activeExpenseIndex === item.originalIndex ? 'bg-[#141520] border-[#D4BFFF]/50 ring-1 ring-[#D4BFFF]/40' : ''"
+                class="flex items-center justify-between py-2 px-2.5 rounded-xl border transition-all duration-200 cursor-pointer"
+                :class="activeExpenseIndex === item.originalIndex ? 'bg-[#141520] border-[#D4BFFF]' : 'hover:bg-[#141520] border-transparent'"
               >
                 <!-- Left: Material Symbol Icon + Category Name -->
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -651,17 +658,14 @@
             <div class="md:col-span-6 flex items-center justify-center">
               <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center shrink-0">
                 <svg class="w-full h-full overflow-visible" viewBox="-30 -30 260 260">
-                  <!-- Glowing Background Aura for Active Category -->
-                  <circle
-                    v-if="activeHoveredIncomeInfo"
-                    cx="100"
-                    cy="100"
-                    r="85"
-                    :fill="activeHoveredIncomeInfo.color"
-                    class="opacity-20 blur-2xl transition-all duration-500 pointer-events-none"
-                  />
-
                   <defs>
+                    <!-- Smooth Ambient Radial Gradient Glow for Active Category -->
+                    <radialGradient v-if="activeHoveredIncomeInfo" id="income-radial-glow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" :stop-color="activeHoveredIncomeInfo.color" stop-opacity="0.4" />
+                      <stop offset="60%" :stop-color="activeHoveredIncomeInfo.color" stop-opacity="0.15" />
+                      <stop offset="100%" :stop-color="activeHoveredIncomeInfo.color" stop-opacity="0" />
+                    </radialGradient>
+
                     <!-- Option A Clockwise Radial Sweep Mask -->
                     <mask id="income-donut-mask">
                       <circle
@@ -678,6 +682,16 @@
                       />
                     </mask>
                   </defs>
+
+                  <!-- Ambient Breathing Radial Glow Aura for Active Category -->
+                  <circle
+                    v-if="activeHoveredIncomeInfo"
+                    cx="100"
+                    cy="100"
+                    r="90"
+                    fill="url(#income-radial-glow)"
+                    class="animate-breathe-glow transition-all duration-700 pointer-events-none origin-[100px_100px]"
+                  />
 
                   <!-- Donut Slices Group with Snap-to-Top Rotation -->
                   <g 
@@ -740,8 +754,8 @@
                 @mouseenter="hoveredIncomeIndex = item.originalIndex"
                 @mouseleave="hoveredIncomeIndex = null"
                 @click="toggleSelectIncomeCategory(item.originalIndex)"
-                class="flex items-center justify-between py-1.5 px-2 rounded-xl border border-transparent transition-all duration-200 cursor-pointer hover:bg-[#141520] hover:border-[#1f202e]"
-                :class="activeIncomeIndex === item.originalIndex ? 'bg-[#141520] border-[#B3F5E1]/50 ring-1 ring-[#B3F5E1]/40' : ''"
+                class="flex items-center justify-between py-1.5 px-2 rounded-xl border transition-all duration-200 cursor-pointer"
+                :class="activeIncomeIndex === item.originalIndex ? 'bg-[#141520] border-[#B3F5E1]' : 'hover:bg-[#141520] border-transparent'"
               >
                 <!-- Left: Material Symbol Icon + Category Name -->
                 <div class="flex items-center gap-2 min-w-0">
