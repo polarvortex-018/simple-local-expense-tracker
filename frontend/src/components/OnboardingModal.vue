@@ -790,54 +790,14 @@ function updateSpotlightStep() {
       }
 
       if (el) {
-        const rect = el.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-          spotlightRect.value = {
-            top: Math.max(8, rect.top - 6),
-            left: Math.max(8, rect.left - 6),
-            width: rect.width + 12,
-            height: rect.height + 12
-          };
+        // Scroll target element into view centered on screen before measuring rect
+        try {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (e) {}
 
-          if (step.openFormStep) {
-            // For modal form steps, place tooltip floating neatly at top or bottom to avoid covering the form
-            tooltipStyle.value = { 
-              bottom: 'max(16px, env(safe-area-inset-bottom))', 
-              left: '50%', 
-              transform: 'translateX(-50%)' 
-            };
-          } else {
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-
-            if (spaceBelow >= 240) {
-              tooltipStyle.value = { 
-                top: (rect.bottom + 14) + 'px', 
-                left: '50%', 
-                transform: 'translateX(-50%)' 
-              };
-            } else if (spaceAbove >= 240) {
-              tooltipStyle.value = { 
-                top: Math.max(54, rect.top - 210) + 'px', 
-                left: '50%', 
-                transform: 'translateX(-50%)' 
-              };
-            } else {
-              tooltipStyle.value = { 
-                bottom: 'max(24px, env(safe-area-inset-bottom))', 
-                left: '50%', 
-                transform: 'translateX(-50%)' 
-              };
-            }
-          }
-        } else {
-          spotlightRect.value = null;
-          tooltipStyle.value = { 
-            top: '50%', 
-            left: '50%', 
-            transform: 'translate(-50%, -50%)' 
-          };
-        }
+        setTimeout(() => {
+          positionSpotlightForElement(el, step);
+        }, 150);
       } else {
         spotlightRect.value = null;
         tooltipStyle.value = { 
@@ -848,6 +808,58 @@ function updateSpotlightStep() {
       }
     }, 180);
   });
+}
+
+function positionSpotlightForElement(el, step) {
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  if (rect.width > 0 && rect.height > 0) {
+    spotlightRect.value = {
+      top: Math.max(8, rect.top - 6),
+      left: Math.max(8, rect.left - 6),
+      width: rect.width + 12,
+      height: rect.height + 12
+    };
+
+    if (step && step.openFormStep) {
+      // For modal form steps, place tooltip floating neatly at bottom to avoid covering the form
+      tooltipStyle.value = { 
+        bottom: 'max(16px, env(safe-area-inset-bottom))', 
+        left: '50%', 
+        transform: 'translateX(-50%)' 
+      };
+    } else {
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow >= 240) {
+        tooltipStyle.value = { 
+          top: (rect.bottom + 14) + 'px', 
+          left: '50%', 
+          transform: 'translateX(-50%)' 
+        };
+      } else if (spaceAbove >= 240) {
+        tooltipStyle.value = { 
+          top: Math.max(54, rect.top - 210) + 'px', 
+          left: '50%', 
+          transform: 'translateX(-50%)' 
+        };
+      } else {
+        tooltipStyle.value = { 
+          bottom: 'max(24px, env(safe-area-inset-bottom))', 
+          left: '50%', 
+          transform: 'translateX(-50%)' 
+        };
+      }
+    }
+  } else {
+    spotlightRect.value = null;
+    tooltipStyle.value = { 
+      top: '50%', 
+      left: '50%', 
+      transform: 'translate(-50%, -50%)' 
+    };
+  }
 }
 
 function nextSpotlightStep() {
