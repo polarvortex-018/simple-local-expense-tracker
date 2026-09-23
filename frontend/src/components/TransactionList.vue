@@ -102,19 +102,16 @@
             </span>
           </button>
 
-          <!-- Sort Dropdown Icon -->
-          <div class="relative flex items-center justify-center w-7 h-7 bg-[#0f1019] border border-[#1f202e] focus-within:border-[#D4BFFF] rounded-xl transition shrink-0" title="Sort Order">
-            <span class="material-symbols-outlined text-sm text-[#D4BFFF] pointer-events-none">swap_vert</span>
-            <select 
-              v-model="sortBy"
-              class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-            >
-              <option value="date_desc" class="bg-[#0c0d14] text-[#f1f0f5]">Newest First</option>
-              <option value="date_asc" class="bg-[#0c0d14] text-[#f1f0f5]">Oldest First</option>
-              <option value="amount_desc" class="bg-[#0c0d14] text-[#f1f0f5]">Highest Amount</option>
-              <option value="amount_asc" class="bg-[#0c0d14] text-[#f1f0f5]">Lowest Amount</option>
-            </select>
-          </div>
+          <!-- Aesthetic Sort Order Trigger Button -->
+          <button 
+            type="button"
+            @click="showSortModal = true"
+            class="w-7 h-7 bg-[#0f1019] hover:bg-[#141520] border border-[#1f202e] hover:border-[#D4BFFF]/60 rounded-xl text-[#D4BFFF] flex items-center justify-center transition cursor-pointer relative shrink-0"
+            title="Sort Order"
+          >
+            <span class="material-symbols-outlined text-sm">swap_vert</span>
+            <span v-if="sortBy !== 'date_desc'" class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#D4BFFF] border border-[#0c0d14]"></span>
+          </button>
         </div>
       </div>
     </div>
@@ -340,6 +337,18 @@
                   </div>
                 </button>
                 <button
+                  type="button"
+                  @click="toggleBucketFilter('unassigned')"
+                  class="px-2 py-1.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-1.5 h-8"
+                  :class="filters.bucket_ids.includes('unassigned') ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#D4BFFF] font-bold' : 'bg-[#0f1019] border-[#1f202e] text-[#9e9cae] hover:border-[#D4BFFF]/40'"
+                >
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="material-symbols-outlined text-xs leading-none shrink-0 text-[#FFD1B3]">account_balance_wallet</span>
+                    <span class="truncate text-[11px]">Unassigned</span>
+                  </div>
+                  <span v-if="filters.bucket_ids.includes('unassigned')" class="material-symbols-outlined text-xs text-[#D4BFFF] shrink-0">check</span>
+                </button>
+                <button
                   v-for="b in buckets"
                   :key="b.id"
                   type="button"
@@ -461,6 +470,27 @@
                   </div>
                 </div>
 
+                <!-- Sort Order Matrix inside Filter Drawer -->
+                <div class="space-y-1">
+                  <label class="text-[10px] font-semibold text-[#9e9cae] uppercase tracking-wider block">Sort Order</label>
+                  <div class="grid grid-cols-2 gap-1.5 p-1 bg-[#0f0f15] rounded-xl border border-[#29293a]">
+                    <button
+                      v-for="opt in sortOptions"
+                      :key="opt.value"
+                      type="button"
+                      @click="sortBy = opt.value"
+                      class="py-1.5 px-2 rounded-lg border text-xs font-semibold transition cursor-pointer flex items-center justify-between gap-1.5"
+                      :class="sortBy === opt.value ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#f1f0f5] font-bold shadow-sm' : 'bg-[#14141d] border-transparent text-[#9e9cae] hover:text-[#f1f0f5]'"
+                    >
+                      <div class="flex items-center gap-1.5 min-w-0 truncate">
+                        <span class="material-symbols-outlined text-xs text-[#D4BFFF] shrink-0">{{ opt.icon }}</span>
+                        <span class="truncate text-[11px]">{{ opt.label }}</span>
+                      </div>
+                      <span v-if="sortBy === opt.value" class="material-symbols-outlined text-xs text-[#D4BFFF] shrink-0">check</span>
+                    </button>
+                  </div>
+                </div>
+
               </div>
 
               <!-- Modal Footer Action Strip -->
@@ -484,6 +514,40 @@
             </div>
           </div>
         </Transition>
+
+    <!-- Sleek Custom Sort Sheet Modal -->
+    <Transition name="fade-slide">
+      <div v-if="showSortModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 pb-20 sm:pb-4 bg-black/75 backdrop-blur-md" @click.self="showSortModal = false">
+        <div class="relative w-full max-w-xs sm:max-w-sm bg-[#0c0d14] border border-[#1f202e] rounded-2xl shadow-2xl overflow-hidden flex flex-col p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#1f202e] pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-base text-[#D4BFFF]">swap_vert</span>
+              <h3 class="text-sm font-bold text-[#f1f0f5] tracking-tight">Sort Transactions</h3>
+            </div>
+            <button @click="showSortModal = false" class="text-[#9e9cae] hover:text-[#f1f0f5] transition cursor-pointer p-1">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+
+          <div class="space-y-1.5">
+            <button
+              v-for="opt in sortOptions"
+              :key="opt.value"
+              type="button"
+              @click="sortBy = opt.value; showSortModal = false"
+              class="w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-left"
+              :class="sortBy === opt.value ? 'bg-[#D4BFFF]/20 border-[#D4BFFF] text-[#f1f0f5] font-bold shadow-sm' : 'bg-[#0f1019] border-[#1f202e] text-[#9e9cae] hover:text-[#f1f0f5] hover:border-[#D4BFFF]/40'"
+            >
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-base text-[#D4BFFF]">{{ opt.icon }}</span>
+                <span>{{ opt.label }}</span>
+              </div>
+              <span v-if="sortBy === opt.value" class="material-symbols-outlined text-sm text-[#D4BFFF]">check</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Dual Expenses & Income Donut Charts Container with Continuous Spring Gesture Physics -->
     <div class="overflow-hidden relative min-h-[220px] animate-cascade-2">
@@ -786,26 +850,21 @@
 
 
 
-    <!-- 4. Grouped Transaction Records List (Flush, Hairline Dividers) -->
+    <!-- 4. Grouped / Flat Transaction Records List (Flush, Hairline Dividers) -->
     <div id="history-records-section" v-if="displayedTransactions.length > 0" class="space-y-4 animate-cascade-3">
-      <div 
-        v-for="group in groupedTransactionsByDate" 
-        :key="group.dateStr" 
-        class="space-y-0"
-      >
-        <!-- Group Date Header (Flush, sticky background) -->
+      <!-- Flat Continuous List for Amount Sorting -->
+      <div v-if="isAmountSort" class="space-y-0">
         <div class="flex items-center justify-between px-1 py-2 border-b border-[#1f202e] text-xs font-semibold sticky top-13 z-10 bg-[#0c0d14]/95 backdrop-blur-md">
-          <span class="text-[#f1f0f5] font-bold tracking-tight">{{ formatDateHeader(group.dateStr) }}</span>
-          <div class="flex items-center gap-2 tabular-nums text-xs font-semibold">
-            <span v-if="group.totalExpense > 0" class="text-[#9e9cae]">Spent: <span class="text-[#f1f0f5]">{{ currencySymbol }}{{ formatAmount(group.totalExpense) }}</span></span>
-            <span v-if="group.totalIncome > 0" class="text-[#B3F5E1]">Income: {{ currencySymbol }}{{ formatAmount(group.totalIncome) }}</span>
-          </div>
+          <span class="text-[#D4BFFF] font-bold tracking-tight flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm">{{ sortBy === 'amount_desc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+            <span>{{ sortBy === 'amount_desc' ? 'Sorted by Highest Amount' : 'Sorted by Lowest Amount' }}</span>
+          </span>
+          <span class="text-[#9e9cae] text-[11px] font-medium">{{ displayedTransactions.length }} records</span>
         </div>
 
-        <!-- Group Records Hairline List -->
         <div class="divide-y divide-[#1f202e] border-b border-[#1f202e]">
           <div 
-            v-for="tx in group.transactions" 
+            v-for="tx in displayedTransactions" 
             :key="tx.id" 
             @click="viewTransactionDetails(tx)"
             class="py-3 px-1 hover:bg-[#141520] transition cursor-pointer flex items-center justify-between gap-3 min-h-[48px] active:bg-[#141520]"
@@ -820,7 +879,9 @@
               <div class="min-w-0 flex-1">
                 <p class="text-xs font-bold text-[#f1f0f5] truncate leading-tight">{{ tx.description || 'No description' }}</p>
                 <div class="flex items-center gap-1.5 text-[10px] text-[#9e9cae] truncate mt-0.5">
-                  <span class="inline-flex items-center gap-1">
+                  <span class="font-semibold text-[#D4BFFF] shrink-0">{{ formatDate(tx.date) }}</span>
+                  <span>•</span>
+                  <span class="inline-flex items-center gap-1 min-w-0">
                     <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
                     <span class="truncate font-medium text-[#9e9cae]">{{ getCategoryName(tx.category_id) }}</span>
                   </span>
@@ -849,6 +910,71 @@
           </div>
         </div>
       </div>
+
+      <!-- Date-Grouped List for Date Sorting (Newest / Oldest First) -->
+      <template v-else>
+        <div 
+          v-for="group in groupedTransactionsByDate" 
+          :key="group.dateStr" 
+          class="space-y-0"
+        >
+          <!-- Group Date Header (Flush, sticky background) -->
+          <div class="flex items-center justify-between px-1 py-2 border-b border-[#1f202e] text-xs font-semibold sticky top-13 z-10 bg-[#0c0d14]/95 backdrop-blur-md">
+            <span class="text-[#f1f0f5] font-bold tracking-tight">{{ formatDateHeader(group.dateStr) }}</span>
+            <div class="flex items-center gap-2 tabular-nums text-xs font-semibold">
+              <span v-if="group.totalExpense > 0" class="text-[#9e9cae]">Spent: <span class="text-[#f1f0f5]">{{ currencySymbol }}{{ formatAmount(group.totalExpense) }}</span></span>
+              <span v-if="group.totalIncome > 0" class="text-[#B3F5E1]">Income: {{ currencySymbol }}{{ formatAmount(group.totalIncome) }}</span>
+            </div>
+          </div>
+
+          <!-- Group Records Hairline List -->
+          <div class="divide-y divide-[#1f202e] border-b border-[#1f202e]">
+            <div 
+              v-for="tx in group.transactions" 
+              :key="tx.id" 
+              @click="viewTransactionDetails(tx)"
+              class="py-3 px-1 hover:bg-[#141520] transition cursor-pointer flex items-center justify-between gap-3 min-h-[48px] active:bg-[#141520]"
+            >
+              <!-- Left: Square Icon Tile & Description -->
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <div class="w-8 h-8 rounded-lg bg-[#141520] border border-[#1f202e] flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-base leading-none" :style="{ color: getCategoryColor(tx.category_id) }">{{ resolveIcon(getBucketIcon(tx.bucket_id) !== '🪣' ? getBucketIcon(tx.bucket_id) : getCategoryIcon(tx.category_id), 'savings') }}</span>
+                </div>
+
+                <!-- Center: Description & Metadata -->
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-bold text-[#f1f0f5] truncate leading-tight">{{ tx.description || 'No description' }}</p>
+                  <div class="flex items-center gap-1.5 text-[10px] text-[#9e9cae] truncate mt-0.5">
+                    <span class="inline-flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: getCategoryColor(tx.category_id) }"></span>
+                      <span class="truncate font-medium text-[#9e9cae]">{{ getCategoryName(tx.category_id) }}</span>
+                    </span>
+                    <span>•</span>
+                    <span class="truncate text-[#9e9cae] font-medium">{{ getAccountName(tx.account_id) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Amount & Actions -->
+              <div class="flex items-center gap-2 shrink-0 text-right">
+                <span class="text-xs sm:text-sm font-bold block tabular-nums" :class="transactionAmountClass(tx)">
+                  {{ transactionSign(tx) }}{{ currencySymbol }}{{ formatAmount(tx.amount) }}
+                </span>
+
+                <!-- Desktop Action Buttons -->
+                <div class="hidden sm:flex gap-1 items-center ml-1">
+                  <button @click.stop="$emit('edit-transaction', tx)" class="p-1 text-[#D4BFFF] hover:text-white transition cursor-pointer" title="Edit">
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                  </button>
+                  <button @click.stop="confirmDelete(tx)" class="p-1 text-[#FFD1B3] hover:text-rose-300 transition cursor-pointer" title="Delete">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
 
     <!-- 5. Desktop Data Table Section (Visible on >= sm) -->
@@ -1290,7 +1416,16 @@ const toggleTimeMode = () => {
 // Filter Drawer State & Values
 const filteredCategories = computed(() => props.categories.filter(c => c.name !== 'Uncategorized'));
 const showFilterDrawer = ref(false);
+const showSortModal = ref(false);
 const sortBy = ref('date_desc'); // 'date_desc', 'date_asc', 'amount_desc', 'amount_asc'
+const sortOptions = [
+  { value: 'date_desc', label: 'Newest First', icon: 'schedule' },
+  { value: 'date_asc', label: 'Oldest First', icon: 'history' },
+  { value: 'amount_desc', label: 'Highest Amount', icon: 'arrow_upward' },
+  { value: 'amount_asc', label: 'Lowest Amount', icon: 'arrow_downward' }
+];
+const isAmountSort = computed(() => sortBy.value === 'amount_desc' || sortBy.value === 'amount_asc');
+
 const filters = ref({
   search: '',
   bucket_ids: [],
@@ -1493,7 +1628,7 @@ const resetAllFilters = clearFilters;
 
 // Multi-Select Helpers
 const selectAllBuckets = () => {
-  filters.value.bucket_ids = props.buckets.map(b => b.id);
+  filters.value.bucket_ids = [...props.buckets.map(b => b.id), 'unassigned'];
 };
 
 const deselectAllBuckets = () => {
@@ -1621,9 +1756,15 @@ const isMatchingTransaction = (t) => {
     if (!desc.includes(q) && !notes.includes(q)) return false;
   }
 
-  // 3. Bucket Filter (Multi-select)
-  if (filters.value.bucket_ids.length > 0 && !filters.value.bucket_ids.includes(t.bucket_id)) {
-    return false;
+  // 3. Bucket Filter (Multi-select with Unassigned support)
+  if (filters.value.bucket_ids.length > 0) {
+    const matchesBucket = filters.value.bucket_ids.some(bId => {
+      if (bId === 'unassigned') {
+        return !t.bucket_id || t.bucket_id === '' || t.bucket_id === 'unassigned';
+      }
+      return t.bucket_id === bId;
+    });
+    if (!matchesBucket) return false;
   }
 
   // 4. Account Filter (Multi-select)

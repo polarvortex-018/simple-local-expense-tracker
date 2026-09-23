@@ -8,14 +8,20 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.06.03`**
+## Current Version: **`v0.06.04`**
 
 ---
 
 ## Version History Log
 
 ### **v0.06 — Multi-Theme Engine & Semantic Token System**
-- **`v0.06.03`** *(Current)*
+- **`v0.06.04`** *(Current)*
+  - **Enter-to-Save on Description**: Pressing Enter on description input in transaction creation saves transaction directly without jumping to notes field; updated mobile floating input in `App.vue` to dispatch Enter KeyboardEvents to target elements.
+  - **Editable Savings Bucket in Edit Mode**: Integrated `BucketPicker.vue` in Step 2 of `TransactionForm.vue` to view and edit assigned savings buckets with 1 tap.
+  - **Unassigned Bucket Filter Option**: Added "Unassigned" button option under Savings Buckets in the History Filter Drawer (`TransactionList.vue`) and updated filter matching to display unassigned transactions.
+  - **App-Aesthetic Sort Sheet & Flat Amount Sorting**: Replaced native HTML `<select>` with custom popover sheet modal (`showSortModal`) matching Cash Buddy's dark pastel theme. Implemented flat continuous list rendering when sorting by Highest or Lowest Amount without breaking into date headers.
+  - **Capacitor Android Sync**: Rebuilt production assets (`npm run build`) and synced Capacitor Android bundle (`npx cap sync android`).
+- **`v0.06.03`**
   - **In-App Encrypted Backup Passphrase Modal**: Replaced raw browser `prompt()` dialog with a dark glassmorphic modal in `SettingsView.vue` (`#0f1019` container, `#1f202e` borders, `backdrop-blur-md`), featuring target filename banner, password visibility eye toggle button, 8-character validation, and sleek action buttons (`Cancel` and `Encrypt & Share`).
   - **Floating Glassmorphic Island Nav Dock**: Mobile bottom navigation in `App.vue` styled as a floating capsule island (`bottom-3 rounded-3xl backdrop-blur-xl bg-[#0c0d14]/90 border border-[#1f202e] shadow-2xl`) with active tab glow pills.
   - **Ambient Radial Breathing Pie Chart Glow**: Multi-stop `<radialGradient>` and smooth 3.5s breathing pulse animation (`animate-breathe-glow`) on both Home (`Dashboard.vue`) and History (`TransactionList.vue`) charts.

@@ -483,9 +483,11 @@ const syncFloatingValueToTarget = () => {
 };
 
 const closeFloatingInput = () => {
+  const target = floatingInput.value.targetEl;
   floatingInput.value.show = false;
-  if (floatingInput.value.targetEl) {
-    floatingInput.value.targetEl.blur();
+  if (target) {
+    target.blur();
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true, cancelable: true }));
   }
 };
 

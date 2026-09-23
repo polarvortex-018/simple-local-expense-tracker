@@ -132,7 +132,7 @@
           <div v-else key="step-2" class="space-y-3.5 pb-2">
             
             <!-- Selected Allocation Badges Bar -->
-            <div v-if="!isEdit" class="flex items-center justify-between gap-2 p-2 px-3 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs">
+            <div class="flex items-center justify-between gap-2 p-2 px-3 bg-[#0f1019] border border-[#1f202e] rounded-xl text-xs">
               <div class="flex flex-wrap items-center gap-1.5 min-w-0">
                 <span class="px-2 py-0.5 rounded-md bg-[#D4BFFF]/15 text-[#D4BFFF] font-semibold text-[10px] truncate flex items-center gap-1">
                   <span v-if="selectedBucketObj" class="material-symbols-outlined text-xs leading-none">{{ resolveIcon(selectedBucketObj.icon, 'savings') }}</span>
@@ -142,6 +142,17 @@
                 <span class="px-2 py-0.5 rounded-md bg-[#141520] border border-[#1f202e] text-[#f1f0f5] font-semibold text-[10px] truncate">{{ selectedAccountName }}</span>
               </div>
               <button type="button" @click="goToStep1" class="text-[10px] text-[#D4BFFF] hover:underline font-semibold cursor-pointer shrink-0 ml-auto">Change</button>
+            </div>
+
+            <!-- Savings Bucket Selector in Step 2 (Editable in Edit & Add Modes) -->
+            <div v-if="form.account_id !== 'acc_unallocated_funds'" class="space-y-1">
+              <BucketPicker 
+                :buckets="activeBuckets" 
+                v-model="form.bucket_id" 
+                label="SAVINGS BUCKET *"
+                title="Select Savings Bucket"
+                placeholder="Choose Savings Bucket"
+              />
             </div>
 
             <!-- Transaction Type Switcher (Expense & Income) -->
@@ -221,7 +232,7 @@
               />
             </div>
 
-            <!-- 2. AMOUNT & DATE SECOND -->
+            <!-- 2. AMOUNT & DESCRIPTION SECOND -->
             <div class="grid grid-cols-2 gap-3 items-end">
               <!-- Amount Input (Left) -->
               <div class="space-y-1">
@@ -249,40 +260,40 @@
                 </div>
               </div>
 
-              <!-- Date Selector (Right) -->
+              <!-- Description Input (Right - Replaces Date in Grid) -->
               <div class="space-y-1">
-                <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DATE</label>
+                <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION (OPTIONAL)</label>
                 <input 
-                  v-model="form.date"
-                  @click="$event.target.showPicker?.()"
-                  type="date" 
-                  required
-                  class="w-full h-8.5 px-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer [color-scheme:dark]"
+                  ref="descriptionInputRef"
+                  v-model="form.description"
+                  type="text" 
+                  name="tx_description"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  data-form-type="other"
+                  data-lpignore="true"
+                  placeholder="e.g. Lunch"
+                  @keydown.enter.prevent="handleSubmit"
+                  class="w-full h-8.5 px-3 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition"
                 />
               </div>
             </div>
 
-            <!-- 3. DESCRIPTION THIRD -->
+            <!-- 3. DATE THIRD -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DESCRIPTION (OPTIONAL)</label>
+              <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">DATE</label>
               <input 
-                ref="descriptionInputRef"
-                v-model="form.description"
-                type="text" 
-                name="tx_description"
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
-                data-form-type="other"
-                data-lpignore="true"
-                placeholder="e.g. Lunch with friends"
-                @keydown.enter.prevent="handleSubmit"
-                class="w-full h-8.5 px-3 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs placeholder-[#9e9cae]/50 focus:outline-none transition"
+                v-model="form.date"
+                @click="$event.target.showPicker?.()"
+                type="date" 
+                required
+                class="w-full h-8.5 px-2.5 bg-[#0f1019] border border-[#1f202e] focus:border-[#D4BFFF] rounded-xl text-[#f1f0f5] text-xs font-semibold focus:outline-none transition cursor-pointer [color-scheme:dark]"
               />
             </div>
 
-            <!-- Note Field -->
+            <!-- 4. NOTE FOURTH -->
             <div class="space-y-1">
               <label class="text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider block">NOTE (OPTIONAL)</label>
               <textarea 
@@ -352,6 +363,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import CategoryPicker from './CategoryPicker.vue';
+import BucketPicker from './BucketPicker.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 import { currencySymbol } from '../utils/currency.js';
 

@@ -8,14 +8,17 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.05.16`** (or `v0.5.16`)
+## Current Version: **`v0.05.17`** (or `v0.5.17`)
 
 ---
 
 ## Version History Log
 
 ### **v0.05 — Multi-Currency System & Native Drag-and-Drop Polish**
-- **`v0.05.16`** *(Current)*
+- **`v0.05.17`** *(Current)*
+  - Updated `TransactionForm.vue` Step 2 layout: paired `AMOUNT` and `DESCRIPTION (OPTIONAL)` side-by-side in a 2-column grid directly below Category selection, and moved Date below Amount & Description.
+  - Re-synced Capacitor web assets and assembled Android debug APK.
+- **`v0.05.16`**
   - Resolved fatal uncaught console errors (`ReferenceError: loadSettings is not defined`, `ReferenceError: Cannot access 'x' before initialization`, `ReferenceError: Cannot access 'y' before initialization`) captured in diagnostic screenshot.
   - Converted pointer/drag event handlers in `SettingsView.vue` to hoisted function declarations to eliminate Temporal Dead Zone (TDZ) minification crashes.
   - Removed stale `loadSettings()` call from `SettingsView.vue`'s `onMounted()` hook to prevent component initialization failure.
