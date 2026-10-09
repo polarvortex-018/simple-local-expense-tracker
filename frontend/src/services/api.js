@@ -36,7 +36,7 @@ function uint8ToBase64(uint8) {
   return btoa(binary);
 }
 
-async function handleNativeExportOrShare(filename, uint8Array, title = 'Cash Buddy File', text = 'Cash Buddy Export') {
+async function handleNativeExportOrShare(filename, uint8Array, title = 'Cash Buddy File') {
   try {
     const base64Data = uint8ToBase64(uint8Array);
     
@@ -50,8 +50,7 @@ async function handleNativeExportOrShare(filename, uint8Array, title = 'Cash Bud
     if (canShareResult && canShareResult.value) {
       await Share.share({
         title,
-        text,
-        url: writeResult.uri,
+        files: [writeResult.uri],
         dialogTitle: title
       });
     } else {
@@ -909,43 +908,47 @@ export const api = {
     await ensureDB();
     const isObject = typeof payload === 'object' && payload !== null;
     const bucketId = isObject ? payload.bucket_id : payload;
+    const accountId = isObject ? payload.account_id : null;
     const allocation = Math.round(Number(isObject ? payload.amount : amountArg) * 100) / 100;
     const categoryId = isObject ? (payload.category_id || null) : null;
     const description = isObject ? payload.description : null;
 
     if (!Number.isFinite(allocation) || allocation <= 0) throw new Error('Allocation amount must be positive.');
+    if (!accountId || accountId === 'acc_unallocated_funds') throw new Error('Please select a destination bank account.');
+    const account = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId])[0];
+    if (!account) throw new Error('Destination bank account not found.');
     const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [bucketId])[0];
     if (!bucket) throw new Error('Savings bucket not found.');
+    const unallocatedAccount = execQuery("SELECT * FROM accounts WHERE id = 'acc_unallocated_funds'")[0];
+    if (!unallocatedAccount) throw new Error('Unallocated Funds account not found.');
+    if (allocation > Number(unallocatedAccount.balance || 0)) throw new Error('Allocation exceeds available unallocated funds.');
 
-    const unallocRows = execQuery("SELECT * FROM accounts WHERE id = 'acc_unallocated_funds'");
-    const unallocBal = unallocRows.length ? Number(unallocRows[0].balance) || 0 : 0;
-    
     const now = new Date().toISOString();
     const today = now.slice(0, 10);
     const desc = description?.trim() || `Reallocated to ${bucket.name}`;
 
     return runInTransaction(async () => {
-      // 1. Deduct from Unallocated Funds secret account
-      if (unallocRows.length) {
-        execRun("UPDATE accounts SET balance = balance - ?, updated_at = ? WHERE id = 'acc_unallocated_funds'", [allocation, now], false);
-      }
+      const currentPool = execQuery("SELECT * FROM accounts WHERE id = 'acc_unallocated_funds'")[0];
+      const currentAccount = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId])[0];
+      const currentBucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [bucketId])[0];
+      if (!currentPool || !currentAccount || !currentBucket) throw new Error('The selected account or bucket is no longer available.');
+      if (allocation > Number(currentPool.balance || 0)) throw new Error('Allocation exceeds available unallocated funds.');
 
-      // 2. Add to target bucket allocated balance
-      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [Number(bucket.allocated_balance) + allocation, now, bucketId], false);
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Math.round((Number(currentPool.balance) - allocation) * 100) / 100, now, currentPool.id], false);
+      execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [Math.round((Number(currentAccount.balance) + allocation) * 100) / 100, now, accountId], false);
+      execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [Math.round((Number(currentBucket.allocated_balance) + allocation) * 100) / 100, now, bucketId], false);
 
-      // 3. Log real transaction so it counts in analytics & pie charts under categoryId
       const txId = generateUUID();
       execRun(
         `INSERT INTO transactions (id, amount, transaction_type, adjustment_direction, description, date, account_id, bucket_id, category_id, created_at, updated_at, include_in_chart)
-         VALUES (?, ?, 'income', NULL, ?, ?, 'acc_unallocated_funds', ?, ?, ?, ?, 1)`,
-        [txId, allocation, desc, today, bucketId, categoryId, now, now],
+         VALUES (?, ?, 'income', NULL, ?, ?, ?, ?, ?, ?, ?, 1)`,
+        [txId, allocation, desc, today, accountId, bucketId, categoryId, now, now],
         false
       );
 
-      return { status: 'allocated', amount: allocation, bucket_id: bucketId, transaction_id: txId };
+      return { status: 'allocated', amount: allocation, bucket_id: bucketId, account_id: accountId, transaction_id: txId };
     });
   },
-
   async settleDebt(id, payload = {}) {
     await ensureDB();
     const debt = execQuery('SELECT * FROM debts WHERE id = ?', [id])[0];
@@ -971,6 +974,56 @@ export const api = {
     });
   },
 
+  async settleDebts(ids, payload = {}) {
+    await ensureDB();
+    const debtIds = [...new Set((Array.isArray(ids) ? ids : []).filter(Boolean))];
+    if (!debtIds.length) throw new Error('No debt entries to settle.');
+    const placeholders = debtIds.map(() => '?').join(', ');
+    const debts = execQuery(`SELECT * FROM debts WHERE id IN (${placeholders})`, debtIds);
+    if (debts.length !== debtIds.length) throw new Error('One or more debt records could not be found.');
+    if (debts.some(debt => debt.is_settled)) throw new Error('All entries must be active to settle them together.');
+    const personKey = String(debts[0].person_name || '').trim().toLocaleLowerCase();
+    if (debts.some(debt => String(debt.person_name || '').trim().toLocaleLowerCase() !== personKey)) {
+      throw new Error('Debt entries must belong to the same person.');
+    }
+
+    const netCents = debts.reduce((total, debt) => {
+      const cents = Math.round(Number(debt.amount) * 100);
+      return total + (debt.debt_type === 'lent' ? cents : -cents);
+    }, 0);
+    const accountId = typeof payload === 'string' ? payload : payload.account_id;
+    if (netCents && !accountId) throw new Error('Please select a settlement account.');
+    const now = new Date().toISOString();
+
+    return runInTransaction(async () => {
+      if (netCents) {
+        const account = execQuery('SELECT * FROM accounts WHERE id = ?', [accountId])[0];
+        if (!account) throw new Error('Please select a valid settlement account.');
+        const nextBalance = Math.round((Number(account.balance) + netCents / 100) * 100) / 100;
+        execRun('UPDATE accounts SET balance = ?, updated_at = ? WHERE id = ?', [nextBalance, now, account.id], false);
+      }
+
+      const bucketDeltas = new Map();
+      for (const debt of debts) {
+        if (!debt.bucket_id) continue;
+        const cents = Math.round(Number(debt.amount) * 100) * (debt.debt_type === 'lent' ? 1 : -1);
+        bucketDeltas.set(debt.bucket_id, (bucketDeltas.get(debt.bucket_id) || 0) + cents);
+      }
+      for (const [bucketId, cents] of bucketDeltas) {
+        const bucket = execQuery('SELECT * FROM savings_buckets WHERE id = ?', [bucketId])[0];
+        if (!bucket) continue;
+        const nextAllocation = Math.round((Number(bucket.allocated_balance) + cents / 100) * 100) / 100;
+        execRun('UPDATE savings_buckets SET allocated_balance = ?, updated_at = ? WHERE id = ?', [nextAllocation, now, bucketId], false);
+      }
+
+      execRun(
+        `UPDATE debts SET is_settled = 1, ${netCents ? 'account_id = ?, ' : ''}updated_at = ? WHERE id IN (${placeholders}) AND is_settled = 0`,
+        netCents ? [accountId, now, ...debtIds] : [now, ...debtIds],
+        false
+      );
+      return { status: 'settled', count: debts.length, net_amount: netCents / 100 };
+    });
+  },
   async deleteDebt(id) {
     await ensureDB();
     const debt = execQuery('SELECT * FROM debts WHERE id = ?', [id])[0];
@@ -1120,7 +1173,7 @@ export const api = {
     const filename = getActiveVaultName() || 'finance.db';
 
     if (Capacitor.isNativePlatform()) {
-      await handleNativeExportOrShare(filename, binary, `Cash Buddy Database (${filename})`, `Here is my Cash Buddy database file: ${filename}`);
+      await handleNativeExportOrShare(filename, binary, `Cash Buddy Database (${filename})`);
       return;
     }
 
@@ -1143,7 +1196,7 @@ export const api = {
     const outName = filename.endsWith('.db') ? filename : filename.replace(/\.cbbak$/i, '.db');
 
     if (Capacitor.isNativePlatform()) {
-      await handleNativeExportOrShare(outName, binary, `Cash Buddy Backup (${outName})`, `Backup file: ${outName}`);
+      await handleNativeExportOrShare(outName, binary, `Cash Buddy Backup (${outName})`);
       return;
     }
 
@@ -1198,7 +1251,7 @@ export const api = {
     if (!binary) throw new Error("Backup file not found");
 
     if (Capacitor.isNativePlatform()) {
-      await handleNativeExportOrShare(filename, binary, `Cash Buddy Backup (${filename})`, `Here is my Cash Buddy database backup file: ${filename}`);
+      await handleNativeExportOrShare(filename, binary, `Cash Buddy Backup (${filename})`);
       return;
     }
 
@@ -1235,7 +1288,7 @@ export const api = {
     if (!binary) throw new Error("Vault not found.");
 
     if (Capacitor.isNativePlatform()) {
-      await handleNativeExportOrShare(filename, binary, `Cash Buddy Vault (${filename})`, `Here is my Cash Buddy vault file: ${filename}`);
+      await handleNativeExportOrShare(filename, binary, `Cash Buddy Vault (${filename})`);
       return;
     }
 

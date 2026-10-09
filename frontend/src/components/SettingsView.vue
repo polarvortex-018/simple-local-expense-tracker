@@ -221,6 +221,7 @@
 
           <ReportsView
             v-if="activeSheet === 'reports'"
+            ref="reportsViewRef"
             :categories="categories"
             :buckets="buckets"
             :active-vault="activeVault"
@@ -1218,9 +1219,14 @@
           <form @submit.prevent="submitAllocateFromUnallocated" class="flex flex-col flex-1 min-h-0">
             <div class="overflow-y-auto p-5 space-y-4 flex-1 pb-14 sm:pb-5">
               <div class="p-3 bg-[#FFD1B3]/10 border border-[#FFD1B3]/20 rounded-xl text-xs text-[#FFD1B3]">
-                <p>Reallocating from <strong>Unallocated Funds</strong> creates a real transaction for the chosen target bucket & category, so it instantly reflects in your pie charts & analytics!</p>
+                <p>Moves the amount from the Unallocated Funds pool into the selected bank account and bucket. The chosen category remains included in charts and analytics.</p>
               </div>
 
+              <!-- Destination Bank Account -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-[#ccc3d8]">To Bank Account *</label>
+                <AccountGrid :accounts="bankAccounts" v-model="allocateForm.account_id" />
+              </div>
               <!-- Target Bucket Selection -->
               <div class="space-y-1.5">
                 <label class="block text-xs font-semibold text-[#ccc3d8]">To Bucket *</label>
@@ -1740,7 +1746,8 @@ import ReportsView from './ReportsView.vue';
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
 const showThemeModal = ref(false);
-const activeSheet = ref(null); // null, 'quick_actions', 'buckets', 'accounts', 'categories', 'backup', 'faq', 'unassigned_audit', 'currency'
+const activeSheet = ref(null); // null or the selected settings page
+const reportsViewRef = ref(null);
 const unassignedAuditLogs = ref([]);
 const auditDateFilter = ref('all');
 const customAuditMonth = ref('');
@@ -1906,6 +1913,7 @@ const handleTakeTourAgain = () => {
 
 defineExpose({
   closeActiveSheet: () => {
+    if (activeSheet.value === 'reports' && reportsViewRef.value?.closeDrilldown()) return;
     activeSheet.value = null;
   }
 });
@@ -1923,6 +1931,7 @@ const editAccountName = ref('');
 const editAccountType = ref('Checking');
 
 const userAccounts = computed(() => props.accounts || []);
+const bankAccounts = computed(() => userAccounts.value.filter(account => account.id !== 'acc_unallocated_funds'));
 
 const displayedAccounts = computed(() => {
   const list = [...(props.accounts || [])];
@@ -2057,6 +2066,7 @@ const showAllocateModal = ref(false);
 const submittingAllocate = ref(false);
 const allocateForm = ref({
   bucket_id: '',
+  account_id: '',
   category_id: '',
   amount: '',
   description: ''
@@ -2065,6 +2075,7 @@ const allocateForm = ref({
 const openAllocateModal = (targetBucketId = null) => {
   allocateForm.value = {
     bucket_id: targetBucketId || activeBuckets.value[0]?.id || '',
+    account_id: bankAccounts.value[0]?.id || '',
     category_id: props.categories[0]?.id || '',
     amount: '',
     description: ''
@@ -2082,6 +2093,10 @@ const submitAllocateFromUnallocated = async () => {
     emit('error', 'Please select a target bucket.');
     return;
   }
+  if (!allocateForm.value.account_id) {
+    emit('error', 'Please select a bank account.');
+    return;
+  }
   if (amt > unassignedAmount.value) {
     emit('error', `Allocation exceeds available unallocated funds (${currencySymbol.value}${unassignedAmount.value.toFixed(2)} available).`);
     return;
@@ -2091,6 +2106,7 @@ const submitAllocateFromUnallocated = async () => {
   try {
     await api.allocateUnassigned({
       bucket_id: allocateForm.value.bucket_id,
+      account_id: allocateForm.value.account_id,
       category_id: allocateForm.value.category_id || null,
       amount: amt,
       description: allocateForm.value.description

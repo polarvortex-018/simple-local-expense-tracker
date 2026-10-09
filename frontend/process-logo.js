@@ -85,59 +85,7 @@ async function processLogo() {
   }
   console.log('Android launcher mipmap icons optimized.');
 
-  // 3. Android Splash Screens
-  async function generateSplash(width, height, iconSize, targetPath) {
-    const iconResized = await sharp(croppedBuffer)
-      .resize(iconSize, iconSize)
-      .png({ quality: 80, compressionLevel: 9, palette: true })
-      .toBuffer();
 
-    await sharp({
-      create: {
-        width: width,
-        height: height,
-        channels: 4,
-        background: { r: 12, g: 13, b: 20, alpha: 1 } // #0c0d14 app dark theme
-      }
-    })
-    .composite([{ input: iconResized, gravity: 'center' }])
-    .png({ quality: 80, compressionLevel: 9, palette: true })
-    .toFile(targetPath);
-  }
-
-  const drawableDir = path.join(resDir, 'drawable');
-  if (!fs.existsSync(drawableDir)) fs.mkdirSync(drawableDir, { recursive: true });
-  await generateSplash(512, 512, 280, path.join(drawableDir, 'splash.png'));
-
-  // Portrait densities
-  const portDensities = [
-    { name: 'drawable-port-mdpi', w: 320, h: 480, icon: 180 },
-    { name: 'drawable-port-hdpi', w: 480, h: 800, icon: 240 },
-    { name: 'drawable-port-xhdpi', w: 720, h: 1280, icon: 320 },
-    { name: 'drawable-port-xxhdpi', w: 960, h: 1600, icon: 400 },
-    { name: 'drawable-port-xxxhdpi', w: 1280, h: 1920, icon: 480 },
-  ];
-  for (const d of portDensities) {
-    const dir = path.join(resDir, d.name);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    await generateSplash(d.w, d.h, d.icon, path.join(dir, 'splash.png'));
-  }
-
-  // Landscape densities
-  const landDensities = [
-    { name: 'drawable-land-mdpi', w: 480, h: 320, icon: 180 },
-    { name: 'drawable-land-hdpi', w: 800, h: 480, icon: 240 },
-    { name: 'drawable-land-xhdpi', w: 1280, h: 720, icon: 320 },
-    { name: 'drawable-land-xxhdpi', w: 1600, h: 960, icon: 400 },
-    { name: 'drawable-land-xxxhdpi', w: 1920, h: 1280, icon: 480 },
-  ];
-  for (const d of landDensities) {
-    const dir = path.join(resDir, d.name);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    await generateSplash(d.w, d.h, d.icon, path.join(dir, 'splash.png'));
-  }
-
-  console.log('Android splash screen drawables optimized.');
 }
 
 processLogo().catch(err => {

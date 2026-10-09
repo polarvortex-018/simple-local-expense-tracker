@@ -8,14 +8,39 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.07.00`**
+## Current Version: **`v0.07.10`**
 
 ---
 
 ## Version History Log
 
 ### **v0.07 — Reports & Spending Insights**
-- **`v0.07.00`** *(Current)*
+- **`v0.07.10`** *(Current)*
+  - Wrapped the high-resolution splash logo in an Android adaptive icon so the system keeps it circular through the splash-to-app transition.
+- **`v0.07.09`** *(Current)*
+  - Deleted the legacy square splash images in all Android density/orientation folders and removed the scripts that regenerated them.
+- **`v0.07.08`** *(Current)*
+  - Removed the legacy square launch-window background so the Android splash no longer changes from the circular high-resolution logo to a square image.
+- **`v0.07.07`** *(Current)*
+  - Pool allocation now moves funds from Unallocated Funds into a selected bank account while adding them to the chosen savings bucket.
+- **`v0.07.06`** *(Current)*
+  - Added person-level **Settle all**, which nets active lent and borrowed entries, settles the difference through the selected account, restores bucket allocations, and retains individual settlement controls.
+- **`v0.07.05`** *(Current)*
+  - Fixed debt entry submission being blocked when the optional reason field is empty and made the Record Debt control explicitly open its form.
+  - Updated the Android splash to use the app’s 512px transparent logo asset instead of a density-scaled launcher image.
+- **`v0.07.04`** *(Current)*
+  - Replaced native report month dropdowns with app-styled month/year pickers, removed the redundant comparison-filter note, and made Android Back close an open report detail first.
+  - Grouped debt records by person, added per-person detail views and repeat debt entries with a required reason; each entry remains independently settleable.
+- **`v0.07.03`** *(Current)*
+  - Fixed the Android launch splash to display the transparent Cash Buddy logo without the launcher tile background.
+  - Changed native database and backup sharing to pass files explicitly without a text-only payload, preventing WhatsApp from sending only the caption.
+- **`v0.07.02`**
+  - Added category and savings-bucket drilldowns with average, highest, and lowest expense transaction amounts plus matching transactions.
+  - Made report exclusions persist across month and custom-range changes within the active vault, carrying forward saved exclusions when available.
+- **`v0.07.01`**
+  - Updated monthly reports with readable month/year selectors and direct comparison of any two months; the default is labeled as the previous month’s report.
+  - Changed category insights to rank spending categories by transaction count and total amount.
+- **`v0.07.00`**
   - Added private, on-device monthly and custom-range reports with category and savings-bucket spending breakdowns, period comparisons, and per-month exclusion filters.
   - Excluded transfers, internal savings allocations, and balance adjustments from report totals.
   - Corrected transaction category names returned by the local API so reports and other transaction views can display them accurately.

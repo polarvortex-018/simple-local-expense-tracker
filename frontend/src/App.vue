@@ -553,6 +553,15 @@ const handleSettleDebt = async (id, payload) => {
   }
 };
 
+const handleSettleDebts = async (ids, accountId) => {
+  try {
+    await api.settleDebts(ids, accountId);
+    await refreshAll();
+    showSuccess('Debts settled');
+  } catch (err) {
+    alert(err.message || 'Failed to settle debts.');
+  }
+};
 const handleDeleteDebt = async (id) => {
   try {
     await api.deleteDebt(id);
@@ -779,6 +788,7 @@ onMounted(() => {
           :buckets="buckets"
           @create-debt="handleCreateDebt"
           @settle-debt="handleSettleDebt"
+          @settle-debts="handleSettleDebts"
           @delete-debt="handleDeleteDebt"
         />
 
