@@ -637,7 +637,7 @@ onMounted(() => {
     <header class="bg-[#0c0d14]/95 backdrop-blur-md border-b border-[#1f202e] sticky top-0 z-40 safe-area-pt">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 h-13 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <img src="/cashbuddy-logo.svg" alt="Cash Buddy Logo" class="w-7 h-7 object-contain" />
+          <img src="/cashbuddy-logo.svg" alt="Cash Buddy Logo" class="w-9.5 h-9.5 object-contain" />
           <span class="font-bold text-[#D4BFFF] tracking-tight text-base leading-none">Cash Buddy</span>
           
           <!-- Vault Switcher Trigger -->
@@ -660,7 +660,7 @@ onMounted(() => {
             class="px-3 py-1 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5"
             :class="currentTab === 'dashboard' ? 'bg-[#D4BFFF] text-[#0f0f15]' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
           >
-            <span class="material-symbols-outlined text-base">dashboard</span>
+            <img src="/cashbuddy-logo.svg" alt="Home" class="w-4 h-4 object-contain shrink-0" />
             <span>Dashboard</span>
           </button>
           <button 
@@ -822,7 +822,7 @@ onMounted(() => {
           :class="currentTab === 'dashboard' ? 'text-[#D4BFFF] font-bold' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
         >
           <span v-if="currentTab === 'dashboard'" class="absolute inset-0 bg-[#D4BFFF]/15 border border-[#D4BFFF]/30 rounded-2xl pointer-events-none transition-all duration-300 shadow-[0_0_12px_rgba(212,191,255,0.15)]"></span>
-          <span class="material-symbols-outlined text-lg mb-0.5 relative z-10 transition-transform duration-200" :class="{ 'scale-110': currentTab === 'dashboard' }">dashboard</span>
+          <img src="/cashbuddy-logo.svg" alt="Home" class="w-5.5 h-5.5 object-contain mb-0.5 relative z-10 transition-transform duration-200" :class="{ 'scale-110': currentTab === 'dashboard' }" />
           <span class="text-[10px] leading-none relative z-10">Home</span>
         </button>
 
