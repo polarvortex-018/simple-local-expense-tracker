@@ -189,7 +189,7 @@ export const api = {
       updated_at: r.updated_at,
       include_in_chart: r.include_in_chart ?? 0,
       account: r.account_name ? { id: r.account_id, name: r.account_name } : null,
-      category: r.category_name ? { id: r.category_id, name: r.category_id, color: r.category_color } : null,
+      category: r.category_name ? { id: r.category_id, name: r.category_name, color: r.category_color } : null,
       bucket: r.bucket_name ? { id: r.bucket_id, name: r.bucket_name, icon: r.bucket_icon, color: r.bucket_color } : null
     }));
   },

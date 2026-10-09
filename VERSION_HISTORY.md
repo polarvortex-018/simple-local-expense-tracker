@@ -8,14 +8,20 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.06.04`**
+## Current Version: **`v0.07.00`**
 
 ---
 
 ## Version History Log
 
+### **v0.07 — Reports & Spending Insights**
+- **`v0.07.00`** *(Current)*
+  - Added private, on-device monthly and custom-range reports with category and savings-bucket spending breakdowns, period comparisons, and per-month exclusion filters.
+  - Excluded transfers, internal savings allocations, and balance adjustments from report totals.
+  - Corrected transaction category names returned by the local API so reports and other transaction views can display them accurately.
+
 ### **v0.06 — Multi-Theme Engine & Semantic Token System**
-- **`v0.06.04`** *(Current)*
+- **`v0.06.04`**
   - **Enter-to-Save on Description**: Pressing Enter on description input in transaction creation saves transaction directly without jumping to notes field; updated mobile floating input in `App.vue` to dispatch Enter KeyboardEvents to target elements.
   - **Editable Savings Bucket in Edit Mode**: Integrated `BucketPicker.vue` in Step 2 of `TransactionForm.vue` to view and edit assigned savings buckets with 1 tap.
   - **Unassigned Bucket Filter Option**: Added "Unassigned" button option under Savings Buckets in the History Filter Drawer (`TransactionList.vue`) and updated filter matching to display unassigned transactions.

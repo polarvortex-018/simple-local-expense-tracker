@@ -150,6 +150,24 @@
           </button>
         </div>
 
+        <!-- Reports -->
+        <div class="border-t border-[#1f202e]">
+          <button
+            type="button"
+            @click="activeSheet = 'reports'"
+            class="w-full p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">summarize</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Reports</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Spending by month, category, and bucket</p>
+            </div>
+            <span class="material-symbols-outlined text-[#9e9cae] text-sm group-hover:text-[#f1f0f5] transition">chevron_right</span>
+          </button>
+        </div>
+
         <!-- Row 5: App Theme & Appearance -->
         <div class="border-t border-[#1f202e]">
           <button 
@@ -200,6 +218,13 @@
 
         <!-- Full Page Content Body Container -->
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 pb-32 max-w-4xl mx-auto w-full space-y-6">
+
+          <ReportsView
+            v-if="activeSheet === 'reports'"
+            :categories="categories"
+            :buckets="buckets"
+            :active-vault="activeVault"
+          />
           
           <!-- 1. QUICK ACTIONS PAGE -->
           <div v-if="activeSheet === 'quick_actions'" class="space-y-6">
@@ -1710,6 +1735,7 @@ import { api } from '../services/api';
 import { CURRENCIES, currentCurrency, currencySymbol, setCurrency } from '../utils/currency.js';
 import { sortAccountsByOrder, saveAccountOrder } from '../utils/accountSorter.js';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import ReportsView from './ReportsView.vue';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -1825,6 +1851,7 @@ const getSheetIcon = (sheet) => {
     case 'adjustment_audit':
     case 'unassigned_audit': return 'history_edu';
     case 'currency': return 'payments';
+    case 'reports': return 'summarize';
     default: return 'widgets';
   }
 };
@@ -1840,6 +1867,7 @@ const getSheetTitle = (sheet) => {
     case 'adjustment_audit':
     case 'unassigned_audit': return 'Balance Adjustments & Audit Log';
     case 'currency': return 'Currency & Formatting';
+    case 'reports': return 'Reports';
     default: return 'More';
   }
 };
