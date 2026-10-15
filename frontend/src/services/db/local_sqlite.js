@@ -301,6 +301,7 @@ function runSchemaAndSeeds() {
   db.run('CREATE TABLE IF NOT EXISTS app_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
   const migrations = [
     ['categories', 'is_quick_select', 'ALTER TABLE categories ADD COLUMN is_quick_select INTEGER NOT NULL DEFAULT 0'],
+    ['categories', 'category_type', "ALTER TABLE categories ADD COLUMN category_type TEXT NOT NULL DEFAULT 'expense'"],
     ['categories', 'icon', "ALTER TABLE categories ADD COLUMN icon TEXT NULL DEFAULT '🏷️'"],
     ['savings_buckets', 'sort_order', 'ALTER TABLE savings_buckets ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0']
     ,['transactions', 'adjustment_direction', 'ALTER TABLE transactions ADD COLUMN adjustment_direction TEXT NULL']

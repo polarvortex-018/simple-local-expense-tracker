@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS categories (
     name TEXT NOT NULL UNIQUE,
     color TEXT NOT NULL DEFAULT '#6366f1',
     icon TEXT NULL DEFAULT '🏷️',
+    category_type TEXT NOT NULL DEFAULT 'expense',
     is_quick_select INTEGER NOT NULL DEFAULT 0,
     sort_order INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,

@@ -159,7 +159,7 @@
             <div class="grid grid-cols-2 gap-1 p-1 bg-[#0f1019] rounded-xl border border-[#1f202e]">
               <button 
                 type="button"
-                @click="form.transaction_type = 'expense'"
+                @click="setTransactionType('expense')"
                 class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
                 :class="form.transaction_type === 'expense' ? 'bg-[#FFD1B3] text-[#0f0f15] font-bold shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
               >
@@ -168,7 +168,7 @@
               </button>
               <button 
                 type="button"
-                @click="form.transaction_type = 'income'"
+                @click="setTransactionType('income')"
                 class="py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5"
                 :class="form.transaction_type === 'income' ? 'bg-[#B3F5E1] text-[#0f0f15] font-bold shadow-sm' : 'text-[#9e9cae] hover:text-[#f1f0f5]'"
               >
@@ -223,9 +223,11 @@
               <!-- Reusable Category Picker Modal (Hidden inline trigger) -->
               <CategoryPicker 
                 ref="categoryPickerRef"
-                :categories="categories" 
+                :categories="transactionCategories"
                 v-model="form.category_id" 
                 :hide-trigger="true"
+                allow-create
+                @create="showCategoryForm = true"
                 @change="focusAmountInput"
                 title="Select Category" 
                 placeholder="Choose Category"
@@ -357,12 +359,19 @@
         </button>
       </div>
     </div>
+    <CategoryFormModal
+      :is-open="showCategoryForm"
+      :default-category-type="form.transaction_type === 'income' ? 'income' : 'expense'"
+      @close="showCategoryForm = false"
+      @save="createCategoryFromPicker"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import CategoryPicker from './CategoryPicker.vue';
+import CategoryFormModal from './CategoryFormModal.vue';
 import BucketPicker from './BucketPicker.vue';
 import { resolveIcon } from '../utils/iconResolver.js';
 import { currencySymbol } from '../utils/currency.js';
@@ -392,6 +401,7 @@ const props = defineProps({
     type: String,
     default: 'expense'
   },
+  createCategory: { type: Function, required: true },
   initialStep: {
     type: Number,
     default: 1
@@ -399,6 +409,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'save']);
+const showCategoryForm = ref(false);
 
 const isEdit = computed(() => !!props.transaction);
 const currentStep = ref(props.initialStep || 1);
@@ -412,10 +423,12 @@ watch(() => props.initialStep, (val) => {
 
 const activeBuckets = computed(() => props.buckets.filter(b => !b.is_archived));
 const userAccounts = computed(() => props.accounts.filter(a => a.id !== 'acc_unallocated_funds'));
-const quickSelectCategories = computed(() => props.categories.filter(c => c.is_quick_select == 1));
+const categoryType = computed(() => form.value.transaction_type === 'income' ? 'income' : 'expense');
+const transactionCategories = computed(() => props.categories.filter(c => (c.category_type || 'expense') === categoryType.value));
+const quickSelectCategories = computed(() => transactionCategories.value.filter(c => c.is_quick_select == 1));
 const displayedQuickCategories = computed(() => {
   const pinned = quickSelectCategories.value;
-  return pinned.length > 0 ? pinned : props.categories.slice(0, 5);
+  return pinned.length > 0 ? pinned : transactionCategories.value.slice(0, 5);
 });
 
 // Category grid picker ref, amount ref, description ref & account section ref
@@ -493,17 +506,25 @@ const selectBucket = (bId) => {
   });
 };
 
+const setTransactionType = (type) => {
+  const currentCategory = props.categories.find(c => c.id === form.value.category_id);
+  form.value.transaction_type = type;
+  if (currentCategory && (currentCategory.category_type || 'expense') !== type) {
+    form.value.category_id = '';
+  }
+};
+
 const selectAccount = (accId) => {
   const prevAcc = form.value.account_id;
   form.value.account_id = accId || '';
   if (accId === 'acc_unallocated_funds') {
     form.value.bucket_id = '';
     if (form.value.transaction_type !== 'adjustment') {
-      form.value.transaction_type = 'income';
+      setTransactionType('income');
     }
   } else if (prevAcc === 'acc_unallocated_funds') {
     if (form.value.transaction_type !== 'adjustment') {
-      form.value.transaction_type = props.defaultType || 'expense';
+      setTransactionType(props.defaultType || 'expense');
     }
   }
 };
@@ -518,6 +539,20 @@ const focusAmountInput = () => {
     amountInputRef.value?.focus();
     amountInputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
+};
+
+const createCategoryFromPicker = async (payload) => {
+  try {
+    const category = await props.createCategory(payload);
+    if (category?.id) {
+      setTransactionType(category.category_type === 'income' ? 'income' : 'expense');
+      form.value.category_id = category.id;
+    }
+    showCategoryForm.value = false;
+    focusAmountInput();
+  } catch (err) {
+    error.value = err.message || 'Failed to create category.';
+  }
 };
 
 const focusDescriptionInput = () => {

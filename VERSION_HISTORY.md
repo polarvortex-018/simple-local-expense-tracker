@@ -8,30 +8,34 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.07.10`**
+## Current Version: **`v0.07.12`**
 
 ---
 
 ## Version History Log
 
 ### **v0.07 — Reports & Spending Insights**
-- **`v0.07.10`** *(Current)*
+- **`v0.07.12`** *(Current)*
+  - Split categories into expense and income types, defaulted existing and newly created categories to expense, added type selection when creating or editing categories, filtered transaction quick-select and picker options by transaction type, and added category creation directly from the transaction picker.
+- **`v0.07.11`**
+  - Replaced the adaptive-icon splash resource with the transparent high-resolution logo drawable directly; removed the wrapper after the splash continued to display as a square. Clean Android debug APK build succeeded.
+- **`v0.07.10`**
   - Wrapped the high-resolution splash logo in an Android adaptive icon so the system keeps it circular through the splash-to-app transition.
-- **`v0.07.09`** *(Current)*
+- **`v0.07.09`**
   - Deleted the legacy square splash images in all Android density/orientation folders and removed the scripts that regenerated them.
-- **`v0.07.08`** *(Current)*
+- **`v0.07.08`**
   - Removed the legacy square launch-window background so the Android splash no longer changes from the circular high-resolution logo to a square image.
-- **`v0.07.07`** *(Current)*
+- **`v0.07.07`**
   - Pool allocation now moves funds from Unallocated Funds into a selected bank account while adding them to the chosen savings bucket.
-- **`v0.07.06`** *(Current)*
+- **`v0.07.06`**
   - Added person-level **Settle all**, which nets active lent and borrowed entries, settles the difference through the selected account, restores bucket allocations, and retains individual settlement controls.
-- **`v0.07.05`** *(Current)*
+- **`v0.07.05`**
   - Fixed debt entry submission being blocked when the optional reason field is empty and made the Record Debt control explicitly open its form.
   - Updated the Android splash to use the app’s 512px transparent logo asset instead of a density-scaled launcher image.
-- **`v0.07.04`** *(Current)*
+- **`v0.07.04`**
   - Replaced native report month dropdowns with app-styled month/year pickers, removed the redundant comparison-filter note, and made Android Back close an open report detail first.
   - Grouped debt records by person, added per-person detail views and repeat debt entries with a required reason; each entry remains independently settleable.
-- **`v0.07.03`** *(Current)*
+- **`v0.07.03`**
   - Fixed the Android launch splash to display the transparent Cash Buddy logo without the launcher tile background.
   - Changed native database and backup sharing to pass files explicitly without a text-only payload, preventing WhatsApp from sending only the caption.
 - **`v0.07.02`**

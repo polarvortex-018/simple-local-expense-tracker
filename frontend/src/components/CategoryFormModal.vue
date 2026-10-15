@@ -40,6 +40,15 @@
                 />
               </div>
 
+              <!-- Category Type -->
+              <div class="space-y-1">
+                <label class="block text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">Category Type</label>
+                <div class="grid grid-cols-2 gap-2" role="group" aria-label="Category type">
+                  <button type="button" :aria-pressed="form.category_type === 'expense'" @click="form.category_type = 'expense'" class="min-h-11 rounded-xl border px-3 text-xs font-bold transition" :class="form.category_type === 'expense' ? 'border-[#FFD1B3] bg-[#FFD1B3]/15 text-[#FFD1B3]' : 'border-[#1f202e] bg-[#0f1019] text-[#9e9cae]'">Expense</button>
+                  <button type="button" :aria-pressed="form.category_type === 'income'" @click="form.category_type = 'income'" class="min-h-11 rounded-xl border px-3 text-xs font-bold transition" :class="form.category_type === 'income' ? 'border-[#B3F5E1] bg-[#B3F5E1]/15 text-[#B3F5E1]' : 'border-[#1f202e] bg-[#0f1019] text-[#9e9cae]'">Income</button>
+                </div>
+              </div>
+
               <!-- Compact Appearance Trigger -->
               <div class="space-y-1">
                 <label class="block text-[10px] font-bold text-[#9e9cae] uppercase tracking-wider">Appearance</label>
@@ -113,7 +122,8 @@ import AppearanceModal from './AppearanceModal.vue';
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
-  category: { type: Object, default: null }
+  category: { type: Object, default: null },
+  defaultCategoryType: { type: String, default: 'expense' }
 });
 
 const emit = defineEmits(['close', 'save']);
@@ -129,12 +139,13 @@ const form = ref({
   is_quick_select: false
 });
 
-watch([() => props.isOpen, () => props.category], ([open, currentCategory]) => {
+watch([() => props.isOpen, () => props.category, () => props.defaultCategoryType], ([open, currentCategory, defaultCategoryType]) => {
   if (open) {
     if (currentCategory) {
       form.value = {
         id: currentCategory.id,
         name: currentCategory.name || '',
+        category_type: currentCategory.category_type === 'income' ? 'income' : 'expense',
         icon: resolveIcon(currentCategory.icon, 'category'),
         color: currentCategory.color || '#D4BFFF',
         is_quick_select: Boolean(currentCategory.is_quick_select)
@@ -143,6 +154,7 @@ watch([() => props.isOpen, () => props.category], ([open, currentCategory]) => {
       form.value = {
         id: null,
         name: '',
+        category_type: defaultCategoryType === 'income' ? 'income' : 'expense',
         icon: 'category',
         color: '#D4BFFF',
         is_quick_select: false
@@ -158,6 +170,7 @@ function handleSubmit() {
     emit('save', {
       id: form.value.id,
       name: form.value.name.trim(),
+      category_type: form.value.category_type === 'income' ? 'income' : 'expense',
       icon: form.value.icon,
       color: form.value.color,
       is_quick_select: form.value.is_quick_select ? 1 : 0

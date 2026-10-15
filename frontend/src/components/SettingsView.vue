@@ -667,6 +667,7 @@
                   </div>
                   <p class="text-xs font-bold text-[#f1f0f5] truncate" :title="category.name">{{ category.name }}</p>
                   <span v-if="category.is_quick_select" class="text-[9px] font-bold text-[#D4BFFF] bg-[#D4BFFF]/10 px-1.5 py-0.2 rounded border border-[#D4BFFF]/20 shrink-0">Pinned</span>
+                  <span class="text-[9px] font-bold px-1.5 py-0.2 rounded border shrink-0" :class="category.category_type === 'income' ? 'text-[#B3F5E1] bg-[#B3F5E1]/10 border-[#B3F5E1]/20' : 'text-[#FFD1B3] bg-[#FFD1B3]/10 border-[#FFD1B3]/20'">{{ category.category_type === 'income' ? 'Income' : 'Expense' }}</span>
                 </div>
 
                 <div class="flex items-center gap-1 shrink-0">

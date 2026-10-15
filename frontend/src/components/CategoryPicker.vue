@@ -96,7 +96,15 @@
           </div>
 
           <!-- Modal Footer -->
-          <div class="px-4 py-3 bg-[#0c0d14] border-t border-[#1f202e] flex justify-end shrink-0">
+          <div class="px-4 py-3 bg-[#0c0d14] border-t border-[#1f202e] flex flex-col-reverse sm:flex-row gap-2 shrink-0">
+            <button
+              v-if="allowCreate"
+              type="button"
+              @click="isOpen = false; emit('create')"
+              class="w-full sm:flex-1 px-4 py-2.5 border border-[#1f202e] hover:border-[#D4BFFF]/60 text-[#D4BFFF] font-bold text-xs rounded-xl transition cursor-pointer min-h-11"
+            >
+              + Create Category
+            </button>
             <button
               type="button"
               @click="isOpen = false"
@@ -123,10 +131,11 @@ const props = defineProps({
   placeholder: { type: String, default: 'Select Category' },
   title: { type: String, default: 'Select Category' },
   disabled: { type: Boolean, default: false },
-  hideTrigger: { type: Boolean, default: false }
+  hideTrigger: { type: Boolean, default: false },
+  allowCreate: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['update:modelValue', 'change']);
+const emit = defineEmits(['update:modelValue', 'change', 'create']);
 
 const isOpen = ref(false);
 const searchQuery = ref('');
