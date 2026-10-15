@@ -539,8 +539,8 @@ export const api = {
     const id = generateUUID();
     const now = new Date().toISOString();
     execRun(
-      'INSERT INTO categories (id, name, color, icon, is_quick_select, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [id, payload.name.trim(), payload.color || '#D4BFFF', payload.icon || 'category', payload.is_quick_select ? 1 : 0, now, now]
+      'INSERT INTO categories (id, name, color, icon, category_type, is_quick_select, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, payload.name.trim(), payload.color || '#D4BFFF', payload.icon || 'category', payload.category_type === 'income' ? 'income' : 'expense', payload.is_quick_select ? 1 : 0, now, now]
     );
     const rows = execQuery('SELECT * FROM categories WHERE id = ?', [id]);
     return rows[0];
@@ -550,8 +550,8 @@ export const api = {
     await ensureDB();
     const now = new Date().toISOString();
     execRun(
-      'UPDATE categories SET name = ?, color = ?, icon = ?, is_quick_select = ?, updated_at = ? WHERE id = ?',
-      [payload.name.trim(), payload.color || '#D4BFFF', payload.icon || 'category', payload.is_quick_select ? 1 : 0, now, id]
+      'UPDATE categories SET name = ?, color = ?, icon = ?, category_type = ?, is_quick_select = ?, updated_at = ? WHERE id = ?',
+      [payload.name.trim(), payload.color || '#D4BFFF', payload.icon || 'category', payload.category_type === 'income' ? 'income' : 'expense', payload.is_quick_select ? 1 : 0, now, id]
     );
     const rows = execQuery('SELECT * FROM categories WHERE id = ?', [id]);
     return rows[0];

@@ -355,6 +355,13 @@ const handleCreateCategory = async (payload) => {
   }
 };
 
+const handleCreateTransactionCategory = async (payload) => {
+  const category = await api.createCategory(payload);
+  await refreshAll();
+  showSuccess('Category created');
+  return category;
+};
+
 const handleUpdateCategory = async (id, payload) => {
   try {
     await api.updateCategory(id, payload);
@@ -891,6 +898,7 @@ onMounted(() => {
         :default-bucket-id="selectedBucketForTx"
         :default-type="selectedTypeForTx"
         :initial-step="transactionFormStep"
+        :create-category="handleCreateTransactionCategory"
         @close="showForm = false"
         @save="handleSaveTransaction"
       />
