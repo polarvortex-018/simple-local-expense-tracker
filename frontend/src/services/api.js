@@ -574,6 +574,44 @@ export const api = {
     return execQuery('SELECT * FROM savings_buckets WHERE is_archived = 0 ORDER BY sort_order ASC, created_at ASC');
   },
 
+  async getCalculatorSnapshots() {
+    await ensureDB();
+    return execQuery('SELECT id, title, snapshot_json, result, created_at FROM calculator_snapshots ORDER BY created_at DESC')
+      .map(row => {
+        try {
+          return { ...row, snapshot: JSON.parse(row.snapshot_json) };
+        } catch {
+          return { ...row, snapshot: null };
+        }
+      });
+  },
+
+  async saveCalculatorSnapshot(payload) {
+    await ensureDB();
+    const title = String(payload?.title || '').trim();
+    const snapshot = payload?.snapshot;
+    const result = Number(payload?.result);
+    if (!title) throw new Error('Snapshot name is required.');
+    if (!snapshot || !Array.isArray(snapshot.terms) || !Number.isFinite(result)) {
+      throw new Error('This calculation cannot be saved as a snapshot.');
+    }
+
+    const id = generateUUID();
+    const createdAt = new Date().toISOString();
+    execRun(
+      'INSERT INTO calculator_snapshots (id, title, snapshot_json, result, created_at) VALUES (?, ?, ?, ?, ?)',
+      [id, title, JSON.stringify(snapshot), result, createdAt]
+    );
+    return { id, title, snapshot, result, created_at: createdAt };
+  },
+
+  async deleteCalculatorSnapshot(id) {
+    await ensureDB();
+    if (!id) throw new Error('Snapshot id is required.');
+    execRun('DELETE FROM calculator_snapshots WHERE id = ?', [id]);
+    return { status: 'deleted' };
+  },
+
   async updateBucketSortOrder(bucketIds) {
     await ensureDB();
     const now = new Date().toISOString();

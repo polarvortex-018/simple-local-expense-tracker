@@ -8,14 +8,18 @@ This document tracks the complete versioning roadmap for Cash Buddy, mapped dire
 
 ---
 
-## Current Version: **`v0.07.12`**
+## Current Version: **`v0.08.00`**
 
 ---
 
 ## Version History Log
 
+### **v0.08 — Spending Calculator**
+- **`v0.08.00`** *(Current)*
+  - Added a Settings calculator with editable amount labels and icons in its history, standard arithmetic, one-step undo, a compact starting-balance bucket dial, signed available-after-plan totals, and per-vault calculation snapshots.
+
 ### **v0.07 — Reports & Spending Insights**
-- **`v0.07.12`** *(Current)*
+- **`v0.07.12`**
   - Split categories into expense and income types, defaulted existing and newly created categories to expense, added type selection when creating or editing categories, filtered transaction quick-select and picker options by transaction type, and added category creation directly from the transaction picker.
 - **`v0.07.11`**
   - Replaced the adaptive-icon splash resource with the transparent high-resolution logo drawable directly; removed the wrapper after the splash continued to display as a square. Clean Android debug APK build succeeded.

@@ -150,21 +150,33 @@
           </button>
         </div>
 
-        <!-- Reports -->
-        <div class="border-t border-[#1f202e]">
+        <!-- Reports & Calculator -->
+        <div class="grid grid-cols-2 divide-x divide-[#1f202e] border-t border-[#1f202e]">
           <button
             type="button"
             @click="activeSheet = 'reports'"
-            class="w-full p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
           >
             <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
               <span class="material-symbols-outlined text-base">summarize</span>
             </div>
             <div class="min-w-0 flex-1">
               <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Reports</h3>
-              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Spending by month, category, and bucket</p>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Spending insights</p>
             </div>
-            <span class="material-symbols-outlined text-[#9e9cae] text-sm group-hover:text-[#f1f0f5] transition">chevron_right</span>
+          </button>
+          <button
+            type="button"
+            @click="activeSheet = 'calculator'"
+            class="p-3.5 hover:bg-[#141520] transition duration-150 cursor-pointer text-left flex items-center gap-2.5 group active:bg-[#191924]"
+          >
+            <div class="w-8.5 h-8.5 rounded-xl bg-[#D4BFFF]/10 border border-[#D4BFFF]/20 text-[#D4BFFF] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+              <span class="material-symbols-outlined text-base">calculate</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-bold text-[#f1f0f5] group-hover:text-[#D4BFFF] transition leading-tight truncate">Calculator</h3>
+              <p class="text-[10px] text-[#9e9cae] mt-0.5 leading-tight truncate">Plan spending</p>
+            </div>
           </button>
         </div>
 
@@ -223,6 +235,13 @@
             v-if="activeSheet === 'reports'"
             ref="reportsViewRef"
             :categories="categories"
+            :buckets="buckets"
+            :active-vault="activeVault"
+          />
+
+          <CalculatorView
+            ref="calculatorViewRef"
+            v-if="activeSheet === 'calculator'"
             :buckets="buckets"
             :active-vault="activeVault"
           />
@@ -1743,12 +1762,14 @@ import { CURRENCIES, currentCurrency, currencySymbol, setCurrency } from '../uti
 import { sortAccountsByOrder, saveAccountOrder } from '../utils/accountSorter.js';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import ReportsView from './ReportsView.vue';
+import CalculatorView from './CalculatorView.vue';
 
 const isOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
 const showThemeModal = ref(false);
 const activeSheet = ref(null); // null or the selected settings page
 const reportsViewRef = ref(null);
+const calculatorViewRef = ref(null);
 const unassignedAuditLogs = ref([]);
 const auditDateFilter = ref('all');
 const customAuditMonth = ref('');
@@ -1860,6 +1881,7 @@ const getSheetIcon = (sheet) => {
     case 'unassigned_audit': return 'history_edu';
     case 'currency': return 'payments';
     case 'reports': return 'summarize';
+    case 'calculator': return 'calculate';
     default: return 'widgets';
   }
 };
@@ -1876,6 +1898,7 @@ const getSheetTitle = (sheet) => {
     case 'unassigned_audit': return 'Balance Adjustments & Audit Log';
     case 'currency': return 'Currency & Formatting';
     case 'reports': return 'Reports';
+    case 'calculator': return 'Calculator';
     default: return 'More';
   }
 };
@@ -1915,6 +1938,7 @@ const handleTakeTourAgain = () => {
 defineExpose({
   closeActiveSheet: () => {
     if (activeSheet.value === 'reports' && reportsViewRef.value?.closeDrilldown()) return;
+    if (activeSheet.value === 'calculator' && calculatorViewRef.value?.closeBucketDial()) return;
     activeSheet.value = null;
   }
 });
